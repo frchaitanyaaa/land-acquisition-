@@ -1,0 +1,702 @@
+// NLAMS — Prisma schema
+// FROZEN as of day 0. Changes go through Chaitanya only.
+//
+// PostGIS note: Prisma cannot query geometry columns. They are Unsupported(...) here,
+// which means Prisma manages the column but all spatial reads/writes use $queryRaw.
+// Area is ALWAYS computed as ST_Area(geom::geography) — never on raw 4326.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis, pgcrypto]
+}
+
+// ═══════════════════════════════════════════════════════════
+// ADMINISTRATIVE HIERARCHY (LGD codes — real, from NAPIX)
+// ═══════════════════════════════════════════════════════════
+
+model State {
+  code      String     @id
+  name      String
+  districts District[]
+  projects  Project[]
+}
+
+model District {
+  code      String   @id
+  name      String
+  stateCode String
+  state     State    @relation(fields: [stateCode], references: [code])
+  blocks    Block[]
+}
+
+model Block {
+  code         String    @id
+  name         String
+  districtCode String
+  district     District  @relation(fields: [districtCode], references: [code])
+  villages     Village[]
+}
+
+model Village {
+  code      String       @id
+  name      String
+  blockCode String
+  block     Block        @relation(fields: [blockCode], references: [code])
+  boundary  Unsupported("geometry(MultiPolygon, 4326)")?
+  parcels   LandParcel[]
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODULE 0 — RULE PACKS (the "future policy changes" feature)
+// ═══════════════════════════════════════════════════════════
+
+model StatuteRulePack {
+  id               String    @id @default(uuid())
+  key              String // larr-2013-base | larr-2013-maharashtra | nh-act-1956
+  governingAct     String
+  stateCode        String?
+  version          Int
+  effectiveFrom    DateTime
+  stageDefinitions Json // ordered stages: code, actor role, required docs, clock
+  deadlineRules    Json // ruleRef, durationDays, clockStartsOn, consequence
+  consentRules     Json // { required: bool, threshold: 0.7 | 0.8 | null }
+  compensationHeads Json // which First/Second Schedule heads apply, factor ranges
+  constraintRules  Json // s.10 limits, s.41 scheduled area, s.45 acreage
+  projects         Project[]
+
+  @@unique([key, version])
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODULE A — PROJECT
+// ═══════════════════════════════════════════════════════════
+
+enum ProjectStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_SCRUTINY
+  ACTIVE
+  TERMINATED // consent failed (s.2) or Expert Group rejection upheld
+  DENOTIFIED // government dropped it after objections (s.15/s.19)
+  COMPLETED
+}
+
+model Project {
+  id                String        @id @default(uuid())
+  name              String
+  requiringBody     String
+  category          String // Transport & Connectivity, Energy & Utilities, …
+  subCategory       String?
+  acquisitionPurpose String
+  status            ProjectStatus @default(DRAFT)
+
+  rulePackId String
+  rulePack   StatuteRulePack @relation(fields: [rulePackId], references: [id])
+  stateCode  String
+  state      State           @relation(fields: [stateCode], references: [code])
+
+  isUrgencyInvoked Boolean @default(false) // s.40
+  isScheduledArea  Boolean @default(false) // s.41
+  isInterState     Boolean @default(false) // s.3(1)(e)(iv) — Centre is appropriate Govt
+
+  // linear corridor (centreline buffered) or an area polygon
+  corridor           Unsupported("geometry(MultiPolygon, 4326)")?
+  centreline         Unsupported("geometry(LineString, 4326)")?
+  rightOfWayMetres   Int?
+  totalAreaProposedHa Decimal? @db.Decimal(12, 4)
+  totalAreaAcquiredHa Decimal? @db.Decimal(12, 4)
+
+  dataSource String @default("synthetic_demo")
+  createdAt  DateTime @default(now())
+
+  stages        ProjectStage[]
+  parcels       LandParcel[]
+  families      AffectedFamily[]
+  objections    Objection[]
+  claims        Claim[]
+  consents      ConsentRecord[]
+  documents     Document[]
+  escrow        EscrowAccount?
+  rnrScheme     RnRScheme?
+  awards        Award[]
+  blockchainEvents BlockchainEvent[]
+}
+
+// ═══════════════════════════════════════════════════════════
+// STAGES, REJECTIONS, DEADLINES
+// ═══════════════════════════════════════════════════════════
+
+enum StageStatus {
+  PENDING
+  IN_PROGRESS
+  RETURNED // sent back for correction
+  NULLIFIED // hearing declared void, must be repeated
+  COMPLETE
+  SKIPPED // exempt under the rule pack (e.g. govt project skips consent)
+  LAPSED // statutory clock expired
+}
+
+model ProjectStage {
+  id        String      @id @default(uuid())
+  projectId String
+  project   Project     @relation(fields: [projectId], references: [id])
+  stageCode String // SIA | EXPERT_GROUP | CONSENT | S11_NOTIFICATION | OBJECTIONS
+  //        | RNR_SCHEME | S19_DECLARATION | S23_AWARD | DISBURSEMENT | POSSESSION | CLOSURE
+  sequence  Int
+  status    StageStatus @default(PENDING)
+  startedOn   DateTime?
+  completedOn DateTime?
+
+  assignedUserId String?
+  assignedUser   User?   @relation(fields: [assignedUserId], references: [id])
+
+  deadlines  StatutoryDeadline[]
+  approvals  Approval[]
+  rejections StageRejection[]
+
+  @@unique([projectId, stageCode])
+}
+
+// Every sub-stage in the process document has a rejection route.
+// This table is what makes the bottleneck dashboard possible.
+model StageRejection {
+  id           String   @id @default(uuid())
+  stageId      String
+  stage        ProjectStage @relation(fields: [stageId], references: [id])
+  returnedTo   String // stage code it went back to
+  reasonCode   String // INCOMPLETE_ENUMERATION | MISSING_SCST | BOUNDARY_DISPUTE …
+  reasonText   String
+  byUserId     String
+  byUser       User     @relation(fields: [byUserId], references: [id])
+  occurredAt   DateTime @default(now())
+}
+
+model StatutoryDeadline {
+  id            String   @id @default(uuid())
+  stageId       String
+  stage         ProjectStage @relation(fields: [stageId], references: [id])
+  ruleReference String // "s.19" | "s.25" | "s.38" | "s.80"
+  clockStart    DateTime
+  durationDays  Int
+  dueOn         DateTime
+  consequence   String // LAPSE | DEEMED_RESCINDED | POSSESSION_BLOCKED | INTEREST_ACCRUAL
+  breachStatus  String   @default("safe") // safe | due_soon | breached
+  // conditional clocks: s.64 is 6 weeks if present at award, 6 months if not
+  conditionKey  String?
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODULE B — PARCELS AND FIELD EVIDENCE
+// ═══════════════════════════════════════════════════════════
+
+enum ParcelStatus {
+  PROPOSED
+  VERIFICATION_PENDING
+  VERIFIED
+  NOTIFIED
+  AWARDED
+  COMPENSATION_PENDING
+  COMPENSATION_COMPLETE
+  POSSESSED
+  DISPUTED
+}
+
+enum BoundarySource {
+  CADASTRAL_IMPORT
+  FIELD_DRAWN
+  SURVEY_REFERENCE_ONLY
+}
+
+model LandParcel {
+  id           String  @id @default(uuid())
+  projectId    String
+  project      Project @relation(fields: [projectId], references: [id])
+  villageCode  String
+  village      Village @relation(fields: [villageCode], references: [code])
+  surveyNumber String
+  khasraNumber String?
+
+  boundary Unsupported("geometry(Polygon, 4326)")?
+
+  // BOTH areas are kept. The field-measured value never overwrites the record.
+  recordedAreaHa Decimal? @db.Decimal(10, 4) // from cadastral / RoR
+  measuredAreaHa Decimal? @db.Decimal(10, 4) // ST_Area(boundary::geography)/10000
+  affectedAreaHa Decimal? @db.Decimal(10, 4) // ST_Intersection with project corridor
+
+  boundarySource BoundarySource @default(FIELD_DRAWN)
+  landClass      String? // irrigated_multicrop | agricultural | barren | urban
+  status         ParcelStatus   @default(PROPOSED)
+
+  transferFrozenFrom DateTime? // s.11 — sub-registrar freeze
+  geometryHash       String? // canonical hash, see CLAUDE.md §5
+  geometryVersion    Int      @default(1)
+  dataSource         String   @default("synthetic_demo")
+
+  vertices   ParcelVertex[]
+  surveys    FieldSurvey[]
+  interests  ParcelInterest[]
+  possession Possession?
+  larrCases  LarrCase[]
+
+  @@unique([villageCode, surveyNumber])
+}
+
+// One row per corner the officer walked to. Evidence, not just a point.
+model ParcelVertex {
+  id            String     @id @default(uuid())
+  parcelId      String
+  parcel        LandParcel @relation(fields: [parcelId], references: [id])
+  sequenceNo    Int
+  lat           Decimal    @db.Decimal(10, 7)
+  lon           Decimal    @db.Decimal(10, 7)
+  gpsAccuracyM  Decimal?   @db.Decimal(6, 2)
+  captureMethod String     @default("gps_walked") // gps_walked | map_drawn
+  averagedSamples Int      @default(1) // hold-to-average
+  photoId       String?
+  capturedAt    DateTime // device clock — claimed
+  syncedAt      DateTime  @default(now()) // server clock — authoritative for anchoring
+
+  @@unique([parcelId, sequenceNo])
+}
+
+enum SurveyType {
+  PARCEL_IDENTIFICATION // s.12 — boundary
+  JOINT_INSPECTION // s.12 — trees, crops, wells, structures (feeds asset valuation)
+}
+
+model FieldSurvey {
+  id         String     @id @default(uuid())
+  parcelId   String
+  parcel     LandParcel @relation(fields: [parcelId], references: [id])
+  surveyType SurveyType
+  surveyorUserId String
+  surveyor       User   @relation(fields: [surveyorUserId], references: [id])
+
+  gpsPoint Unsupported("geometry(Point, 4326)")?
+  photoRefs Json? // object keys of geo-tagged images
+  assetInventory Json? // JIR: trees, crops, wells, borewells, structures
+
+  mockLocationFlag Boolean @default(false)
+  noticeServedOn   DateTime? // s.12 requires advance notice to owner/occupier
+  noticeDocumentId String?
+
+  verificationStatus String  @default("pending")
+  verifiedByUserId   String?
+  verifierRemarks    String?
+  capturedAt DateTime
+  syncedAt   DateTime @default(now())
+}
+
+// ═══════════════════════════════════════════════════════════
+// PEOPLE AND RIGHTS — s.3 "person interested" / "affected family"
+// ═══════════════════════════════════════════════════════════
+
+enum InterestType {
+  OWNER
+  TENANT
+  SHARECROPPER
+  LABOURER
+  FOREST_RIGHT_HOLDER
+  EASEMENT
+  MORTGAGEE
+}
+
+model Person {
+  id            String  @id @default(uuid())
+  name          String
+  guardianName  String?
+  category      String? // general | sc | st | obc
+  maskedContact String? // RESTRICTED
+  bankAccountRef String? // RESTRICTED — never in public views
+  dataSource    String  @default("synthetic_demo")
+
+  interests ParcelInterest[]
+  families  AffectedFamily[]
+  objections Objection[]
+  claims    Claim[]
+  consents  ConsentRecord[]
+  larrCases LarrCase[]
+}
+
+model ParcelInterest {
+  id            String       @id @default(uuid())
+  parcelId      String
+  parcel        LandParcel   @relation(fields: [parcelId], references: [id])
+  personId      String
+  person        Person       @relation(fields: [personId], references: [id])
+  interestType  InterestType
+  shareFraction Decimal?     @db.Decimal(5, 4)
+  evidenceDocumentId String?
+  verifiedByUserId   String? // human verification only — never AI
+
+  @@unique([parcelId, personId, interestType])
+}
+
+enum AffectedType {
+  LAND_LOSER
+  LIVELIHOOD_DEPENDENT
+  FOREST_DWELLER
+  URBAN_LIVELIHOOD
+}
+
+model AffectedFamily {
+  id           String       @id @default(uuid())
+  projectId    String
+  project      Project      @relation(fields: [projectId], references: [id])
+  headPersonId String
+  headPerson   Person       @relation(fields: [headPersonId], references: [id])
+  affectedType AffectedType
+  isDisplaced  Boolean      @default(false) // drives Second Schedule housing
+  isMultipleDisplacement Boolean @default(false) // s.39 — additional compensation
+  isVulnerable Boolean      @default(false) // SC/ST, woman-headed, disabled
+  familySize   Int          @default(1)
+  resettlementSiteId String?
+
+  entitlements Entitlement[]
+  consents     ConsentRecord[]
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODULE D — CONSENT, OBJECTIONS
+// ═══════════════════════════════════════════════════════════
+
+model ConsentRecord {
+  id               String   @id @default(uuid())
+  projectId        String
+  project          Project  @relation(fields: [projectId], references: [id])
+  personId         String
+  person           Person   @relation(fields: [personId], references: [id])
+  affectedFamilyId String?
+  affectedFamily   AffectedFamily? @relation(fields: [affectedFamilyId], references: [id])
+  consentType      String // PRIVATE_80 | PPP_70 | GRAM_SABHA_S41
+  consentGiven     Boolean
+  // DLSA neutral observer certifies non-coercion — process doc stage 4.3
+  observerUserId   String?
+  observerCertified Boolean @default(false)
+  identityVerifiedBy String  @default("MOCK") // adapter provider
+  evidenceDocumentId String?
+  recordedAt       DateTime @default(now())
+
+  @@unique([projectId, personId, consentType])
+}
+
+// s.15 — within 60 days of the s.11 notification
+model Objection {
+  id         String   @id @default(uuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id])
+  personId   String
+  person     Person   @relation(fields: [personId], references: [id])
+  ground     String // AREA_SUITABILITY | PUBLIC_PURPOSE | SIA_FINDINGS
+  text       String
+  filedAt    DateTime @default(now())
+  dueForHearing DateTime?
+  status     String   @default("filed") // filed | heard | upheld | rejected
+  decidedByUserId String? // RESTRICTED
+  decisionText    String?
+}
+
+// s.21 — a CLAIM is not an objection. Different stage, different thing.
+model Claim {
+  id         String   @id @default(uuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id])
+  personId   String
+  person     Person   @relation(fields: [personId], references: [id])
+  category   String // LAND_VALUATION | STRUCTURE_ASSET | RNR_ENTITLEMENT
+  text       String
+  noticeServedOn DateTime?
+  filedAt    DateTime @default(now())
+  status     String   @default("registered")
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODULES E / F / G — R&R, AWARD, MONEY
+// ═══════════════════════════════════════════════════════════
+
+model RnRScheme {
+  id        String   @id @default(uuid())
+  projectId String   @unique
+  project   Project  @relation(fields: [projectId], references: [id])
+  status    String   @default("draft") // draft | public_review | approved
+  publicHearingOn     DateTime?
+  hearingValid        Boolean  @default(true) // false = nullified, must repeat
+  approvedByCommissionerAt DateTime? // s.44
+  documentId String?
+}
+
+model ResettlementSite {
+  id        String @id @default(uuid())
+  projectId String
+  name      String
+  location  Unsupported("geometry(Point, 4326)")?
+  // Third Schedule amenity checklist — displacement blocked until complete
+  amenities Json
+  readinessPercent Int @default(0)
+}
+
+// s.19 requires the full cost deposited BEFORE the declaration is published
+model EscrowAccount {
+  id           String   @id @default(uuid())
+  projectId    String   @unique
+  project      Project  @relation(fields: [projectId], references: [id])
+  demandedAmount  Decimal @db.Decimal(16, 2)
+  depositedAmount Decimal @default(0) @db.Decimal(16, 2)
+  committedAmount Decimal @default(0) @db.Decimal(16, 2) // sum of awards
+  sufficiencyCertifiedAt DateTime?
+}
+
+model Award {
+  id          String   @id @default(uuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  awardType   String // LAND_COMPENSATION (s.23) | RNR (s.31)
+  sectionRef  String
+  declaredOn  DateTime
+  collectorUserId String
+  documentId  String?
+  // the system RECORDS this. It does not compute it. See CLAUDE.md §2.
+  enteredByUserId String
+  ocrAssisted     Boolean @default(false)
+}
+
+enum EntitlementStatus {
+  ASSESSED
+  SANCTIONED
+  DISBURSED
+  ACKNOWLEDGED
+  DEPOSITED_WITH_AUTHORITY // s.77 — refusal, incapacity, title dispute
+  DISPUTED
+  UNDER_PROTEST // s.77 — preserves the s.64 right
+}
+
+model Entitlement {
+  id               String @id @default(uuid())
+  affectedFamilyId String
+  affectedFamily   AffectedFamily @relation(fields: [affectedFamilyId], references: [id])
+  scheduleRef      String // FIRST_SCHEDULE | SECOND_SCHEDULE
+  headCode         String // MARKET_VALUE | SOLATIUM | ADDITIONAL_12PC | SUBSISTENCE
+  //                 | TRANSPORT | RESETTLEMENT_ALLOWANCE | ANNUITY | CATTLE_SHED
+  //                 | ARTISAN_GRANT | SCST_ADDITIONAL
+  amountAwarded    Decimal @db.Decimal(14, 2) // entered from the award, NOT computed
+  awardId          String?
+  dueBy            DateTime? // derived from s.38
+  status           EntitlementStatus @default(ASSESSED)
+
+  disbursements Disbursement[]
+}
+
+model Disbursement {
+  id            String      @id @default(uuid())
+  entitlementId String
+  entitlement   Entitlement @relation(fields: [entitlementId], references: [id])
+  amountPaid    Decimal     @db.Decimal(14, 2)
+  paidOn        DateTime?
+  instrument    String // BANK_TRANSFER | DEPOSIT_WITH_AUTHORITY
+  isFirstInstalment Boolean @default(false) // s.41 — SC/ST at least one-third
+  paymentProvider   String  @default("MOCK")
+  // RESTRICTED — District level and above only. Stripped in the API, not the UI.
+  holdReason    String?
+
+  acknowledgement Acknowledgement?
+}
+
+// Our lead novelty: proof the family actually received the money.
+model Acknowledgement {
+  id             String   @id @default(uuid())
+  disbursementId String   @unique
+  disbursement   Disbursement @relation(fields: [disbursementId], references: [id])
+  method         String // WEBAUTHN_BIOMETRIC | OTP | OFFICER_ATTESTED
+  credentialId   String? // device key id ONLY — no biometric is ever stored
+  confirmedAt    DateTime
+  confirmedAtLocation Unsupported("geometry(Point, 4326)")?
+  witnessUserId  String? // officer-attested fallback
+  fallbackReason String?
+}
+
+// ═══════════════════════════════════════════════════════════
+// POSSESSION, MUTATION, LEGAL, CLOSURE
+// ═══════════════════════════════════════════════════════════
+
+model Possession {
+  id          String     @id @default(uuid())
+  parcelId    String     @unique
+  parcel      LandParcel @relation(fields: [parcelId], references: [id])
+  noticeServedOn DateTime?
+  takenOn     DateTime?
+  panchnamaDocumentId String?
+  witnessNames Json?
+  geoPhotoRefs Json?
+  mutatedOn   DateTime? // revenue record transferred to the Requiring Body
+  mutationRef String?
+}
+
+// s.64 reference to the LARR Authority, ss.69–74 outcomes
+model LarrCase {
+  id         String     @id @default(uuid())
+  parcelId   String
+  parcel     LandParcel @relation(fields: [parcelId], references: [id])
+  personId   String
+  person     Person     @relation(fields: [personId], references: [id])
+  caseNumber String
+  filedAt    DateTime
+  wasPresentAtAward Boolean @default(false) // decides 6 weeks vs 6 months
+  status     String     @default("filed")
+  enhancedAmount Decimal? @db.Decimal(14, 2)
+  interestRate   Decimal? @db.Decimal(5, 2) // 9% rising to 15%
+  nextHearingOn  DateTime?
+}
+
+// s.101 five-year utilisation audit, s.102 appreciated value sharing
+model UtilizationAudit {
+  id          String   @id @default(uuid())
+  parcelId    String
+  possessionTakenOn DateTime
+  lastCheckedOn     DateTime?
+  isUtilized        Boolean  @default(false)
+  reversionDueOn    DateTime? // possession + 5 years
+  reversionStatus   String   @default("monitoring")
+  transferredForConsideration Boolean @default(false) // s.102 trigger
+  appreciatedValueShare       Decimal? @db.Decimal(14, 2) // 40%
+}
+
+// ═══════════════════════════════════════════════════════════
+// DOCUMENTS, ATTESTATION, USERS, AUDIT
+// ═══════════════════════════════════════════════════════════
+
+model Document {
+  id         String   @id @default(uuid())
+  projectId  String?
+  project    Project? @relation(fields: [projectId], references: [id])
+  entityType String
+  entityId   String
+  docType    String
+  version    Int      @default(1)
+  objectKey  String
+  sha256Hash String
+  uploadedByUserId String
+  uploadedBy User     @relation(fields: [uploadedByUserId], references: [id])
+  uploadedAt DateTime @default(now())
+
+  attestation Attestation?
+}
+
+// The s.84 declaration. NOT a disclaimer — it puts a named officer's name on the file.
+model Attestation {
+  id          String   @id @default(uuid())
+  documentId  String   @unique
+  document    Document @relation(fields: [documentId], references: [id])
+  userId      String
+  designation String
+  jurisdictionCode String
+  declarationTextVersion String // which wording they agreed to
+  attestedAt  DateTime @default(now())
+  ipAddress   String?
+  deviceInfo  String?
+}
+
+model User {
+  id               String  @id @default(uuid())
+  name             String
+  email            String  @unique
+  passwordHash     String
+  role             String // PROJECT_AGENCY | FIELD_OFFICER | REVENUE_OFFICER
+  //                 | DISTRICT_AUTHORITY | STATE_AUTHORITY | CENTRAL_ADMIN | CITIZEN
+  jurisdictionType String // national | state | district | project | self
+  jurisdictionCode String?
+  canViewRestrictedFields Boolean @default(false)
+
+  postAssignments PostAssignment[]
+  stages          ProjectStage[]
+  rejections      StageRejection[]
+  surveys         FieldSurvey[]
+  approvals       Approval[]
+  documents       Document[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+}
+
+// Roles attach to posts, not people. Officers transfer; history must not break.
+model Post {
+  id               String @id @default(uuid())
+  designation      String // "Collector, Pune"
+  jurisdictionType String
+  jurisdictionCode String
+  assignments      PostAssignment[]
+}
+
+model PostAssignment {
+  id        String    @id @default(uuid())
+  postId    String
+  post      Post      @relation(fields: [postId], references: [id])
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  validFrom DateTime
+  validTo   DateTime?
+}
+
+model Approval {
+  id             String   @id @default(uuid())
+  stageId        String
+  stage          ProjectStage @relation(fields: [stageId], references: [id])
+  approverUserId String
+  approver       User     @relation(fields: [approverUserId], references: [id])
+  decision       String // APPROVED | RETURNED | REJECTED
+  remarks        String?
+  decidedAt      DateTime @default(now())
+  // maker-checker: the submitter of a stage cannot be its approver
+  submittedByUserId String?
+}
+
+model Notification {
+  id              String   @id @default(uuid())
+  recipientUserId String
+  recipient       User     @relation(fields: [recipientUserId], references: [id])
+  trigger         String // PENDING_APPROVAL | DUE_SOON | BREACHED | CORRECTION_REQUIRED
+  entityType      String
+  entityId        String
+  message         String
+  escalationLevel Int      @default(0) // 0 officer, 1 district, 2 state
+  sentAt          DateTime @default(now())
+  readAt          DateTime?
+}
+
+// Append-only. prevEntryHash chains it. This always works, chain or no chain.
+model AuditLog {
+  id            String   @id @default(uuid())
+  actorUserId   String
+  actor         User     @relation(fields: [actorUserId], references: [id])
+  action        String
+  entityType    String
+  entityId      String
+  beforeValue   Json?
+  afterValue    Json?
+  prevEntryHash String?
+  entryHash     String
+  occurredAt    DateTime @default(now())
+}
+
+// Anchoring runs in a BACKGROUND QUEUE. It never blocks a request. See CLAUDE.md §2.
+model BlockchainEvent {
+  id           String   @id @default(uuid())
+  projectId    String?
+  project      Project? @relation(fields: [projectId], references: [id])
+  entityType   String
+  entityId     String
+  eventType    String // PARCEL_VERIFIED | APPROVAL_RECORDED | AWARD_DECLARED
+  //              | COMPENSATION_DISBURSED | COMPENSATION_ACKNOWLEDGED | POSSESSION_CONFIRMED
+  dataHash     String // hash of the HUMAN-APPROVED record
+  recordVersion Int    @default(1)
+  rulePackVersion Int?
+  transactionHash String?
+  blockNumber     BigInt?
+  actorRole       String
+  anchorStatus    String   @default("pending") // pending | anchored | mismatch
+  occurredAt      DateTime @default(now())
+}
