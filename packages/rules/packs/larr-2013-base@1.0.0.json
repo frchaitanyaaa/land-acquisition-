@@ -1,0 +1,807 @@
+{
+  "code": "larr-2013-base",
+  "version": "1.0.0",
+  "title": "Right to Fair Compensation and Transparency in Land Acquisition, Rehabilitation and Resettlement Act, 2013 — base",
+  "governingAct": "RFCTLARR_2013",
+  "jurisdiction": { "level": "NATIONAL" },
+  "effectiveFrom": "2014-01-01",
+  "verify": [
+    "Legal day-counting for 'within N months/days': the engine uses calendar arithmetic in Asia/Kolkata with the due time at end of day IST (computeDueAt).",
+    "s.30(3): the period over which the 12% additional amount runs is not modelled; only the presence of the head is checked.",
+    "s.80: interest is estimated as simple interest on a 365-day basis."
+  ],
+
+  "appliesTo": { "acquisitionTypes": ["GOVERNMENT", "PPP", "PRIVATE"] },
+
+  "stages": [
+    {
+      "code": "S01_PROPOSAL",
+      "name": "Pre-Proposal & Identification",
+      "order": 1,
+      "sections": [],
+      "ownerRole": "COLLECTOR",
+      "checklist": [
+        { "code": "DPR_SUMMARY", "type": "document", "docType": "DPR_SUMMARY", "required": true },
+        {
+          "code": "ADMIN_FINANCIAL_SANCTION",
+          "type": "document",
+          "docType": "ADMIN_FINANCIAL_SANCTION",
+          "required": true
+        },
+        { "code": "FUNDING_CLEARANCE", "type": "document", "docType": "FUNDING_CLEARANCE", "required": true },
+        {
+          "code": "REQUISITION_APPLICATION",
+          "type": "document",
+          "docType": "REQUISITION_APPLICATION",
+          "required": true
+        },
+        { "code": "LAND_SCHEDULE_MATRIX", "type": "document", "docType": "LAND_SCHEDULE_MATRIX", "required": true },
+        { "code": "ALIGNMENT_OVERLAY_MAP", "type": "document", "docType": "ALIGNMENT_OVERLAY_MAP", "required": true },
+        { "code": "MIN_LAND_JUSTIFICATION", "type": "document", "docType": "MIN_LAND_JUSTIFICATION", "required": true },
+        { "code": "ESCROW_INITIAL_FUNDED", "type": "gate", "required": true }
+      ],
+      "actions": {
+        "SUBMIT": { "roles": ["LAO"] },
+        "APPROVE": { "roles": ["COLLECTOR"], "makerChecker": true },
+        "RETURN": {
+          "roles": ["COLLECTOR"],
+          "to": "SAME",
+          "reasonCodes": [
+            "MIN_LAND_NOT_PROVEN",
+            "INCOMPLETE_LAND_RECORDS",
+            "NO_BUDGET_SANCTION",
+            "BOUNDARY_CONFLICT",
+            "UNVERIFIED_TITLE",
+            "ESCROW_INITIAL_UNFUNDED"
+          ]
+        }
+      }
+    },
+    {
+      "code": "S02_SIA",
+      "name": "Social Impact Assessment & Public Hearing",
+      "order": 2,
+      "sections": ["4", "5", "6"],
+      "ownerRole": "COLLECTOR",
+      "appliesWhen": { "not": { "isUrgency": true } },
+      "checklist": [
+        { "code": "SIA_REPORT_FINAL", "type": "document", "docType": "SIA_REPORT_FINAL", "required": true },
+        { "code": "SIMP_FINAL", "type": "document", "docType": "SIMP_FINAL", "required": true },
+        { "code": "CPR_INVENTORY_REPORT", "type": "document", "docType": "CPR_INVENTORY_REPORT", "required": true },
+        { "code": "LOCAL_LANGUAGE_SUMMARY", "type": "document", "docType": "LOCAL_LANGUAGE_SUMMARY", "required": true },
+        { "code": "SIA_PUBLIC_HEARING_VALID", "type": "hearing", "hearingType": "SIA_PUBLIC", "required": true }
+      ],
+      "actions": {
+        "SUBMIT": { "roles": ["SIA_AGENCY", "LAO"] },
+        "APPROVE": { "roles": ["COLLECTOR"], "makerChecker": true },
+        "RETURN": {
+          "roles": ["COLLECTOR"],
+          "to": "SAME",
+          "reasonCodes": [
+            "IMPROPER_AGENCY_SELECTION",
+            "MISSING_TENANT_ENUMERATION",
+            "UNMAPPED_SC_ST",
+            "INCOMPLETE_CPR_LIST",
+            "UNADDRESSED_OBJECTIONS"
+          ]
+        },
+        "NULLIFY": {
+          "roles": ["COLLECTOR"],
+          "to": "SAME",
+          "reasonCodes": [
+            "INADEQUATE_NOTICE",
+            "NO_QUORUM",
+            "NO_VIDEO_RECORDING",
+            "NO_LOCAL_LANGUAGE_SUMMARY",
+            "ATTENDANCE_NOT_RECORDED"
+          ]
+        }
+      }
+    },
+    {
+      "code": "S03_APPRAISAL",
+      "name": "Expert Group Appraisal",
+      "order": 3,
+      "sections": ["7", "8"],
+      "ownerRole": "STATE_REVENUE",
+      "appliesWhen": { "not": { "isUrgency": true } },
+      "checklist": [
+        {
+          "code": "EXPERT_GROUP_GAZETTE_ORDER",
+          "type": "document",
+          "docType": "EXPERT_GROUP_GAZETTE_ORDER",
+          "required": true
+        },
+        { "code": "COI_DECLARATION", "type": "document", "docType": "COI_DECLARATION", "required": true },
+        {
+          "code": "EXPERT_RECOMMENDATION_REPORT",
+          "type": "document",
+          "docType": "EXPERT_RECOMMENDATION_REPORT",
+          "required": true
+        },
+        { "code": "EXPERT_RECOMMENDATION_SIGNED", "type": "event", "required": true }
+      ],
+      "actions": {
+        "SUBMIT": { "roles": ["EXPERT_GROUP_MEMBER"] },
+        "APPROVE": { "roles": ["STATE_REVENUE"], "makerChecker": true, "emits": ["SIA_APPRAISED"] },
+        "APPROVE_CONDITIONAL": { "roles": ["STATE_REVENUE"], "makerChecker": true, "emits": ["SIA_APPRAISED"] },
+        "REJECT": {
+          "roles": ["STATE_REVENUE"],
+          "makerChecker": true,
+          "to": "TERMINAL",
+          "terminalStatus": "ABANDONED",
+          "reasonCodes": ["SIA_INCOMPLETE", "SIA_DATA_FLAWED"]
+        },
+        "OVERRIDE": {
+          "roles": ["STATE_REVENUE"],
+          "makerChecker": true,
+          "requiresWrittenReasons": true,
+          "emits": ["SIA_APPRAISED"]
+        },
+        "RETURN": {
+          "roles": ["STATE_REVENUE"],
+          "to": "SAME",
+          "reasonCodes": ["MEMBER_CONFLICT_OF_INTEREST", "MEMBER_NOT_QUALIFIED", "SIA_INCOMPLETE", "SIA_DATA_FLAWED"]
+        }
+      }
+    },
+    {
+      "code": "S04_CONSENT",
+      "name": "Consent Procurement",
+      "order": 4,
+      "sections": ["2", "41"],
+      "ownerRole": "COLLECTOR",
+      "appliesWhen": { "any": [{ "acquisitionTypeIn": ["PPP", "PRIVATE"] }, { "inScheduledArea": true }] },
+      "parallelWith": ["S02_SIA"],
+      "checklist": [
+        {
+          "code": "CONSENT_REGISTER_CERTIFIED",
+          "type": "document",
+          "docType": "CONSENT_REGISTER_CERTIFIED",
+          "required": true
+        },
+        {
+          "code": "GRAM_SABHA_CONSENT_HEARING_VALID",
+          "type": "hearing",
+          "hearingType": "GRAM_SABHA_CONSENT",
+          "required": true
+        },
+        {
+          "code": "DLSA_OBSERVER_CERTIFICATE",
+          "type": "document",
+          "docType": "DLSA_OBSERVER_CERTIFICATE",
+          "required": true
+        },
+        {
+          "code": "CERTIFICATE_OF_CONSENT_PROCUREMENT",
+          "type": "document",
+          "docType": "CERTIFICATE_OF_CONSENT_PROCUREMENT",
+          "required": true
+        },
+        { "code": "CONSENT_THRESHOLD_MET", "type": "gate", "required": true }
+      ],
+      "actions": {
+        "SUBMIT": { "roles": ["LAO"] },
+        "APPROVE": { "roles": ["COLLECTOR"], "makerChecker": true },
+        "RETURN": {
+          "roles": ["COLLECTOR"],
+          "to": "SAME",
+          "reasonCodes": ["DUPLICATE_ENTRIES", "UNVERIFIED_HEIRS", "TENANTS_OMITTED"]
+        },
+        "NULLIFY": {
+          "roles": ["COLLECTOR"],
+          "to": "SAME",
+          "reasonCodes": [
+            "INADEQUATE_NOTICE",
+            "NO_QUORUM",
+            "NO_VIDEO_RECORDING",
+            "NO_LOCAL_LANGUAGE_SUMMARY",
+            "ATTENDANCE_NOT_RECORDED"
+          ]
+        },
+        "TERMINATE": {
+          "roles": ["COLLECTOR"],
+          "makerChecker": true,
+          "to": "TERMINAL",
+          "terminalStatus": "TERMINATED",
+          "reasonCodes": ["THRESHOLD_NOT_MET"]
+        }
+      }
+    },
+    {
+      "code": "S05_NOTIFICATION",
+      "name": "Preliminary Notification & Objections",
+      "order": 5,
+      "sections": ["11", "12", "13", "14", "15"],
+      "ownerRole": "COLLECTOR",
+      "checklist": [
+        { "code": "S11_NOTIFICATION", "type": "document", "docType": "S11_NOTIFICATION", "required": true },
+        { "code": "GAZETTE_COPY", "type": "document", "docType": "GAZETTE_COPY", "required": true },
+        { "code": "NEWSPAPER_CLIPPING", "type": "document", "docType": "NEWSPAPER_CLIPPING", "required": true },
+        { "code": "AFFIXATION_CERTIFICATE", "type": "document", "docType": "AFFIXATION_CERTIFICATE", "required": true }
+      ],
+      "actions": {
+        "SUBMIT": { "roles": ["LAO"] },
+        "APPROVE": {
+          "roles": ["COLLECTOR"],
+          "makerChecker": true,
+          "requiresAttestation": true,
+          "emits": ["S11_PUBLISHED"]
+        },
+        "RETURN": {
+          "roles": ["COLLECTOR"],
+          "to": "SAME",
+          "reasonCodes": [
+            "SINGLE_NEWSPAPER_ONLY",
+            "INCORRECT_SURVEY_NUMBERS",
+            "MISSING_SIA_SUMMARY",
+            "HEARING_NOTICE_NOT_SERVED"
+          ]
+        },
+        "TERMINATE": {
+          "roles": ["COLLECTOR"],
+          "makerChecker": true,
+          "to": "TERMINAL",
+          "terminalStatus": "DENOTIFIED",
+          "reasonCodes": ["OBJECTIONS_UPHELD_DENOTIFY"]
+        }
+      }
+    },
+    {
+      "code": "S06_RNR_SCHEME",
+      "name": "R&R Scheme Formulation & Approval",
+      "order": 6,
+      "sections": ["16", "17", "18"],
+      "ownerRole": "RNR_ADMINISTRATOR",
+      "checklist": [
+        { "code": "RNR_CENSUS_EXPORT", "type": "document", "docType": "RNR_CENSUS_EXPORT", "required": true },
+        { "code": "RNR_SCHEME_DRAFT", "type": "document", "docType": "RNR_SCHEME_DRAFT", "required": true },
+        { "code": "RNR_PUBLIC_HEARING_VALID", "type": "hearing", "hearingType": "RNR_PUBLIC", "required": true },
+        {
+          "code": "RNR_COMMITTEE_REVIEWED",
+          "type": "gate",
+          "required": false,
+          "requiredWhen": { "rnrCommitteeRequired": true }
+        },
+        { "code": "RNR_SCHEME_APPROVED", "type": "document", "docType": "RNR_SCHEME_APPROVED", "required": true }
+      ],
+      "actions": {
+        "SUBMIT": { "roles": ["RNR_ADMINISTRATOR"] },
+        "APPROVE": { "roles": ["RNR_COMMISSIONER"], "makerChecker": true },
+        "RETURN": {
+          "roles": ["RNR_COMMISSIONER"],
+          "to": "SAME",
+          "reasonCodes": [
+            "MISSING_TENANTS",
+            "UNCOUNTED_LABOURERS",
+            "EXCLUDED_SC_ST",
+            "BELOW_STATUTORY_MINIMUM",
+            "MISSING_SC_ST_LAND",
+            "UNDERBUDGETED_INFRA",
+            "BUDGETING_ERROR"
+          ]
+        },
+        "NULLIFY": {
+          "roles": ["RNR_COMMISSIONER"],
+          "to": "SAME",
+          "reasonCodes": [
+            "INADEQUATE_NOTICE",
+            "NO_QUORUM",
+            "NO_VIDEO_RECORDING",
+            "NO_LOCAL_LANGUAGE_SUMMARY",
+            "ATTENDANCE_NOT_RECORDED"
+          ]
+        }
+      }
+    },
+    {
+      "code": "S07_DECLARATION",
+      "name": "Final Declaration & Public Notice",
+      "order": 7,
+      "sections": ["19", "20", "21"],
+      "ownerRole": "COLLECTOR",
+      "checklist": [
+        { "code": "ESCROW_FULL_CERTIFIED", "type": "gate", "required": true },
+        { "code": "OBJECTIONS_DISPOSED", "type": "gate", "required": true },
+        { "code": "S19_DECLARATION", "type": "document", "docType": "S19_DECLARATION", "required": true },
+        { "code": "GAZETTE_COPY", "type": "document", "docType": "GAZETTE_COPY", "required": true },
+        { "code": "NEWSPAPER_CLIPPING", "type": "document", "docType": "NEWSPAPER_CLIPPING", "required": true }
+      ],
+      "actions": {
+        "SUBMIT": { "roles": ["LAO"] },
+        "APPROVE": {
+          "roles": ["COLLECTOR"],
+          "makerChecker": true,
+          "requiresAttestation": true,
+          "emits": ["S19_PUBLISHED"]
+        },
+        "RETURN": {
+          "roles": ["COLLECTOR"],
+          "to": "SAME",
+          "reasonCodes": ["ESCROW_SHORTFALL", "SURVEY_BOUNDARY_ERROR", "TIMELINE_EXPIRED", "NOTICE_NOT_SERVED"]
+        }
+      }
+    },
+    {
+      "code": "S08_AWARD",
+      "name": "Valuation & Compensation Award",
+      "order": 8,
+      "sections": ["23", "26", "27", "28", "29", "30", "31"],
+      "ownerRole": "LAO",
+      "checklist": [
+        { "code": "S21_NOTICE", "type": "document", "docType": "S21_NOTICE", "required": true },
+        { "code": "AWARD_LAND", "type": "document", "docType": "AWARD_LAND", "required": true },
+        { "code": "AWARD_RNR", "type": "document", "docType": "AWARD_RNR", "required": true },
+        { "code": "AWARD_CHECKS_PASSED", "type": "gate", "required": true }
+      ],
+      "actions": {
+        "SUBMIT": { "roles": ["LAO"] },
+        "APPROVE": {
+          "roles": ["COLLECTOR"],
+          "makerChecker": true,
+          "requiresAttestation": true,
+          "emits": ["AWARD_SIGNED"]
+        },
+        "RETURN": {
+          "roles": ["COLLECTOR"],
+          "to": "SAME",
+          "reasonCodes": [
+            "HIGH_VALUE_PRECEDENTS_OMITTED",
+            "UNREPRESENTATIVE_SALES",
+            "REPLACEMENT_COST_NOT_REFLECTED",
+            "WRONG_MULTIPLICATION_FACTOR",
+            "ARITHMETIC_ERROR",
+            "DUPLICATE_TITLE_CLAIM",
+            "UNBUDGETED_RNR_LIABILITY"
+          ]
+        }
+      }
+    },
+    {
+      "code": "S09_PAYMENT_POSSESSION",
+      "name": "Disbursement, R&R & Possession",
+      "order": 9,
+      "sections": ["37", "38", "77", "80"],
+      "ownerRole": "LAO",
+      "checklist": [{ "code": "ALL_PARCELS_POSSESSED", "type": "gate", "required": true }],
+      "actions": {
+        "SUBMIT": { "roles": ["LAO"] },
+        "APPROVE": { "roles": ["COLLECTOR"], "makerChecker": true, "requiresAttestation": true },
+        "RETURN": {
+          "roles": ["COLLECTOR"],
+          "to": "SAME",
+          "reasonCodes": ["TITLE_DISPUTED", "TITLE_ENCUMBERED", "RNR_INCOMPLETE", "LEGAL_STAY"]
+        }
+      }
+    },
+    {
+      "code": "S10_POST_ACQUISITION",
+      "name": "Post-Acquisition, Appeals & Land Return",
+      "order": 10,
+      "sections": ["48", "49", "50", "51-74", "94", "101", "102"],
+      "ownerRole": "COLLECTOR",
+      "checklist": [
+        { "code": "ALL_PARCELS_CLOSED", "type": "gate", "required": true },
+        { "code": "NO_OPEN_LEGAL_CASES", "type": "gate", "required": true }
+      ],
+      "actions": {
+        "APPROVE": { "roles": ["COLLECTOR"], "makerChecker": false, "to": "TERMINAL", "terminalStatus": "CLOSED" }
+      }
+    }
+  ],
+
+  "clocks": [
+    {
+      "code": "SIA_COMPLETION",
+      "section": "4",
+      "label": "SIA completion",
+      "subject": "STAGE",
+      "startsOn": "SIA_COMMENCED",
+      "endsOn": "SIA_REPORT_FINAL",
+      "duration": "P6M",
+      "consequence": "WARN",
+      "consequenceText": "The SIA must be completed within six months of its commencement (s.4)."
+    },
+    {
+      "code": "EXPERT_GROUP",
+      "section": "7",
+      "label": "Expert Group recommendation",
+      "subject": "STAGE",
+      "startsOn": "EXPERT_GROUP_CONSTITUTED",
+      "endsOn": "EXPERT_RECOMMENDATION_SIGNED",
+      "duration": "P2M",
+      "consequence": "WARN",
+      "consequenceText": "The Expert Group must make its recommendation within two months of its constitution (s.7)."
+    },
+    {
+      "code": "SIA_LAPSE",
+      "section": "14",
+      "label": "Preliminary notification after SIA appraisal",
+      "subject": "PROJECT",
+      "startsOn": "SIA_APPRAISED",
+      "endsOn": "S11_PUBLISHED",
+      "duration": "P12M",
+      "consequence": "SIA_LAPSED",
+      "consequenceText": "The SIA lapses if the s.11 preliminary notification is not issued within twelve months of the appraisal; a fresh SIA is then required (s.14)."
+    },
+    {
+      "code": "OBJECTION_WINDOW",
+      "section": "15",
+      "label": "Objection window",
+      "subject": "PROJECT",
+      "startsOn": "S11_PUBLISHED",
+      "duration": "P60D",
+      "consequence": "WINDOW_CLOSED",
+      "consequenceText": "Objections under s.15 may be filed within sixty days of the s.11 publication; the window then closes."
+    },
+    {
+      "code": "DECLARATION",
+      "section": "19",
+      "label": "Declaration after preliminary notification",
+      "subject": "PROJECT",
+      "startsOn": "S11_PUBLISHED",
+      "endsOn": "S19_PUBLISHED",
+      "duration": "P12M",
+      "consequence": "DEEMED_RESCINDED",
+      "consequenceText": "If no s.19 declaration is made within twelve months of the s.11 notification, the notification is deemed rescinded (s.19)."
+    },
+    {
+      "code": "AWARD",
+      "section": "25",
+      "label": "Award after declaration",
+      "subject": "PROJECT",
+      "startsOn": "S19_PUBLISHED",
+      "endsOn": "AWARD_SIGNED",
+      "duration": "P12M",
+      "consequence": "PROCEEDINGS_LAPSE",
+      "consequenceText": "If the award is not made within twelve months of the s.19 declaration, the entire acquisition proceedings lapse (s.25)."
+    },
+    {
+      "code": "COMPENSATION_PAYMENT",
+      "section": "38",
+      "label": "Compensation paid before possession",
+      "subject": "ENTITLEMENT",
+      "startsOn": "AWARD_SIGNED",
+      "endsOn": "ENTITLEMENT_PAID",
+      "appliesToHeadKinds": ["LAND"],
+      "duration": "P3M",
+      "consequence": "POSSESSION_BLOCKED",
+      "consequenceText": "Full compensation must be paid within three months of the award; possession cannot be taken before it is (s.38)."
+    },
+    {
+      "code": "MONETARY_RNR",
+      "section": "38",
+      "label": "Monetary R&R entitlements before possession",
+      "subject": "ENTITLEMENT",
+      "startsOn": "AWARD_SIGNED",
+      "endsOn": "ENTITLEMENT_PAID",
+      "appliesToHeadKinds": ["MONETARY_RNR"],
+      "duration": "P6M",
+      "consequence": "POSSESSION_BLOCKED",
+      "consequenceText": "Monetary R&R entitlements must be provided within six months of the award; possession cannot be taken before they are (s.38)."
+    },
+    {
+      "code": "INFRA_RNR",
+      "section": "38",
+      "label": "Infrastructure R&R entitlements",
+      "subject": "PROJECT",
+      "startsOn": "AWARD_SIGNED",
+      "endsOn": "SITE_COMMISSIONED",
+      "duration": "P18M",
+      "consequence": "POSSESSION_BLOCKED",
+      "consequenceText": "Infrastructure R&R entitlements must be provided within eighteen months of the award (s.38)."
+    },
+    {
+      "code": "REFERENCE_WINDOW",
+      "section": "64",
+      "label": "Reference to the Authority",
+      "subject": "AFFECTED_FAMILY",
+      "startsOn": "S37_NOTICE_SERVED",
+      "endsOn": "REFERENCE_FILED",
+      "durationWhen": [{ "if": "presentAtAward", "duration": "P6W" }],
+      "durationElse": "P6M",
+      "consequence": "WINDOW_CLOSED",
+      "consequenceText": "A reference to the Authority may be sought within six weeks if the person was present or represented when the award was made, otherwise within six months (s.64)."
+    },
+    {
+      "code": "INTEREST_STEP",
+      "section": "80",
+      "label": "Interest step-up on unpaid compensation",
+      "subject": "ENTITLEMENT",
+      "startsOn": "POSSESSION_TAKEN",
+      "startsIf": "unpaidAmountExists",
+      "endsOn": "ENTITLEMENT_PAID",
+      "duration": "P1Y",
+      "consequence": "INTEREST_STEP_UP",
+      "consequenceText": "Interest on compensation unpaid at possession runs at 9% a year for the first year and 15% a year after that (s.80)."
+    },
+    {
+      "code": "UTILISATION",
+      "section": "101",
+      "label": "Return of unutilised land",
+      "subject": "PROJECT_PARCEL",
+      "startsOn": "POSSESSION_TAKEN",
+      "endsOn": "PARCEL_UTILISED",
+      "duration": "P5Y",
+      "consequence": "REVERSION_DUE",
+      "consequenceText": "Land left unutilised five years after possession must be returned to the original owner or the Land Bank (s.101)."
+    }
+  ],
+
+  "events": [
+    "PROJECT_SUBMITTED",
+    "STAGE_SUBMITTED",
+    "STAGE_APPROVED",
+    "STAGE_RETURNED",
+    "STAGE_NULLIFIED",
+    "PROJECT_TERMINATED",
+    "SIA_COMMENCED",
+    "SIA_REPORT_FINAL",
+    "SIA_APPRAISED",
+    "EXPERT_GROUP_CONSTITUTED",
+    "EXPERT_RECOMMENDATION_SIGNED",
+    "S11_PUBLISHED",
+    "S19_PUBLISHED",
+    "AWARD_SIGNED",
+    "S37_NOTICE_SERVED",
+    "REFERENCE_FILED",
+    "ENTITLEMENT_PAID",
+    "DISBURSEMENT_SUCCEEDED",
+    "COMPENSATION_ACKNOWLEDGED",
+    "SITE_COMMISSIONED",
+    "POSSESSION_TAKEN",
+    "PARCEL_UTILISED",
+    "PARCEL_VERIFIED",
+    "PARCEL_CORRECTED",
+    "DOCUMENT_ATTESTED"
+  ],
+
+  "reasonCodes": {
+    "S01_PROPOSAL": [
+      "MIN_LAND_NOT_PROVEN",
+      "INCOMPLETE_LAND_RECORDS",
+      "NO_BUDGET_SANCTION",
+      "BOUNDARY_CONFLICT",
+      "UNVERIFIED_TITLE",
+      "ESCROW_INITIAL_UNFUNDED"
+    ],
+    "S02_SIA": [
+      "IMPROPER_AGENCY_SELECTION",
+      "MISSING_TENANT_ENUMERATION",
+      "UNMAPPED_SC_ST",
+      "INCOMPLETE_CPR_LIST",
+      "UNADDRESSED_OBJECTIONS"
+    ],
+    "HEARING": [
+      "INADEQUATE_NOTICE",
+      "NO_QUORUM",
+      "NO_VIDEO_RECORDING",
+      "NO_LOCAL_LANGUAGE_SUMMARY",
+      "ATTENDANCE_NOT_RECORDED"
+    ],
+    "S03_APPRAISAL": ["MEMBER_CONFLICT_OF_INTEREST", "MEMBER_NOT_QUALIFIED", "SIA_INCOMPLETE", "SIA_DATA_FLAWED"],
+    "S04_CONSENT": ["DUPLICATE_ENTRIES", "UNVERIFIED_HEIRS", "TENANTS_OMITTED", "THRESHOLD_NOT_MET"],
+    "S05_NOTIFICATION": [
+      "SINGLE_NEWSPAPER_ONLY",
+      "INCORRECT_SURVEY_NUMBERS",
+      "MISSING_SIA_SUMMARY",
+      "HEARING_NOTICE_NOT_SERVED",
+      "OBJECTIONS_UPHELD_DENOTIFY"
+    ],
+    "S06_RNR_SCHEME": [
+      "MISSING_TENANTS",
+      "UNCOUNTED_LABOURERS",
+      "EXCLUDED_SC_ST",
+      "BELOW_STATUTORY_MINIMUM",
+      "MISSING_SC_ST_LAND",
+      "UNDERBUDGETED_INFRA",
+      "BUDGETING_ERROR"
+    ],
+    "S07_DECLARATION": ["ESCROW_SHORTFALL", "SURVEY_BOUNDARY_ERROR", "TIMELINE_EXPIRED", "NOTICE_NOT_SERVED"],
+    "S08_AWARD": [
+      "HIGH_VALUE_PRECEDENTS_OMITTED",
+      "UNREPRESENTATIVE_SALES",
+      "REPLACEMENT_COST_NOT_REFLECTED",
+      "WRONG_MULTIPLICATION_FACTOR",
+      "ARITHMETIC_ERROR",
+      "DUPLICATE_TITLE_CLAIM",
+      "UNBUDGETED_RNR_LIABILITY"
+    ],
+    "S09_PAYMENT_POSSESSION": ["TITLE_DISPUTED", "TITLE_ENCUMBERED", "RNR_INCOMPLETE", "LEGAL_STAY"],
+    "S10_POST_ACQUISITION": ["REFERENCE_TIME_BARRED"]
+  },
+
+  "consent": { "PRIVATE": 0.8, "PPP": 0.7, "GOVERNMENT": null, "scheduledAreaGramSabha": true },
+
+  "interest": { "section": "80", "rateYear1Pct": 9, "rateAfterPct": 15, "stepAfter": "P1Y", "dayCount": "ACT_365" },
+
+  "checks": [
+    {
+      "code": "SOLATIUM_100",
+      "section": "30",
+      "kind": "HEAD_EQUALS_PCT_OF_HEADS",
+      "params": { "head": "SOLATIUM", "pct": 100, "ofHeads": "LAND_COMPENSATION,ASSETS", "tolerancePaise": 100 },
+      "message": "Solatium must equal 100% of the compensation entered for land and assets (s.30)."
+    },
+    {
+      "code": "ADDITIONAL_12PA_PRESENT",
+      "section": "30(3)",
+      "kind": "HEAD_PRESENT_WHEN",
+      "params": { "head": "ADDITIONAL_12PA", "when": "LAND_COMPENSATION", "ratePctPerAnnum": 12 },
+      "message": "An additional amount at 12% a year must be awarded wherever land compensation is awarded (s.30(3))."
+    },
+    {
+      "code": "RURAL_FACTOR_RANGE",
+      "section": "First Schedule",
+      "kind": "FACTOR_RANGE",
+      "params": { "ruralMin": 1, "ruralMax": 2, "urban": 1 },
+      "message": "A stated multiplication factor must be between 1.00 and 2.00 for rural land and exactly 1.00 for urban land (First Schedule)."
+    },
+    {
+      "code": "SC_ST_FIRST_INSTALMENT",
+      "section": "41",
+      "kind": "FIRST_INSTALMENT_MIN_FRACTION",
+      "params": { "numerator": 1, "denominator": 3 },
+      "message": "For SC/ST families the first instalment must be at least one-third of the compensation (s.41)."
+    },
+    {
+      "code": "URGENCY_80_TENDERED",
+      "section": "40",
+      "kind": "MIN_PCT_TENDERED_BEFORE_POSSESSION",
+      "params": { "pct": 80 },
+      "message": "Under the urgency clause at least 80% of the estimated compensation must be tendered before possession (s.40)."
+    },
+    {
+      "code": "URGENCY_ADDITIONAL_75",
+      "section": "40",
+      "kind": "HEAD_EQUALS_PCT_OF_HEADS",
+      "params": {
+        "head": "URGENCY_ADDITIONAL",
+        "pct": 75,
+        "ofHeads": "LAND_COMPENSATION,ASSETS",
+        "tolerancePaise": 100,
+        "when": "isUrgency"
+      },
+      "message": "Under the urgency clause an additional 75% of the total compensation is payable (s.40)."
+    }
+  ],
+
+  "entitlementHeads": [
+    { "code": "LAND_COMPENSATION", "schedule": "FIRST", "kind": "LAND", "label": "Land compensation (First Schedule)" },
+    { "code": "ASSETS", "schedule": "FIRST", "kind": "LAND", "label": "Value of assets attached to land" },
+    {
+      "code": "SOLATIUM",
+      "schedule": "FIRST",
+      "kind": "LAND",
+      "label": "Solatium",
+      "notes": "= 100% of land + assets (check SOLATIUM_100)"
+    },
+    { "code": "ADDITIONAL_12PA", "schedule": "FIRST", "kind": "LAND", "label": "12% additional amount" },
+    {
+      "code": "URGENCY_ADDITIONAL",
+      "schedule": "FIRST",
+      "kind": "LAND",
+      "label": "Urgency additional compensation (s.40)",
+      "notes": "= 75% of total compensation (check URGENCY_ADDITIONAL_75)"
+    },
+    { "code": "HOUSING_RURAL", "schedule": "SECOND", "kind": "IN_KIND", "label": "House (rural, IAY specification)" },
+    {
+      "code": "HOUSING_URBAN",
+      "schedule": "SECOND",
+      "kind": "IN_KIND",
+      "label": "House (urban)",
+      "min": { "value": 50, "unit": "sqm_plinth" }
+    },
+    {
+      "code": "HOUSING_URBAN_OPTOUT",
+      "schedule": "SECOND",
+      "kind": "MONETARY_RNR",
+      "label": "Urban house opt-out assistance",
+      "minPaise": "15000000"
+    },
+    {
+      "code": "LAND_FOR_LAND",
+      "schedule": "SECOND",
+      "kind": "IN_KIND",
+      "label": "Land for land (irrigation projects)",
+      "min": { "value": 1, "unit": "acre" },
+      "notes": "SC/ST: land equivalent to that acquired or 2.5 acres, whichever is lower"
+    },
+    {
+      "code": "DEVELOPED_LAND",
+      "schedule": "SECOND",
+      "kind": "IN_KIND",
+      "label": "Developed land (urbanisation)",
+      "min": { "value": 20, "unit": "pct_of_acquired_land" }
+    },
+    { "code": "EMPLOYMENT", "schedule": "SECOND", "kind": "IN_KIND", "label": "Employment" },
+    {
+      "code": "ONE_TIME_5L",
+      "schedule": "SECOND",
+      "kind": "MONETARY_RNR",
+      "label": "One-time payment in lieu of employment",
+      "minPaise": "50000000"
+    },
+    {
+      "code": "ANNUITY",
+      "schedule": "SECOND",
+      "kind": "MONETARY_RNR",
+      "label": "Annuity",
+      "minPaise": "200000",
+      "per": "MONTH",
+      "periods": 240
+    },
+    {
+      "code": "SUBSISTENCE",
+      "schedule": "SECOND",
+      "kind": "MONETARY_RNR",
+      "label": "Subsistence grant",
+      "minPaise": "300000",
+      "per": "MONTH",
+      "periods": 12
+    },
+    {
+      "code": "SUBSISTENCE_SCST_EXTRA",
+      "schedule": "SC_ST_ADDITIONAL",
+      "kind": "MONETARY_RNR",
+      "label": "SC/ST displaced from a Scheduled Area",
+      "minPaise": "5000000"
+    },
+    {
+      "code": "TRANSPORT",
+      "schedule": "SECOND",
+      "kind": "MONETARY_RNR",
+      "label": "Transportation",
+      "minPaise": "5000000"
+    },
+    {
+      "code": "CATTLE_SHED",
+      "schedule": "SECOND",
+      "kind": "MONETARY_RNR",
+      "label": "Cattle shed / petty shop",
+      "minPaise": "2500000"
+    },
+    {
+      "code": "ARTISAN_GRANT",
+      "schedule": "SECOND",
+      "kind": "MONETARY_RNR",
+      "label": "Artisan / small trader",
+      "minPaise": "2500000"
+    },
+    {
+      "code": "RESETTLEMENT_ALLOWANCE",
+      "schedule": "SECOND",
+      "kind": "MONETARY_RNR",
+      "label": "One-time resettlement allowance",
+      "minPaise": "5000000"
+    },
+    {
+      "code": "SCST_OUTSIDE_DISTRICT",
+      "schedule": "SC_ST_ADDITIONAL",
+      "kind": "MONETARY_RNR",
+      "label": "SC/ST relocated outside the district",
+      "minPaise": "5000000",
+      "notes": "plus 25% more of the monetary R&R benefits (s.42)"
+    },
+    {
+      "code": "MULTIPLE_DISPLACEMENT",
+      "schedule": "SECOND",
+      "kind": "FLAG",
+      "label": "Second or successive displacement (s.39)"
+    }
+  ],
+
+  "thresholds": {
+    "rnrCommitteeAcres": 100,
+    "scStFirstInstalmentMinFraction": 0.3333,
+    "deadlineDueSoonDays": 30,
+    "gpsAccuracyWarnM": 20,
+    "gpsAccuracyRejectM": 50,
+    "areaMismatchFlagPct": 5,
+    "photoMaxDistanceFromParcelM": 25
+  },
+
+  "escalation": { "afterBreachDays": [0, 7, 21], "levels": ["POST", "DISTRICT", "STATE"] },
+
+  "declarations": { "attestationVersion": "ATTEST_V1" }
+}

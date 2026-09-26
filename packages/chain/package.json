@@ -1,0 +1,6 @@
+{
+  "name": "@bhoomisetu/chain",
+  "version": "0.0.0",
+  "private": true,
+  "description": "AnchorRegistry contract + Hardhat node. Phase 0 ships only the docker node; contracts arrive in Phase 4."
+}

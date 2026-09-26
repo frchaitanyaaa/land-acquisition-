@@ -1,0 +1,3 @@
+# Allowlist for the forbidden-literal scan in `pnpm rules:check` (CLAUDE.md §32.3).
+# One entry per line: `path` (whole file) or `path:line`, relative to the repo root.
+# Every entry needs a comment saying why the literal is not a statutory number.

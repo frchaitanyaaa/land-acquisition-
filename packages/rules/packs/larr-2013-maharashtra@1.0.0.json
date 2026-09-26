@@ -1,0 +1,22 @@
+{
+  "code": "larr-2013-maharashtra",
+  "version": "1.0.0",
+  "extends": { "code": "larr-2013-base", "version": "1.0.0" },
+  "title": "RFCTLARR Act, 2013 — Maharashtra",
+  "jurisdiction": { "level": "STATE", "stateCode": "27" },
+  "effectiveFrom": "2014-01-01",
+  "verify": [
+    "stateCode 27 is taken to be Maharashtra's LGD state code — confirm against the LGD download before the demo.",
+    "Rural multiplication factor bands must be taken from the Maharashtra Government notification — values here are placeholders",
+    "Any state-specific R&R enhancement under s.107 must be sourced before demo"
+  ],
+  "checks": [
+    {
+      "code": "RURAL_FACTOR_BANDS",
+      "section": "First Schedule",
+      "kind": "factorBandsByDistanceKm",
+      "params": { "note": "PLACEHOLDER — replace from notification" },
+      "message": "Maharashtra rural multiplication factor bands by distance from the urban area (placeholder)."
+    }
+  ]
+}

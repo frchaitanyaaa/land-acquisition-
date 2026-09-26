@@ -144,16 +144,16 @@ One language (TypeScript) across the whole repo. Pin **major** versions; let the
 
 | Layer | Choice | Notes |
 |---|---|---|
-| Runtime | Node.js 20 LTS | |
+| Runtime | Node.js 24 LTS | Node 20 reached end-of-life in April 2026; `engines` allows ≥ 20.12 |
 | Package manager | pnpm workspaces | |
 | Monorepo build | Turborepo | |
 | Language | TypeScript, `strict: true` | No `any` in domain code |
-| Backend | NestJS 10 | REST, `/api/v1`, OpenAPI via `@nestjs/swagger` |
+| Backend | NestJS 11 | REST, `/api/v1`, OpenAPI via `@nestjs/swagger` (NestJS 10 is end-of-life) |
 | ORM | Drizzle ORM + drizzle-kit | SQL-first; PostGIS via custom types and `sql` template |
 | Database | PostgreSQL 16 + PostGIS 3.4 | Extensions: `postgis`, `pgcrypto`, `pg_trgm` |
 | Queue / jobs | BullMQ + Redis 7 | Outbox relay, anchoring, deadlines, OCR, notifications |
 | Object storage | MinIO (S3-compatible) | Presigned URLs, short TTL |
-| Portal frontend | Next.js 14+ (App Router), React 18 | Dashboards, workflow, public portal |
+| Portal frontend | Next.js 16 (App Router), React 19 | Dashboards, workflow, public portal. The field app uses React 19 too. |
 | Field app | Vite + React PWA | `vite-plugin-pwa` (Workbox), Dexie (IndexedDB) |
 | UI | Tailwind CSS + shadcn/ui | |
 | Data fetching | TanStack Query | |
@@ -382,9 +382,9 @@ Services and ports. Nothing else in compose.
 |---|---|---|---|
 | `postgres` | `postgis/postgis:16-3.4` | 5432 | Init script creates roles `owner`, `app_user` (no BYPASSRLS), `app_worker` (BYPASSRLS) |
 | `redis` | `redis:7-alpine` | 6379 | |
-| `minio` | `minio/minio` | 9000, 9001 | Init job creates bucket |
+| `minio` | `chainguard/minio` | 9000, 9001 | MinIO no longer publishes images; `minio-init` (`chainguard/minio-client`) creates the bucket |
 | `mailhog` | `mailhog/mailhog` | 1025, 8025 | Dev email inbox at :8025 |
-| `chain` | `node:20` running `npx hardhat node` from `packages/chain` | 8545 | Deterministic accounts |
+| `chain` | built from `packages/chain/Dockerfile` (`node:24-slim` + `npx hardhat node`) | 8545 | Deterministic accounts |
 
 Tables are owned by `owner`. RLS is enabled **and forced** on every scoped table. `app_user` is used by HTTP request handlers; `app_worker` only by background jobs.
 
@@ -547,7 +547,9 @@ users             id uuid pk, full_name, email unique, phone_masked, password_ha
 posts             id uuid pk, designation text, role Role, jurisdiction_level JurisdictionLevel,
                   state_code null, district_code null, project_id null, requiring_body_id null, is_active
 post_assignments  id pk, post_id fk, user_id fk, valid_from timestamptz, valid_to timestamptz null
-refresh_tokens    id pk, user_id fk, token_hash, expires_at, revoked_at, replaced_by
+refresh_tokens    id pk, user_id fk, family_id uuid,          -- a login's rotation chain; reuse revokes the family
+                  active_post_id fk,                        -- the post choice survives refreshes
+                  token_hash, expires_at, revoked_at, replaced_by
 ```
 
 A user may hold several posts. The JWT carries `userId` + `activePostId`. Case participants (SIA agency, expert group, DLSA observer) get **PROJECT-level posts** with a `valid_to`.
@@ -847,7 +849,8 @@ monitoring_audits  id pk, project_id fk, committee (national|state), period text
 #### Documents, trust & audit `[MVP]`
 
 ```
-documents  id pk, entity_type text, entity_id uuid, doc_type DocType (§39.2),
+documents  id pk, project_id fk null,           -- for RLS: a polymorphic entity_id has no path to a project
+           entity_type text, entity_id uuid, doc_type DocType (§39.2),
            title, language, version int, supersedes_id null,
            object_key text, mime text, size_bytes bigint, sha256 text not null,
            uploaded_by_user_id, uploaded_by_post_id, uploaded_at
