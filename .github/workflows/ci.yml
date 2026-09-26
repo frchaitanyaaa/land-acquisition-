@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: lint · typecheck · unit · rules
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - name: rules:check (golden statutory test + forbidden-literal scan)
+        run: pnpm rules:check
+
+  db:
+    name: migrate · seed · RLS + SQL tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgres://app_user:app_pass@localhost:5432/bhoomisetu
+      DATABASE_WORKER_URL: postgres://app_worker:worker_pass@localhost:5432/bhoomisetu
+      DATABASE_OWNER_URL: postgres://owner:owner_pass@localhost:5432/bhoomisetu
+      DEMO_NOW: '2026-12-10T10:00:00+05:30'
+      SEED: '26016'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Create roles, database and extensions (same script docker compose runs)
+        env:
+          PGPASSWORD: postgres
+        run: >-
+          psql -h localhost -U postgres -d postgres
+          -v db_name=bhoomisetu -v owner_pass=owner_pass -v app_pass=app_pass -v worker_pass=worker_pass
+          -f docker/postgres/roles.sql
+      - run: pnpm db:reset
+      - run: pnpm test:db

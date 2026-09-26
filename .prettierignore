@@ -1,0 +1,7 @@
+pnpm-lock.yaml
+**/*.md
+**/dist
+**/.next
+**/.turbo
+**/dev-dist
+packages/db/drizzle

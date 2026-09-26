@@ -1,0 +1,36 @@
+{
+  "name": "@bhoomisetu/rules",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Rule packs (JSON) + rule engine. The main entry is pure TypeScript with no I/O; ./fs reads pack files.",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./fs": {
+      "types": "./dist/src/fs.d.ts",
+      "default": "./dist/src/fs.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "rules:check": "vitest run test/golden.test.ts && tsx scripts/check.ts"
+  },
+  "dependencies": {
+    "@bhoomisetu/shared": "workspace:*",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.0",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.11"
+  }
+}

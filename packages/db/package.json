@@ -1,0 +1,39 @@
+{
+  "name": "@bhoomisetu/db",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Drizzle schema, migrations, raw SQL (functions, triggers, RLS, views), seed.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx src/scripts/migrate.ts",
+    "db:seed": "tsx src/scripts/seed.ts",
+    "db:reset": "tsx src/scripts/reset.ts",
+    "test:db": "vitest run --config vitest.db.config.mts"
+  },
+  "dependencies": {
+    "@bhoomisetu/rules": "workspace:*",
+    "@bhoomisetu/shared": "workspace:*",
+    "argon2": "^0.45.1",
+    "drizzle-orm": "^0.45.3",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.0",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.11",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.11"
+  }
+}
