@@ -37,3 +37,5 @@ Login: any seeded email (see `packages/db/src/scripts/seed/fixtures.ts` USERS), 
 - DONE field API `apps/api/src/field/*` (+ `packages/geo/src/plausibility.ts`).
 - DONE notifications `apps/api/src/notifications/*`, consumers `jobs/event-handlers.service.ts`, `jobs/event-worker.service.ts`, `jobs/mv-refresh.service.ts`, escalation in `jobs/deadline-scan.service.ts`. Set OUTBOX_RELAY=inline in .env when Redis is absent.
 - DONE chain: `packages/chain/{contracts,test,scripts}`, `apps/api/src/chain/{payloads,chain.service,chain.controller}.ts`, `jobs/anchor.service.ts`, `packages/db/src/scripts/tamper.ts`. Run: `pnpm chain:node` (bg) → `pnpm chain:deploy` → restart API.
+- DONE Modules C/D/E/H/I: `apps/api/src/{sia,consent,rnr,legal,compliance}/*`; `packages/rules/src/hearing.ts`.
+- DONE AI assistant `apps/api/src/assistant/*` (POST /assistant/query; LLM_PROVIDER=mock|real).
