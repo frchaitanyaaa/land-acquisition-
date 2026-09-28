@@ -14,6 +14,7 @@ import { JobsModule } from './jobs/jobs.module';
 import { OrgModule } from './org/org.module';
 import { RulesModule } from './rules/rules.module';
 import { WorkflowModule } from './workflow/workflow.module';
+import { ProjectsModule } from './projects/projects.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { WorkflowModule } from './workflow/workflow.module';
     AuthModule,
     RulesModule,
     WorkflowModule,
+    ProjectsModule,
     JobsModule,
   ],
   controllers: [HealthController],

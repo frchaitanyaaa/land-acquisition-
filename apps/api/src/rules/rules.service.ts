@@ -41,4 +41,30 @@ export class RulesService implements OnModuleInit {
   get(code: string, version: string): Pack | undefined {
     return this.packs.get(`${code}@${version}`);
   }
+
+  all(): Pack[] {
+    return [...this.packs.values()];
+  }
+
+  /**
+   * Packs a project may be pinned to (§14 step 3): its acquisition type and category apply, the
+   * pack is national or for the project's state, and it is in force on `on` (ISO date).
+   * State packs come first, then the newest version.
+   */
+  eligible(p: { acquisitionType: string; category: string; stateCode: string }, on: string): Pack[] {
+    return this.all()
+      .filter(
+        (k) =>
+          k.appliesTo.acquisitionTypes.includes(p.acquisitionType as never) &&
+          (!k.appliesTo.categories || k.appliesTo.categories.includes(p.category as never)) &&
+          (k.jurisdiction.level === 'NATIONAL' || k.jurisdiction.stateCode === p.stateCode) &&
+          k.effectiveFrom <= on &&
+          (!k.effectiveTo || k.effectiveTo >= on),
+      )
+      .sort(
+        (a, b) =>
+          Number(b.jurisdiction.level === 'STATE') - Number(a.jurisdiction.level === 'STATE') ||
+          b.version.localeCompare(a.version, undefined, { numeric: true }),
+      );
+  }
 }

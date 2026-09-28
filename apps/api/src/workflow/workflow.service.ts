@@ -33,6 +33,7 @@ import { ProblemException } from '../common/errors/problem';
 import { writeOutbox } from '../common/outbox/outbox';
 import { RulesService } from '../rules/rules.service';
 import { DeadlinesService } from './deadlines.service';
+import { resolveGate } from './gates';
 import type { StageActionBody } from './workflow.dto';
 
 type ProjectRow = typeof projects.$inferSelect;
@@ -148,17 +149,13 @@ export class WorkflowService {
     const heard = new Set<string>(validHearings.map((h) => h.type));
     const ticked = new Set(rows.filter((r) => r.satisfied).map((r) => r.itemCode));
 
-    return Object.fromEntries(
-      stage.checklist.map((i) => {
-        const ok =
-          i.type === 'document'
-            ? !!i.docType && docs.has(i.docType)
-            : i.type === 'hearing'
-              ? !!i.hearingType && heard.has(i.hearingType)
-              : ticked.has(i.code);
-        return [i.code, ok];
-      }),
-    );
+    const out: Record<string, boolean> = {};
+    for (const i of stage.checklist) {
+      if (i.type === 'document') out[i.code] = !!i.docType && docs.has(i.docType);
+      else if (i.type === 'hearing') out[i.code] = !!i.hearingType && heard.has(i.hearingType);
+      else out[i.code] = (await resolveGate(tx, projectId, i.code)) ?? ticked.has(i.code);
+    }
+    return out;
   }
 
   private async context(tx: Tx, user: AuthUser, projectId: string, stageCode: string) {

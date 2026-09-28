@@ -181,3 +181,19 @@ BEGIN
 END $$;
 REVOKE ALL ON FUNCTION audit_verify() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION audit_verify() TO app_user, app_worker;
+
+-- ---------------------------------------------------------------------------------------------
+-- National duplicate-footprint check (§14 step 3). Runs past RLS on purpose — a requiring body
+-- must learn that ANOTHER district's project overlaps — but returns only code, name and area.
+CREATE OR REPLACE FUNCTION project_footprint_overlaps(pid uuid)
+RETURNS TABLE (project_id uuid, code text, name text, status project_status, overlap_area_sqm numeric)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT o.id, o.code, o.name, o.status, area_sqm(ST_Intersection(o.footprint, p.footprint))
+  FROM projects p JOIN projects o ON o.id <> p.id AND o.footprint IS NOT NULL
+   AND ST_Intersects(o.footprint, p.footprint)
+  WHERE p.id = pid AND p.footprint IS NOT NULL
+    AND o.status NOT IN ('DRAFT', 'TERMINATED', 'DENOTIFIED', 'ABANDONED', 'LAPSED', 'CLOSED')
+$$;
+ALTER FUNCTION project_footprint_overlaps(uuid) OWNER TO app_worker;
+REVOKE ALL ON FUNCTION project_footprint_overlaps(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION project_footprint_overlaps(uuid) TO app_user, app_worker;
