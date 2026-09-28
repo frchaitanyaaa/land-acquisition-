@@ -1,5 +1,5 @@
 import { redactTree, tagEntity, type Viewer } from '@bhoomisetu/shared';
-import { Injectable, SetMetadata, type CallHandler, type ExecutionContext, type NestInterceptor } from '@nestjs/common';
+import { Injectable, SetMetadata, StreamableFile, type CallHandler, type ExecutionContext, type NestInterceptor } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request, Response } from 'express';
 import { map, type Observable } from 'rxjs';
@@ -32,6 +32,8 @@ export class RedactionInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       map((body: unknown) => {
+        // Files and pre-rendered text (CSV) are not DTOs.
+        if (body instanceof StreamableFile || Buffer.isBuffer(body) || typeof body === 'string') return body;
         const tagged = rootEntity ? tagRoot(rootEntity, body) : body;
         const { value, redacted } = redactTree(tagged, viewer, bigintToString);
         if (redacted.length && !res.headersSent) res.setHeader('X-Redacted-Fields', redacted.join(','));
