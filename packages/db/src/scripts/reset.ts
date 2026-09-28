@@ -12,7 +12,7 @@ const DROP_ALL = `
   DECLARE r record;
   BEGIN
     -- Views, materialised views and functions owned by app_worker (see sql/01, sql/04).
-    FOR r IN SELECT c.oid::regclass AS name, c.relkind FROM pg_class c
+    FOR r IN SELECT quote_ident(c.relname) AS name, c.relkind FROM pg_class c
              JOIN pg_namespace n ON n.oid = c.relnamespace
              WHERE n.nspname = 'public' AND pg_get_userbyid(c.relowner) = 'app_worker' AND c.relkind IN ('v', 'm')
     LOOP

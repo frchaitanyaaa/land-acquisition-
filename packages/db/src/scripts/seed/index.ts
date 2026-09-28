@@ -17,6 +17,7 @@ import {
   VILLAGES,
 } from './fixtures';
 import { replayHistory } from './history';
+import { seedV1, type SeedCtx } from './v1';
 
 // Deterministic by construction (§9, §33.1): ids are hashed from SEED + a stable name, every date
 // is an offset from DEMO_NOW, and password salts derive from the email. Two runs → same database.
@@ -59,6 +60,7 @@ export async function runSeed(workerUrl: string, opts: { now: Date; seed: string
       });
     const hashes = new Map(await Promise.all(USERS.map(async (u) => [u.email, await passwordHash(u.email)] as const)));
 
+    let summary: Record<string, unknown> = {};
     await db.transaction(async (tx) => {
       await tx.execute(sql`SELECT set_config('app.now', ${now.toISOString()}, true)`);
 
@@ -73,6 +75,7 @@ export async function runSeed(workerUrl: string, opts: { now: Date; seed: string
         .insert(s.requiringBodies)
         .values(REQUIRING_BODIES.map(({ key, ...rb }) => ({ id: id(`requiring_body:${key}`), ...rb })));
 
+      const seeded: SeedCtx['projects'] = [];
       for (const p of PROJECTS) {
         const projectId = id(`project:${p.code}`);
         const pack = packs.get(`${p.pack.code}@${p.pack.version}`);
@@ -94,7 +97,8 @@ export async function runSeed(workerUrl: string, opts: { now: Date; seed: string
           stateCode: p.stateCode,
           isLinear: p.isLinear,
           rowWidthM: p.rowWidthM,
-          totalAreaProposedSqm: p.totalAreaProposedSqm,
+          isUrgency: p.isUrgency ?? false,
+          inScheduledArea: p.inScheduledArea ?? false,
           status: history.projectStatus,
           currentStage: p.currentStage,
           submittedAt: daysAgo(p.submittedDaysAgo),
@@ -119,6 +123,7 @@ export async function runSeed(workerUrl: string, opts: { now: Date; seed: string
             })),
           );
         }
+        seeded.push({ fixture: p, projectId, stages: history.stages });
       }
 
       await tx.insert(s.posts).values(
@@ -149,6 +154,8 @@ export async function runSeed(workerUrl: string, opts: { now: Date; seed: string
           })),
         );
       }
+
+      summary = await seedV1(tx, { now, seed, id, packs, projects: seeded });
     });
 
     await pool.query(`SELECT set_config('app.now', $1, false)`, [now.toISOString()]);
@@ -159,6 +166,7 @@ export async function runSeed(workerUrl: string, opts: { now: Date; seed: string
         `${packs.size} rule packs, ${PROJECTS.length} projects, ${POSTS.length} posts, ${USERS.length} users`,
     );
     console.log(`demo password for every account: ${DEMO_PASSWORD}`);
+    console.log('seed v1:', JSON.stringify(summary, null, 2));
   } finally {
     await pool.end();
   }

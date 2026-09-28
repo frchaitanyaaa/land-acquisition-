@@ -241,6 +241,8 @@ export const parcelCorrections = pgTable('parcel_corrections', {
   fromVersion: integer().notNull(),
   toVersion: integer(),
   reason: text().notNull(),
+  /** The corrected boundary, applied only on approval by a different post. */
+  proposedGeom: multiPolygon(),
   requestedByPostId: uuid()
     .notNull()
     .references(() => posts.id),

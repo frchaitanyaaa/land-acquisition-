@@ -1,0 +1,1 @@
+ALTER TABLE "parcel_corrections" ADD COLUMN "proposed_geom" geometry(MultiPolygon,4326);

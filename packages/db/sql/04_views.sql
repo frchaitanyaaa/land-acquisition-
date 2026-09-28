@@ -136,6 +136,7 @@ SELECT d.id,
        d.due_at,
        d.consequence,
        clk.consequence_text,
+       clk.label,
        dr.days_remaining,
        CASE WHEN app_now() > d.due_at THEN 'BREACHED'
             WHEN dr.days_remaining <= (rp.definition #>> '{thresholds,deadlineDueSoonDays}')::int THEN 'DUE_SOON'
@@ -147,14 +148,16 @@ FROM statutory_deadlines d
 JOIN projects p ON p.id = d.project_id
 LEFT JOIN rule_packs rp ON rp.code = d.rule_pack_code AND rp.version = d.rule_pack_version
 LEFT JOIN LATERAL (
-  SELECT c ->> 'consequenceText' AS consequence_text
+  SELECT c ->> 'consequenceText' AS consequence_text, c ->> 'label' AS label, (c ? 'endsOn') AS has_end
   FROM jsonb_array_elements(rp.definition -> 'clocks') c WHERE c ->> 'code' = d.clock_code
 ) clk ON true
 CROSS JOIN LATERAL (
   SELECT (d.due_at AT TIME ZONE statutory_tz())::date - (app_now() AT TIME ZONE statutory_tz())::date AS days_remaining
 ) dr
 LEFT JOIN stage_instances si ON d.subject_type = 'STAGE' AND si.id = d.subject_id
-WHERE d.status NOT IN ('SATISFIED', 'WAIVED', 'VOIDED');
+WHERE d.status NOT IN ('SATISFIED', 'WAIVED', 'VOIDED')
+  -- A period with no ending event (the s.15 objection window) elapses; it is never a breach.
+  AND NOT (app_now() > d.due_at AND coalesce(clk.has_end, true) = false);
 
 GRANT SELECT ON v_consent_tally, v_family_money, v_project_kpis, v_deadline_board TO app_user, app_worker;
 

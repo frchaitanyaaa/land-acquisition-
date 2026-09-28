@@ -1,0 +1,523 @@
+{
+  "code": "nh-act-1956",
+  "version": "1.0.0",
+  "title": "National Highways Act, 1956 — land acquisition (illustrative)",
+  "governingAct": "NH_ACT_1956",
+  "jurisdiction": {
+    "level": "NATIONAL"
+  },
+  "effectiveFrom": "2015-01-01",
+  "verify": [
+    "Every stage, section number and duration in this pack is ILLUSTRATIVE — verify against the National Highways Act 1956 text before the demo.",
+    "Whether RFCTLARR compensation and R&R schedules apply to NH acquisitions (Fourth Schedule, s.105(3)) must be confirmed; interest and entitlement heads here mirror larr-2013-base for illustration only.",
+    "The CALA is modelled as the LAO role."
+  ],
+  "appliesTo": {
+    "acquisitionTypes": [
+      "GOVERNMENT"
+    ],
+    "categories": [
+      "TRANSPORT"
+    ]
+  },
+  "stages": [
+    {
+      "code": "NH_PROPOSAL",
+      "name": "Proposal & alignment",
+      "order": 1,
+      "sections": [],
+      "ownerRole": "COLLECTOR",
+      "checklist": [
+        {
+          "code": "DPR_SUMMARY",
+          "type": "document",
+          "docType": "DPR_SUMMARY",
+          "required": true
+        },
+        {
+          "code": "ALIGNMENT_OVERLAY_MAP",
+          "type": "document",
+          "docType": "ALIGNMENT_OVERLAY_MAP",
+          "required": true
+        }
+      ],
+      "actions": {
+        "SUBMIT": {
+          "roles": [
+            "LAO"
+          ]
+        },
+        "APPROVE": {
+          "roles": [
+            "COLLECTOR"
+          ],
+          "makerChecker": true
+        },
+        "RETURN": {
+          "roles": [
+            "COLLECTOR"
+          ],
+          "to": "SAME",
+          "reasonCodes": [
+            "INCOMPLETE_LAND_RECORDS",
+            "BOUNDARY_CONFLICT"
+          ]
+        }
+      }
+    },
+    {
+      "code": "NH_3A_INTENT",
+      "name": "Notification of intention to acquire",
+      "order": 2,
+      "sections": [
+        "3A"
+      ],
+      "ownerRole": "LAO",
+      "checklist": [
+        {
+          "code": "GAZETTE_COPY",
+          "type": "document",
+          "docType": "GAZETTE_COPY",
+          "required": true
+        },
+        {
+          "code": "NEWSPAPER_CLIPPING",
+          "type": "document",
+          "docType": "NEWSPAPER_CLIPPING",
+          "required": true
+        }
+      ],
+      "actions": {
+        "SUBMIT": {
+          "roles": [
+            "LAO"
+          ]
+        },
+        "APPROVE": {
+          "roles": [
+            "COLLECTOR"
+          ],
+          "makerChecker": true,
+          "requiresAttestation": true,
+          "emits": [
+            "NH_3A_PUBLISHED"
+          ]
+        },
+        "RETURN": {
+          "roles": [
+            "COLLECTOR"
+          ],
+          "to": "SAME",
+          "reasonCodes": [
+            "INCORRECT_SURVEY_NUMBERS",
+            "SINGLE_NEWSPAPER_ONLY"
+          ]
+        }
+      }
+    },
+    {
+      "code": "NH_3C_OBJECTIONS",
+      "name": "Objections and hearing by CALA",
+      "order": 3,
+      "sections": [
+        "3C"
+      ],
+      "ownerRole": "LAO",
+      "checklist": [
+        {
+          "code": "OBJECTIONS_DISPOSED",
+          "type": "gate",
+          "required": true
+        }
+      ],
+      "actions": {
+        "SUBMIT": {
+          "roles": [
+            "LAO"
+          ]
+        },
+        "APPROVE": {
+          "roles": [
+            "COLLECTOR"
+          ],
+          "makerChecker": true
+        },
+        "RETURN": {
+          "roles": [
+            "COLLECTOR"
+          ],
+          "to": "SAME",
+          "reasonCodes": [
+            "HEARING_NOTICE_NOT_SERVED"
+          ]
+        }
+      }
+    },
+    {
+      "code": "NH_3D_DECLARATION",
+      "name": "Declaration of acquisition",
+      "order": 4,
+      "sections": [
+        "3D"
+      ],
+      "ownerRole": "LAO",
+      "checklist": [
+        {
+          "code": "GAZETTE_COPY",
+          "type": "document",
+          "docType": "GAZETTE_COPY",
+          "required": true
+        }
+      ],
+      "actions": {
+        "SUBMIT": {
+          "roles": [
+            "LAO"
+          ]
+        },
+        "APPROVE": {
+          "roles": [
+            "COLLECTOR"
+          ],
+          "makerChecker": true,
+          "requiresAttestation": true,
+          "emits": [
+            "NH_3D_PUBLISHED"
+          ]
+        },
+        "RETURN": {
+          "roles": [
+            "COLLECTOR"
+          ],
+          "to": "SAME",
+          "reasonCodes": [
+            "TIMELINE_EXPIRED",
+            "NOTICE_NOT_SERVED"
+          ]
+        }
+      }
+    },
+    {
+      "code": "NH_3G_AMOUNT",
+      "name": "Determination of amount by CALA",
+      "order": 5,
+      "sections": [
+        "3G"
+      ],
+      "ownerRole": "LAO",
+      "checklist": [
+        {
+          "code": "AWARD_LAND",
+          "type": "document",
+          "docType": "AWARD_LAND",
+          "required": true
+        },
+        {
+          "code": "AWARD_CHECKS_PASSED",
+          "type": "gate",
+          "required": true
+        }
+      ],
+      "actions": {
+        "SUBMIT": {
+          "roles": [
+            "LAO"
+          ]
+        },
+        "APPROVE": {
+          "roles": [
+            "COLLECTOR"
+          ],
+          "makerChecker": true,
+          "requiresAttestation": true,
+          "emits": [
+            "AWARD_SIGNED"
+          ]
+        },
+        "RETURN": {
+          "roles": [
+            "COLLECTOR"
+          ],
+          "to": "SAME",
+          "reasonCodes": [
+            "ARITHMETIC_ERROR",
+            "WRONG_MULTIPLICATION_FACTOR"
+          ]
+        }
+      }
+    },
+    {
+      "code": "NH_3H_DEPOSIT_PAYMENT",
+      "name": "Deposit and payment",
+      "order": 6,
+      "sections": [
+        "3H"
+      ],
+      "ownerRole": "LAO",
+      "checklist": [
+        {
+          "code": "ESCROW_FULL_CERTIFIED",
+          "type": "gate",
+          "required": true
+        }
+      ],
+      "actions": {
+        "SUBMIT": {
+          "roles": [
+            "LAO"
+          ]
+        },
+        "APPROVE": {
+          "roles": [
+            "COLLECTOR"
+          ],
+          "makerChecker": true
+        },
+        "RETURN": {
+          "roles": [
+            "COLLECTOR"
+          ],
+          "to": "SAME",
+          "reasonCodes": [
+            "TITLE_DISPUTED"
+          ]
+        }
+      }
+    },
+    {
+      "code": "NH_POSSESSION",
+      "name": "Possession",
+      "order": 7,
+      "sections": [
+        "3E"
+      ],
+      "ownerRole": "LAO",
+      "checklist": [
+        {
+          "code": "ALL_PARCELS_POSSESSED",
+          "type": "gate",
+          "required": true
+        }
+      ],
+      "actions": {
+        "SUBMIT": {
+          "roles": [
+            "LAO"
+          ]
+        },
+        "APPROVE": {
+          "roles": [
+            "COLLECTOR"
+          ],
+          "makerChecker": true,
+          "requiresAttestation": true
+        },
+        "RETURN": {
+          "roles": [
+            "COLLECTOR"
+          ],
+          "to": "SAME",
+          "reasonCodes": [
+            "LEGAL_STAY",
+            "TITLE_ENCUMBERED"
+          ]
+        }
+      }
+    },
+    {
+      "code": "NH_POST",
+      "name": "Post-acquisition",
+      "order": 8,
+      "sections": [],
+      "ownerRole": "COLLECTOR",
+      "checklist": [
+        {
+          "code": "ALL_PARCELS_CLOSED",
+          "type": "gate",
+          "required": true
+        },
+        {
+          "code": "NO_OPEN_LEGAL_CASES",
+          "type": "gate",
+          "required": true
+        }
+      ],
+      "actions": {
+        "APPROVE": {
+          "roles": [
+            "COLLECTOR"
+          ],
+          "makerChecker": false,
+          "to": "TERMINAL",
+          "terminalStatus": "CLOSED"
+        }
+      }
+    }
+  ],
+  "clocks": [
+    {
+      "code": "NH_OBJECTION_WINDOW",
+      "section": "3C",
+      "label": "Objection window (illustrative)",
+      "subject": "PROJECT",
+      "startsOn": "NH_3A_PUBLISHED",
+      "duration": "P21D",
+      "consequence": "WINDOW_CLOSED",
+      "consequenceText": "[VERIFY] Objections under s.3C must be filed within 21 days of the s.3A notification."
+    },
+    {
+      "code": "NH_DECLARATION",
+      "section": "3D",
+      "label": "Declaration after intent (illustrative)",
+      "subject": "PROJECT",
+      "startsOn": "NH_3A_PUBLISHED",
+      "endsOn": "NH_3D_PUBLISHED",
+      "duration": "P1Y",
+      "consequence": "DEEMED_RESCINDED",
+      "consequenceText": "[VERIFY] If no s.3D declaration is published within one year of the s.3A notification, the notification ceases to have effect."
+    },
+    {
+      "code": "NH_INTEREST_STEP",
+      "section": "80 (RFCTLARR, by extension)",
+      "label": "Interest step (illustrative)",
+      "subject": "ENTITLEMENT",
+      "startsOn": "POSSESSION_TAKEN",
+      "startsIf": "unpaidAmountExists",
+      "endsOn": "ENTITLEMENT_PAID",
+      "duration": "P1Y",
+      "consequence": "INTEREST_STEP_UP",
+      "consequenceText": "[VERIFY] Interest on unpaid amounts steps up after one year."
+    }
+  ],
+  "events": [
+    "PROJECT_SUBMITTED",
+    "STAGE_SUBMITTED",
+    "STAGE_APPROVED",
+    "STAGE_RETURNED",
+    "STAGE_NULLIFIED",
+    "PROJECT_TERMINATED",
+    "NH_3A_PUBLISHED",
+    "NH_3D_PUBLISHED",
+    "AWARD_SIGNED",
+    "ENTITLEMENT_PAID",
+    "DISBURSEMENT_SUCCEEDED",
+    "COMPENSATION_ACKNOWLEDGED",
+    "POSSESSION_TAKEN",
+    "PARCEL_UTILISED",
+    "PARCEL_VERIFIED",
+    "PARCEL_CORRECTED",
+    "DOCUMENT_ATTESTED",
+    "S37_NOTICE_SERVED",
+    "REFERENCE_FILED",
+    "SITE_COMMISSIONED"
+  ],
+  "reasonCodes": {
+    "NH": [
+      "ARITHMETIC_ERROR",
+      "BOUNDARY_CONFLICT",
+      "HEARING_NOTICE_NOT_SERVED",
+      "INCOMPLETE_LAND_RECORDS",
+      "INCORRECT_SURVEY_NUMBERS",
+      "LEGAL_STAY",
+      "NOTICE_NOT_SERVED",
+      "SINGLE_NEWSPAPER_ONLY",
+      "TIMELINE_EXPIRED",
+      "TITLE_DISPUTED",
+      "TITLE_ENCUMBERED",
+      "WRONG_MULTIPLICATION_FACTOR"
+    ]
+  },
+  "consent": {
+    "GOVERNMENT": null,
+    "scheduledAreaGramSabha": false
+  },
+  "interest": {
+    "section": "80",
+    "rateYear1Pct": 9,
+    "rateAfterPct": 15,
+    "stepAfter": "P1Y",
+    "dayCount": "ACT_365"
+  },
+  "checks": [
+    {
+      "code": "SOLATIUM_100",
+      "section": "30",
+      "kind": "HEAD_EQUALS_PCT_OF_HEADS",
+      "params": {
+        "head": "SOLATIUM",
+        "pct": 100,
+        "ofHeads": "LAND_COMPENSATION,ASSETS",
+        "tolerancePaise": 100
+      },
+      "message": "Solatium must equal 100% of the compensation entered for land and assets (s.30)."
+    },
+    {
+      "code": "RURAL_FACTOR_RANGE",
+      "section": "First Schedule",
+      "kind": "FACTOR_RANGE",
+      "params": {
+        "ruralMin": 1,
+        "ruralMax": 2,
+        "urban": 1
+      },
+      "message": "A stated multiplication factor must be between 1.00 and 2.00 for rural land and exactly 1.00 for urban land (First Schedule)."
+    }
+  ],
+  "entitlementHeads": [
+    {
+      "code": "LAND_COMPENSATION",
+      "schedule": "FIRST",
+      "kind": "LAND",
+      "label": "Land compensation (First Schedule)"
+    },
+    {
+      "code": "ASSETS",
+      "schedule": "FIRST",
+      "kind": "LAND",
+      "label": "Value of assets attached to land"
+    },
+    {
+      "code": "SOLATIUM",
+      "schedule": "FIRST",
+      "kind": "LAND",
+      "label": "Solatium",
+      "notes": "= 100% of land + assets (check SOLATIUM_100)"
+    },
+    {
+      "code": "ADDITIONAL_12PA",
+      "schedule": "FIRST",
+      "kind": "LAND",
+      "label": "12% additional amount"
+    },
+    {
+      "code": "URGENCY_ADDITIONAL",
+      "schedule": "FIRST",
+      "kind": "LAND",
+      "label": "Urgency additional compensation (s.40)",
+      "notes": "= 75% of total compensation (check URGENCY_ADDITIONAL_75)"
+    }
+  ],
+  "thresholds": {
+    "scStFirstInstalmentMinFraction": 0.3333,
+    "deadlineDueSoonDays": 30,
+    "gpsAccuracyWarnM": 20,
+    "gpsAccuracyRejectM": 50,
+    "areaMismatchFlagPct": 5,
+    "photoMaxDistanceFromParcelM": 25
+  },
+  "escalation": {
+    "afterBreachDays": [
+      0,
+      7,
+      21
+    ],
+    "levels": [
+      "POST",
+      "DISTRICT",
+      "STATE"
+    ]
+  },
+  "declarations": {
+    "attestationVersion": "ATTEST_V1"
+  }
+}

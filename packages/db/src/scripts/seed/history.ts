@@ -44,8 +44,8 @@ export function replayHistory(pack: Pack, p: ProjectFixture, now: Date) {
   const daysAgo = (n: number) => new Date(now.getTime() - n * DAY_MS);
   const facts: ProjectFacts = {
     acquisitionType: p.acquisitionType,
-    isUrgency: false,
-    inScheduledArea: false,
+    isUrgency: p.isUrgency ?? false,
+    inScheduledArea: p.inScheduledArea ?? false,
     affectedAreaSqm: 0,
     status: 'SUBMITTED',
   };
