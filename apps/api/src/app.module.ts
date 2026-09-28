@@ -31,6 +31,7 @@ import { ConsentModule } from './consent/consent.module';
 import { RnrModule } from './rnr/rnr.module';
 import { LegalModule } from './legal/legal.module';
 import { ComplianceModule } from './compliance/compliance.module';
+import { AssistantModule } from './assistant/assistant.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { ComplianceModule } from './compliance/compliance.module';
     RnrModule,
     LegalModule,
     ComplianceModule,
+    AssistantModule,
     NotificationsModule,
     JobsModule,
   ],
