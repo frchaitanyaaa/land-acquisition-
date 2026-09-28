@@ -1,0 +1,28 @@
+{
+  "data_source": "SYNTHETIC_DEMO",
+  "language": "mr",
+  "text": "Sarpanch: Namaskar, aajच्या sunavणीत survey number 214/3 chi boundary chukichi dakhavli aahe, mojani parat vhaychi aahe. Doosra mudda, ha highway cha alignment amchya sheticha vaat lavto, tyala pryay marg havi. Tisra mudda, ya prakalpachi samajik parinam mulyankan report madhe amchi kahi kutumbe samavesh nahit, tyanchi ganana vhavi.",
+  "segments": [
+    {
+      "index": 0,
+      "speaker": "Sarpanch",
+      "start": 0.0,
+      "end": 18.4,
+      "text": "Survey number 214/3 chi boundary chukichi dakhavli aahe, mojani parat vhaychi aahe."
+    },
+    {
+      "index": 1,
+      "speaker": "Sarpanch",
+      "start": 18.4,
+      "end": 34.0,
+      "text": "Ha highway cha alignment amchya sheticha vaat lavto, tyala pryay marg havi."
+    },
+    {
+      "index": 2,
+      "speaker": "Sarpanch",
+      "start": 34.0,
+      "end": 52.7,
+      "text": "Ya prakalpachi samajik parinam mulyankan report madhe amchi kahi kutumbe samavesh nahit, tyanchi ganana vhavi."
+    }
+  ]
+}

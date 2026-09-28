@@ -3,12 +3,13 @@ import { CadastralController } from './cadastral/cadastral.controller';
 import { IdentityService } from './identity/identity.adapter';
 import { PaymentService } from './payment/payment.adapter';
 import { SmsService } from './sms/sms.adapter';
+import { SttService } from './stt/stt.adapter';
 
 /** All external integrations sit behind these adapters; every mock result says provider MOCK (G7). */
 @Global()
 @Module({
   controllers: [CadastralController],
-  providers: [PaymentService, SmsService, IdentityService],
-  exports: [PaymentService, SmsService, IdentityService],
+  providers: [PaymentService, SmsService, IdentityService, SttService],
+  exports: [PaymentService, SmsService, IdentityService, SttService],
 })
 export class AdaptersModule {}

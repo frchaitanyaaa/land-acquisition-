@@ -29,6 +29,13 @@
       "when": 1790596323512,
       "tag": "0003_money_support",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790626056144,
+      "tag": "0004_ocr_retry",
+      "breakpoints": true
     }
   ]
 }

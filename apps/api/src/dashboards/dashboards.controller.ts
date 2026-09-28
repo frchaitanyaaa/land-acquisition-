@@ -2,16 +2,18 @@ import { Controller, Get, Header, Param, ParseUUIDPipe, Query, Res } from '@nest
 import type { Response } from 'express';
 import { z } from 'zod';
 import type { AuthUser } from '../common/auth-user';
+import { ClockService } from '../common/clock/clock.service';
 import { ProblemException } from '../common/errors/problem';
 import { CurrentUser } from '../common/guards/decorators';
 import { ZodPipe } from '../common/validation/zod.pipe';
 import { AnalyticsService, toCsv } from './analytics.service';
 import { DashboardsService } from './dashboards.service';
+import { renderReportPdf } from './pdf-report';
 
 const BoardQuery = z.object({ withinDays: z.coerce.number().int().min(0).max(3650).optional() });
 const RiskQuery = z.object({ projectId: z.uuid().optional() });
 const ReportQuery = z.object({
-  format: z.enum(['csv', 'json']).default('csv'),
+  format: z.enum(['csv', 'json', 'pdf']).default('csv'),
   stateCode: z.string().optional(),
   districtCode: z.string().optional(),
   projectId: z.uuid().optional(),
@@ -23,6 +25,7 @@ export class DashboardsController {
   constructor(
     private readonly dashboards: DashboardsService,
     private readonly analytics: AnalyticsService,
+    private readonly clock: ClockService,
   ) {}
 
   @Get('dashboards/national')
@@ -85,6 +88,11 @@ export class DashboardsController {
         ],
       });
     if (q.format === 'json') return data;
+    if (q.format === 'pdf') {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${type}.pdf"`);
+      return renderReportPdf(type, data, this.clock.now());
+    }
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader('Content-Disposition', `attachment; filename="${type}.csv"`);
     return toCsv(

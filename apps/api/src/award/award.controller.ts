@@ -25,6 +25,9 @@ const S37 = z.strictObject({
     .min(1)
     .max(2000),
 });
+const Review = z.strictObject({
+  accepted: z.array(z.strictObject({ key: z.string().min(1), value: Rupees })).min(1).max(2000),
+});
 
 /** Module F — award entry, checks, signing (§20). */
 @Controller()
@@ -87,5 +90,20 @@ export class AwardController {
   @Get('families/:id/entitlements')
   familyEntitlements(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.awards.familyEntitlements(user, id);
+  }
+
+  @Get('ocr-extractions/:id')
+  extraction(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string) {
+    return this.awards.getExtraction(user, id);
+  }
+
+  @Post('ocr-extractions/:id/review')
+  @HttpCode(200)
+  review(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(new ZodPipe(Review)) body: z.infer<typeof Review>,
+  ) {
+    return this.awards.reviewExtraction(user, id, body);
   }
 }

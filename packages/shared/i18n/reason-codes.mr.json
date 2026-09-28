@@ -1,0 +1,210 @@
+{
+  "ARITHMETIC_ERROR": {
+    "label": "अंकगणितीय चूक",
+    "needsNativeReview": true
+  },
+  "ATTENDANCE_NOT_RECORDED": {
+    "label": "उपस्थिती नोंदवली नाही",
+    "needsNativeReview": true
+  },
+  "BELOW_STATUTORY_MINIMUM": {
+    "label": "वैधानिक किमानपेक्षा कमी",
+    "needsNativeReview": true
+  },
+  "BOUNDARY_CONFLICT": {
+    "label": "सीमा वाद",
+    "needsNativeReview": true
+  },
+  "BUDGETING_ERROR": {
+    "label": "अंदाजपत्रक त्रुटी",
+    "needsNativeReview": true
+  },
+  "DUPLICATE_ENTRIES": {
+    "label": "दुहेरी नोंदी",
+    "needsNativeReview": true
+  },
+  "DUPLICATE_TITLE_CLAIM": {
+    "label": "दुहेरी मालकी दावा",
+    "needsNativeReview": true
+  },
+  "ESCROW_INITIAL_UNFUNDED": {
+    "label": "प्रारंभिक एस्क्रो निधी उपलब्ध नाही",
+    "needsNativeReview": true
+  },
+  "ESCROW_SHORTFALL": {
+    "label": "एस्क्रो तुटवडा",
+    "needsNativeReview": true
+  },
+  "EXCLUDED_SC_ST": {
+    "label": "अनुसूचित जाती/जमाती कुटुंबे वगळली",
+    "needsNativeReview": true
+  },
+  "HEARING_NOTICE_NOT_SERVED": {
+    "label": "सुनावणीची नोटीस दिली नाही",
+    "needsNativeReview": true
+  },
+  "HIGH_VALUE_PRECEDENTS_OMITTED": {
+    "label": "उच्च-मूल्य विक्री दाखले वगळले",
+    "needsNativeReview": true
+  },
+  "IMPROPER_AGENCY_SELECTION": {
+    "label": "एसआयए एजन्सीची अयोग्य निवड",
+    "needsNativeReview": true
+  },
+  "INADEQUATE_NOTICE": {
+    "label": "अपुरी नोटीस",
+    "needsNativeReview": true
+  },
+  "INCOMPLETE_CPR_LIST": {
+    "label": "सामायिक मालमत्ता संसाधन यादी अपूर्ण",
+    "needsNativeReview": true
+  },
+  "INCOMPLETE_LAND_RECORDS": {
+    "label": "जमीन अभिलेख अपूर्ण",
+    "needsNativeReview": true
+  },
+  "INCORRECT_SURVEY_NUMBERS": {
+    "label": "सर्वे क्रमांक चुकीचे",
+    "needsNativeReview": true
+  },
+  "LEGAL_STAY": {
+    "label": "न्यायालयीन स्थगिती लागू",
+    "needsNativeReview": true
+  },
+  "MEMBER_CONFLICT_OF_INTEREST": {
+    "label": "सदस्याचा हितसंबंध विरोध",
+    "needsNativeReview": true
+  },
+  "MEMBER_NOT_QUALIFIED": {
+    "label": "सदस्य अपात्र",
+    "needsNativeReview": true
+  },
+  "MIN_LAND_NOT_PROVEN": {
+    "label": "किमान जमीन आवश्यकता सिद्ध नाही",
+    "needsNativeReview": true
+  },
+  "MISSING_SC_ST_LAND": {
+    "label": "अजा/अज जमीन-बदली-जमीन वाटप गहाळ",
+    "needsNativeReview": true
+  },
+  "MISSING_SIA_SUMMARY": {
+    "label": "एसआयए सारांश गहाळ",
+    "needsNativeReview": true
+  },
+  "MISSING_TENANTS": {
+    "label": "पुनर्वसन योजनेत भाडेकरू वगळले",
+    "needsNativeReview": true
+  },
+  "MISSING_TENANT_ENUMERATION": {
+    "label": "भाडेकरू गणना गहाळ",
+    "needsNativeReview": true
+  },
+  "NOTICE_NOT_SERVED": {
+    "label": "नोटीस बजावली नाही",
+    "needsNativeReview": true
+  },
+  "NO_BUDGET_SANCTION": {
+    "label": "अंदाजपत्रक मंजुरी नाही",
+    "needsNativeReview": true
+  },
+  "NO_LOCAL_LANGUAGE_SUMMARY": {
+    "label": "स्थानिक भाषेतील सारांश नाही",
+    "needsNativeReview": true
+  },
+  "NO_QUORUM": {
+    "label": "गणसंख्या पूर्ण नाही",
+    "needsNativeReview": true
+  },
+  "NO_VIDEO_RECORDING": {
+    "label": "व्हिडिओ चित्रीकरण नाही",
+    "needsNativeReview": true
+  },
+  "OBJECTIONS_UPHELD_DENOTIFY": {
+    "label": "हरकती मान्य — अधिसूचना रद्द",
+    "needsNativeReview": true
+  },
+  "REFERENCE_TIME_BARRED": {
+    "label": "संदर्भ मुदतबाह्य",
+    "needsNativeReview": true
+  },
+  "REPLACEMENT_COST_NOT_REFLECTED": {
+    "label": "प्रतिस्थापन खर्च प्रतिबिंबित नाही",
+    "needsNativeReview": true
+  },
+  "RNR_INCOMPLETE": {
+    "label": "पुनर्वसन व पुनर्स्थापना अपूर्ण",
+    "needsNativeReview": true
+  },
+  "SIA_DATA_FLAWED": {
+    "label": "एसआयए आकडेवारी सدोष",
+    "needsNativeReview": true
+  },
+  "SIA_INCOMPLETE": {
+    "label": "एसआयए अपूर्ण",
+    "needsNativeReview": true
+  },
+  "SINGLE_NEWSPAPER_ONLY": {
+    "label": "फक्त एका वृत्तपत्रात प्रसिद्ध",
+    "needsNativeReview": true
+  },
+  "SURVEY_BOUNDARY_ERROR": {
+    "label": "सर्वेक्षण सीमा चूक",
+    "needsNativeReview": true
+  },
+  "TENANTS_OMITTED": {
+    "label": "भाडेकरू वगळले",
+    "needsNativeReview": true
+  },
+  "THRESHOLD_NOT_MET": {
+    "label": "संमती मर्यादा पूर्ण नाही",
+    "needsNativeReview": true
+  },
+  "TIMELINE_EXPIRED": {
+    "label": "मुदत संपली",
+    "needsNativeReview": true
+  },
+  "TITLE_DISPUTED": {
+    "label": "मालकी वादग्रस्त",
+    "needsNativeReview": true
+  },
+  "TITLE_ENCUMBERED": {
+    "label": "मालकीवर बोजा",
+    "needsNativeReview": true
+  },
+  "UNADDRESSED_OBJECTIONS": {
+    "label": "हरकतींचे निराकरण नाही",
+    "needsNativeReview": true
+  },
+  "UNBUDGETED_RNR_LIABILITY": {
+    "label": "अंदाजपत्रकाबाहेरील पुनर्वसन दायित्व",
+    "needsNativeReview": true
+  },
+  "UNCOUNTED_LABOURERS": {
+    "label": "मजूर गणनेत समाविष्ट नाहीत",
+    "needsNativeReview": true
+  },
+  "UNDERBUDGETED_INFRA": {
+    "label": "पायाभूत सुविधा पुनर्वसनासाठी अपुरे अंदाजपत्रक",
+    "needsNativeReview": true
+  },
+  "UNMAPPED_SC_ST": {
+    "label": "अजा/अज कुटुंबांचे मॅपिंग नाही",
+    "needsNativeReview": true
+  },
+  "UNREPRESENTATIVE_SALES": {
+    "label": "अप्रातिनिधिक विक्री दाखले",
+    "needsNativeReview": true
+  },
+  "UNVERIFIED_HEIRS": {
+    "label": "अपडताळलेले वारस",
+    "needsNativeReview": true
+  },
+  "UNVERIFIED_TITLE": {
+    "label": "अपडताळलेली मालकी",
+    "needsNativeReview": true
+  },
+  "WRONG_MULTIPLICATION_FACTOR": {
+    "label": "चुकीचा गुणाकार घटक",
+    "needsNativeReview": true
+  }
+}

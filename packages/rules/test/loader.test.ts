@@ -17,7 +17,11 @@ const child = (over: Record<string, unknown>) => ({
 describe('resolvePacks', () => {
   it('resolves every committed pack', () => {
     const packs = loadPacks();
-    expect([...packs.keys()].sort()).toEqual(['larr-2013-base@1.0.0', 'larr-2013-maharashtra@1.0.0']);
+    expect([...packs.keys()].sort()).toEqual([
+      'larr-2013-base@1.0.0',
+      'larr-2013-maharashtra@1.0.0',
+      'nh-act-1956@1.0.0',
+    ]);
   });
 
   it('inherits everything the child does not set', () => {

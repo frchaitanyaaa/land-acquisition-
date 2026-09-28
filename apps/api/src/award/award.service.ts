@@ -1,4 +1,4 @@
-import { affectedFamilies, awards, entitlements, statutoryDeadlines, type Tx } from '@bhoomisetu/db';
+import { affectedFamilies, awards, entitlements, ocrExtractions, statutoryDeadlines, type Tx } from '@bhoomisetu/db';
 import { findClock, runChecks, startClock, type CheckResult, type Pack } from '@bhoomisetu/rules';
 import { rupeesToPaise, type Role } from '@bhoomisetu/shared';
 import { Injectable } from '@nestjs/common';
@@ -66,7 +66,17 @@ export class AwardService {
         })
         .returning();
       await this.audit.record({ action: 'AWARD_DRAFTED', entityType: 'award', entityId: row!.id, after: row });
-      return row;
+      // The award PDF (already attested and stored via the documents pipeline) is queued for OCR
+      // (§26.3); the ocr job (§31) does the slow pdf-parse/tesseract work off this request.
+      let ocrExtractionId: string | null = null;
+      if (body.documentId) {
+        const [x] = await tx
+          .insert(ocrExtractions)
+          .values({ documentId: body.documentId, engine: 'pending', fields: [], status: 'pending' })
+          .returning({ id: ocrExtractions.id });
+        ocrExtractionId = x!.id;
+      }
+      return { ...row, ocrExtractionId };
     });
   }
 
@@ -365,5 +375,68 @@ export class AwardService {
   /** Clock lookup helper for other modules (display). */
   clockLabel(pack: Pack, code: string) {
     return findClock(pack, code).label;
+  }
+
+  // ------------------------------------------------------------------ OCR review (§20, §26.3)
+
+  getExtraction(user: AuthUser, id: string) {
+    return this.db.withScope(user, async (tx) => {
+      const r = await one(tx, sql`SELECT * FROM ocr_extractions WHERE id = ${id}`);
+      if (!r) throw new ProblemException(404, 'EXTRACTION_NOT_FOUND', 'No such OCR extraction.');
+      return r;
+    });
+  }
+
+  /**
+   * The review screen accepts fields one at a time (or edited); only accepted values create
+   * entitlements (G3 — the extractor's `fields` never write anything on their own). A field's key
+   * is `<affectedFamilyId>:<headCode>` (see ocr-extract.ts); `value` is rupees, officer-confirmed.
+   */
+  reviewExtraction(
+    user: AuthUser,
+    id: string,
+    body: { accepted: Array<{ key: string; value: string | number }> },
+  ) {
+    requireRole(user, DRAFT_ROLES, 'Reviewing OCR-extracted award fields');
+    return this.db.withScope(user, async (tx) => {
+      const extraction = await one<{ id: string; document_id: string; accepted: unknown }>(
+        tx,
+        sql`SELECT id, document_id, accepted FROM ocr_extractions WHERE id = ${id}`,
+      );
+      if (!extraction) throw new ProblemException(404, 'EXTRACTION_NOT_FOUND', 'No such OCR extraction.');
+      const award = await one<{ id: string }>(
+        tx,
+        sql`SELECT id FROM awards WHERE document_id = ${extraction.document_id}`,
+      );
+      if (!award)
+        throw new ProblemException(409, 'AWARD_NOT_FOUND', 'No award is linked to this extraction’s document.');
+      const entries = body.accepted.map((f) => {
+        const sep = f.key.lastIndexOf(':');
+        if (sep < 0)
+          throw new ProblemException(422, 'FIELD_KEY_INVALID', `${f.key} is not "<affectedFamilyId>:<headCode>".`);
+        return { affectedFamilyId: f.key.slice(0, sep), headCode: f.key.slice(sep + 1), amountRupees: f.value };
+      });
+      const inserted = await this.insertEntitlements(tx, user, award.id, entries, 'ocr_confirmed');
+      const now = this.clock.now();
+      const acceptedSoFar = (Array.isArray(extraction.accepted) ? extraction.accepted : []) as Array<{
+        key: string;
+        value: string | number;
+        acceptedAt: string;
+      }>;
+      const accepted = [
+        ...acceptedSoFar.filter((a) => !body.accepted.some((f) => f.key === a.key)),
+        ...body.accepted.map((f) => ({ key: f.key, value: f.value, acceptedAt: now.toISOString() })),
+      ];
+      await tx.execute(
+        sql`UPDATE ocr_extractions SET status = 'reviewed', reviewed_by_post_id = ${user.post.id}, accepted = ${JSON.stringify(accepted)}::jsonb WHERE id = ${id}`,
+      );
+      await this.audit.record({
+        action: 'OCR_EXTRACTION_REVIEWED',
+        entityType: 'ocr_extraction',
+        entityId: id,
+        after: { accepted: body.accepted.length, entitlements: inserted.length },
+      });
+      return { extractionId: id, entitlements: inserted };
+    });
   }
 }

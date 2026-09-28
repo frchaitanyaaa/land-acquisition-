@@ -1,0 +1,210 @@
+{
+  "ARITHMETIC_ERROR": {
+    "label": "Arithmetic error in the award",
+    "needsNativeReview": false
+  },
+  "ATTENDANCE_NOT_RECORDED": {
+    "label": "Attendance not recorded",
+    "needsNativeReview": false
+  },
+  "BELOW_STATUTORY_MINIMUM": {
+    "label": "Below the statutory minimum",
+    "needsNativeReview": false
+  },
+  "BOUNDARY_CONFLICT": {
+    "label": "Boundary conflict",
+    "needsNativeReview": false
+  },
+  "BUDGETING_ERROR": {
+    "label": "Budgeting error",
+    "needsNativeReview": false
+  },
+  "DUPLICATE_ENTRIES": {
+    "label": "Duplicate entries",
+    "needsNativeReview": false
+  },
+  "DUPLICATE_TITLE_CLAIM": {
+    "label": "Duplicate title claim",
+    "needsNativeReview": false
+  },
+  "ESCROW_INITIAL_UNFUNDED": {
+    "label": "Initial escrow not funded",
+    "needsNativeReview": false
+  },
+  "ESCROW_SHORTFALL": {
+    "label": "Escrow shortfall",
+    "needsNativeReview": false
+  },
+  "EXCLUDED_SC_ST": {
+    "label": "SC/ST families excluded",
+    "needsNativeReview": false
+  },
+  "HEARING_NOTICE_NOT_SERVED": {
+    "label": "Hearing notice not served",
+    "needsNativeReview": false
+  },
+  "HIGH_VALUE_PRECEDENTS_OMITTED": {
+    "label": "High-value sale precedents omitted",
+    "needsNativeReview": false
+  },
+  "IMPROPER_AGENCY_SELECTION": {
+    "label": "Improper SIA agency selection",
+    "needsNativeReview": false
+  },
+  "INADEQUATE_NOTICE": {
+    "label": "Inadequate notice",
+    "needsNativeReview": false
+  },
+  "INCOMPLETE_CPR_LIST": {
+    "label": "Incomplete common property resources list",
+    "needsNativeReview": false
+  },
+  "INCOMPLETE_LAND_RECORDS": {
+    "label": "Incomplete land records",
+    "needsNativeReview": false
+  },
+  "INCORRECT_SURVEY_NUMBERS": {
+    "label": "Incorrect survey numbers",
+    "needsNativeReview": false
+  },
+  "LEGAL_STAY": {
+    "label": "Legal stay in force",
+    "needsNativeReview": false
+  },
+  "MEMBER_CONFLICT_OF_INTEREST": {
+    "label": "Member has a conflict of interest",
+    "needsNativeReview": false
+  },
+  "MEMBER_NOT_QUALIFIED": {
+    "label": "Member not qualified",
+    "needsNativeReview": false
+  },
+  "MIN_LAND_NOT_PROVEN": {
+    "label": "Minimum land requirement not proven",
+    "needsNativeReview": false
+  },
+  "MISSING_SC_ST_LAND": {
+    "label": "SC/ST land-for-land allotment missing",
+    "needsNativeReview": false
+  },
+  "MISSING_SIA_SUMMARY": {
+    "label": "SIA summary missing",
+    "needsNativeReview": false
+  },
+  "MISSING_TENANTS": {
+    "label": "Tenants missing from the R&R scheme",
+    "needsNativeReview": false
+  },
+  "MISSING_TENANT_ENUMERATION": {
+    "label": "Tenant enumeration missing",
+    "needsNativeReview": false
+  },
+  "NOTICE_NOT_SERVED": {
+    "label": "Notice not served",
+    "needsNativeReview": false
+  },
+  "NO_BUDGET_SANCTION": {
+    "label": "No budget sanction",
+    "needsNativeReview": false
+  },
+  "NO_LOCAL_LANGUAGE_SUMMARY": {
+    "label": "No local-language summary",
+    "needsNativeReview": false
+  },
+  "NO_QUORUM": {
+    "label": "No quorum",
+    "needsNativeReview": false
+  },
+  "NO_VIDEO_RECORDING": {
+    "label": "No video recording",
+    "needsNativeReview": false
+  },
+  "OBJECTIONS_UPHELD_DENOTIFY": {
+    "label": "Objections upheld — denotify",
+    "needsNativeReview": false
+  },
+  "REFERENCE_TIME_BARRED": {
+    "label": "Reference is time-barred",
+    "needsNativeReview": false
+  },
+  "REPLACEMENT_COST_NOT_REFLECTED": {
+    "label": "Replacement cost not reflected",
+    "needsNativeReview": false
+  },
+  "RNR_INCOMPLETE": {
+    "label": "R&R incomplete",
+    "needsNativeReview": false
+  },
+  "SIA_DATA_FLAWED": {
+    "label": "SIA data flawed",
+    "needsNativeReview": false
+  },
+  "SIA_INCOMPLETE": {
+    "label": "SIA incomplete",
+    "needsNativeReview": false
+  },
+  "SINGLE_NEWSPAPER_ONLY": {
+    "label": "Published in only one newspaper",
+    "needsNativeReview": false
+  },
+  "SURVEY_BOUNDARY_ERROR": {
+    "label": "Survey boundary error",
+    "needsNativeReview": false
+  },
+  "TENANTS_OMITTED": {
+    "label": "Tenants omitted",
+    "needsNativeReview": false
+  },
+  "THRESHOLD_NOT_MET": {
+    "label": "Consent threshold not met",
+    "needsNativeReview": false
+  },
+  "TIMELINE_EXPIRED": {
+    "label": "Timeline expired",
+    "needsNativeReview": false
+  },
+  "TITLE_DISPUTED": {
+    "label": "Title disputed",
+    "needsNativeReview": false
+  },
+  "TITLE_ENCUMBERED": {
+    "label": "Title encumbered",
+    "needsNativeReview": false
+  },
+  "UNADDRESSED_OBJECTIONS": {
+    "label": "Objections not addressed",
+    "needsNativeReview": false
+  },
+  "UNBUDGETED_RNR_LIABILITY": {
+    "label": "Unbudgeted R&R liability",
+    "needsNativeReview": false
+  },
+  "UNCOUNTED_LABOURERS": {
+    "label": "Labourers not counted",
+    "needsNativeReview": false
+  },
+  "UNDERBUDGETED_INFRA": {
+    "label": "Infrastructure R&R underbudgeted",
+    "needsNativeReview": false
+  },
+  "UNMAPPED_SC_ST": {
+    "label": "SC/ST families not mapped",
+    "needsNativeReview": false
+  },
+  "UNREPRESENTATIVE_SALES": {
+    "label": "Unrepresentative sale instances",
+    "needsNativeReview": false
+  },
+  "UNVERIFIED_HEIRS": {
+    "label": "Unverified heirs",
+    "needsNativeReview": false
+  },
+  "UNVERIFIED_TITLE": {
+    "label": "Unverified title",
+    "needsNativeReview": false
+  },
+  "WRONG_MULTIPLICATION_FACTOR": {
+    "label": "Wrong multiplication factor",
+    "needsNativeReview": false
+  }
+}

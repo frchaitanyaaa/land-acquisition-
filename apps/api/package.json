@@ -7,7 +7,8 @@
     "dev": "nest start --watch --preserveWatchOutput",
     "start": "node dist/main.js",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "vitest run --config vitest.e2e.config.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",
@@ -34,8 +35,11 @@
     "helmet": "^8.3.0",
     "jszip": "^3.10.2",
     "nodemailer": "^10.0.12",
+    "pdf-parse": "^2.4.5",
+    "pdfkit": "^0.20.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
+    "tesseract.js": "^7.0.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -46,6 +50,11 @@
     "@types/multer": "^2.2.0",
     "@types/node": "^24.19.0",
     "@types/nodemailer": "^8.0.2",
+    "@types/pdfkit": "^0.17.6",
+    "@types/pg": "^8.23.1",
+    "@types/supertest": "^7.2.1",
+    "pg": "^8.23.0",
+    "supertest": "^7.3.0",
     "typescript": "~5.9.3",
     "vitest": "^4.1.11"
   }

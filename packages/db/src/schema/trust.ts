@@ -92,6 +92,9 @@ export const ocrExtractions = pgTable('ocr_extractions', {
   accepted: jsonb()
     .notNull()
     .default(sql`'[]'`),
+  /** Retry bookkeeping for the ocr job (§31), same shape as chain_events. */
+  attempts: integer().notNull().default(0),
+  lastError: text(),
   ...stamps,
 });
 

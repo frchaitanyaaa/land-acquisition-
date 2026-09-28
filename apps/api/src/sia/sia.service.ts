@@ -19,6 +19,7 @@ import { writeOutbox } from '../common/outbox/outbox';
 import { projectPack } from '../common/project-pack';
 import { requireRole } from '../common/roles';
 import { env } from '../config/env';
+import { DocumentsService } from '../documents/documents.service';
 import { DeadlinesService } from '../workflow/deadlines.service';
 import { RulesService } from '../rules/rules.service';
 
@@ -41,6 +42,7 @@ export class SiaService {
     private readonly deadlines: DeadlinesService,
     private readonly audit: AuditService,
     private readonly clock: ClockService,
+    private readonly documents: DocumentsService,
   ) {}
 
   /** Emits a statutory event that is not a stage action (SIA commenced, report final…) and runs its clocks. */
@@ -231,6 +233,47 @@ export class SiaService {
         after,
       });
       return after;
+    });
+  }
+
+  /**
+   * s.17 oral objections: attach a recording to the hearing; the stt job (§31) picks it up async,
+   * transcribes it, and files one objections ticket per segment (ai_suggested_* only, G3).
+   */
+  uploadAudio(
+    user: AuthUser,
+    hearingId: string,
+    file: { filename: string; buffer: Buffer },
+    title: string,
+  ) {
+    requireRole(user, ['COLLECTOR', 'LAO', 'SIA_AGENCY', 'RNR_ADMINISTRATOR'], 'Uploading a hearing recording');
+    return this.db.withScope(user, async (tx) => {
+      const [h] = await tx.select().from(hearings).where(eq(hearings.id, hearingId));
+      if (!h) throw new ProblemException(404, 'HEARING_NOT_FOUND', 'No such hearing.');
+      const doc = await this.documents.store(tx, user, {
+        projectId: h.projectId,
+        entityType: 'hearing',
+        entityId: hearingId,
+        docType: 'HEARING_RECORDING',
+        title,
+        attest: true,
+        declarationVersion: null,
+        filename: file.filename,
+        buffer: file.buffer,
+      });
+      const [after] = await tx
+        .update(hearings)
+        .set({ recordingDocumentId: doc.id })
+        .where(eq(hearings.id, hearingId))
+        .returning();
+      await this.audit.record({
+        action: 'HEARING_AUDIO_UPLOADED',
+        entityType: 'hearing',
+        entityId: hearingId,
+        after: { documentId: doc.id },
+      });
+      // Transcription runs off the request path (the stt job polls for unprocessed recordings).
+      return { ...after, validity: hearingValidity(after!, env().STATUTORY_TZ), document: doc };
     });
   }
 

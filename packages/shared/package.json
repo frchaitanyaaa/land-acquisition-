@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./reason-codes": {
+      "types": "./dist/reason-codes.d.ts",
+      "default": "./dist/reason-codes.js"
     }
   },
   "scripts": {

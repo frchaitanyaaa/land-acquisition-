@@ -7,12 +7,26 @@ import { EventHandlers } from './event-handlers.service';
 import { EventWorker } from './event-worker.service';
 import { MvRefresh } from './mv-refresh.service';
 import { AnchorJob } from './anchor.service';
+import { SttJob } from './stt.service';
+import { OcrJob } from './ocr.service';
+import { AnnuityScan } from './annuity-scan.service';
 import { DisbursementModule } from '../disbursement/disbursement.module';
 
 /** Background jobs (§31). The only module besides rules/ allowed to use WorkerDbService. */
 @Module({
   imports: [RulesModule, DisbursementModule],
-  providers: [OutboxRelay, DeadlineScan, PaymentStatusJob, EventHandlers, EventWorker, MvRefresh, AnchorJob],
+  providers: [
+    OutboxRelay,
+    DeadlineScan,
+    PaymentStatusJob,
+    EventHandlers,
+    EventWorker,
+    MvRefresh,
+    AnchorJob,
+    SttJob,
+    OcrJob,
+    AnnuityScan,
+  ],
   exports: [EventHandlers, MvRefresh],
 })
 export class JobsModule {}

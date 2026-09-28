@@ -1,0 +1,210 @@
+{
+  "ARITHMETIC_ERROR": {
+    "label": "अंकगणितीय त्रुटि",
+    "needsNativeReview": true
+  },
+  "ATTENDANCE_NOT_RECORDED": {
+    "label": "उपस्थिति दर्ज नहीं की गई",
+    "needsNativeReview": true
+  },
+  "BELOW_STATUTORY_MINIMUM": {
+    "label": "सांविधिक न्यूनतम से कम",
+    "needsNativeReview": true
+  },
+  "BOUNDARY_CONFLICT": {
+    "label": "सीमा विवाद",
+    "needsNativeReview": true
+  },
+  "BUDGETING_ERROR": {
+    "label": "बजट संबंधी त्रुटि",
+    "needsNativeReview": true
+  },
+  "DUPLICATE_ENTRIES": {
+    "label": "डुप्लिकेट प्रविष्टियां",
+    "needsNativeReview": true
+  },
+  "DUPLICATE_TITLE_CLAIM": {
+    "label": "डुप्लिकेट स्वामित्व दावा",
+    "needsNativeReview": true
+  },
+  "ESCROW_INITIAL_UNFUNDED": {
+    "label": "प्रारंभिक एस्क्रो निधिबद्ध नहीं",
+    "needsNativeReview": true
+  },
+  "ESCROW_SHORTFALL": {
+    "label": "एस्क्रो में कमी",
+    "needsNativeReview": true
+  },
+  "EXCLUDED_SC_ST": {
+    "label": "अनुसूचित जाति/जनजाति परिवार छूट गए",
+    "needsNativeReview": true
+  },
+  "HEARING_NOTICE_NOT_SERVED": {
+    "label": "सुनवाई की सूचना नहीं दी गई",
+    "needsNativeReview": true
+  },
+  "HIGH_VALUE_PRECEDENTS_OMITTED": {
+    "label": "उच्च-मूल्य के विक्रय दृष्टांत छोड़े गए",
+    "needsNativeReview": true
+  },
+  "IMPROPER_AGENCY_SELECTION": {
+    "label": "एसआईऐ एजेंसी का अनुचित चयन",
+    "needsNativeReview": true
+  },
+  "INADEQUATE_NOTICE": {
+    "label": "अपर्याप्त सूचना",
+    "needsNativeReview": true
+  },
+  "INCOMPLETE_CPR_LIST": {
+    "label": "सामान्य संपत्ति संसाधन सूची अधूरी",
+    "needsNativeReview": true
+  },
+  "INCOMPLETE_LAND_RECORDS": {
+    "label": "भूमि अभिलेख अधूरे",
+    "needsNativeReview": true
+  },
+  "INCORRECT_SURVEY_NUMBERS": {
+    "label": "सर्वेक्षण क्रमांक गलत",
+    "needsNativeReview": true
+  },
+  "LEGAL_STAY": {
+    "label": "न्यायालयीन रोक लागू",
+    "needsNativeReview": true
+  },
+  "MEMBER_CONFLICT_OF_INTEREST": {
+    "label": "सदस्य का हितों का टकराव",
+    "needsNativeReview": true
+  },
+  "MEMBER_NOT_QUALIFIED": {
+    "label": "सदस्य अयोग्य",
+    "needsNativeReview": true
+  },
+  "MIN_LAND_NOT_PROVEN": {
+    "label": "न्यूनतम भूमि आवश्यकता सिद्ध नहीं",
+    "needsNativeReview": true
+  },
+  "MISSING_SC_ST_LAND": {
+    "label": "अजा/अजजा हेतु भूमि-प्रति-भूमि आवंटन गायब",
+    "needsNativeReview": true
+  },
+  "MISSING_SIA_SUMMARY": {
+    "label": "एसआईऐ सारांश गायब",
+    "needsNativeReview": true
+  },
+  "MISSING_TENANTS": {
+    "label": "पुनर्वास योजना में किरायेदार छूटे",
+    "needsNativeReview": true
+  },
+  "MISSING_TENANT_ENUMERATION": {
+    "label": "किरायेदार गणना गायब",
+    "needsNativeReview": true
+  },
+  "NOTICE_NOT_SERVED": {
+    "label": "सूचना तामील नहीं",
+    "needsNativeReview": true
+  },
+  "NO_BUDGET_SANCTION": {
+    "label": "बजट स्वीकृति नहीं",
+    "needsNativeReview": true
+  },
+  "NO_LOCAL_LANGUAGE_SUMMARY": {
+    "label": "स्थानीय भाषा सारांश नहीं",
+    "needsNativeReview": true
+  },
+  "NO_QUORUM": {
+    "label": "गणपूर्ति नहीं",
+    "needsNativeReview": true
+  },
+  "NO_VIDEO_RECORDING": {
+    "label": "वीडियो रिकॉर्डिंग नहीं",
+    "needsNativeReview": true
+  },
+  "OBJECTIONS_UPHELD_DENOTIFY": {
+    "label": "आपत्तियां स्वीकृत — अधिसूचना रद्द",
+    "needsNativeReview": true
+  },
+  "REFERENCE_TIME_BARRED": {
+    "label": "संदर्भ समय-बाधित",
+    "needsNativeReview": true
+  },
+  "REPLACEMENT_COST_NOT_REFLECTED": {
+    "label": "प्रतिस्थापन लागत प्रतिबिंबित नहीं",
+    "needsNativeReview": true
+  },
+  "RNR_INCOMPLETE": {
+    "label": "पुनर्वास एवं पुनर्स्थापन अधूरा",
+    "needsNativeReview": true
+  },
+  "SIA_DATA_FLAWED": {
+    "label": "एसआईऐ आंकड़े त्रुटिपूर्ण",
+    "needsNativeReview": true
+  },
+  "SIA_INCOMPLETE": {
+    "label": "एसआईऐ अधूरा",
+    "needsNativeReview": true
+  },
+  "SINGLE_NEWSPAPER_ONLY": {
+    "label": "केवल एक समाचार पत्र में प्रकाशित",
+    "needsNativeReview": true
+  },
+  "SURVEY_BOUNDARY_ERROR": {
+    "label": "सर्वेक्षण सीमा त्रुटि",
+    "needsNativeReview": true
+  },
+  "TENANTS_OMITTED": {
+    "label": "किरायेदार छूटे",
+    "needsNativeReview": true
+  },
+  "THRESHOLD_NOT_MET": {
+    "label": "सहमति सीमा पूरी नहीं",
+    "needsNativeReview": true
+  },
+  "TIMELINE_EXPIRED": {
+    "label": "समय-सीमा समाप्त",
+    "needsNativeReview": true
+  },
+  "TITLE_DISPUTED": {
+    "label": "स्वामित्व विवादित",
+    "needsNativeReview": true
+  },
+  "TITLE_ENCUMBERED": {
+    "label": "स्वामित्व भारग्रस्त",
+    "needsNativeReview": true
+  },
+  "UNADDRESSED_OBJECTIONS": {
+    "label": "आपत्तियों का निराकरण नहीं",
+    "needsNativeReview": true
+  },
+  "UNBUDGETED_RNR_LIABILITY": {
+    "label": "अबजटित पुनर्वास दायित्व",
+    "needsNativeReview": true
+  },
+  "UNCOUNTED_LABOURERS": {
+    "label": "मजदूर गणना में शामिल नहीं",
+    "needsNativeReview": true
+  },
+  "UNDERBUDGETED_INFRA": {
+    "label": "अवसंरचना पुनर्वास हेतु अपर्याप्त बजट",
+    "needsNativeReview": true
+  },
+  "UNMAPPED_SC_ST": {
+    "label": "अजा/अजजा परिवार मानचित्रित नहीं",
+    "needsNativeReview": true
+  },
+  "UNREPRESENTATIVE_SALES": {
+    "label": "अप्रतिनिधिक विक्रय दृष्टांत",
+    "needsNativeReview": true
+  },
+  "UNVERIFIED_HEIRS": {
+    "label": "असत्यापित वारिस",
+    "needsNativeReview": true
+  },
+  "UNVERIFIED_TITLE": {
+    "label": "असत्यापित स्वामित्व",
+    "needsNativeReview": true
+  },
+  "WRONG_MULTIPLICATION_FACTOR": {
+    "label": "गलत गुणन कारक",
+    "needsNativeReview": true
+  }
+}

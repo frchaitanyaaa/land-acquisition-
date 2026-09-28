@@ -66,3 +66,56 @@ jobs:
           -f docker/postgres/roles.sql
       - run: pnpm db:reset
       - run: pnpm test:db
+
+  e2e-api:
+    name: api e2e (§32.5, Supertest against a live seeded DB)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgres://app_user:app_pass@localhost:5432/bhoomisetu
+      DATABASE_WORKER_URL: postgres://app_worker:worker_pass@localhost:5432/bhoomisetu
+      DATABASE_OWNER_URL: postgres://owner:owner_pass@localhost:5432/bhoomisetu
+      REDIS_URL: redis://localhost:6379
+      DEMO_NOW: '2026-12-10T10:00:00+05:30'
+      DEMO_MODE: 'true'
+      SEED: '26016'
+      JWT_ACCESS_SECRET: ci-only-access-secret
+      JWT_REFRESH_SECRET: ci-only-refresh-secret
+      PII_ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      STORAGE_PROVIDER: local
+      STORAGE_LOCAL_DIR: .data/storage
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Create roles, database and extensions (same script docker compose runs)
+        env:
+          PGPASSWORD: postgres
+        run: >-
+          psql -h localhost -U postgres -d postgres
+          -v db_name=bhoomisetu -v owner_pass=owner_pass -v app_pass=app_pass -v worker_pass=worker_pass
+          -f docker/postgres/roles.sql
+      - run: pnpm db:reset
+      - run: pnpm test:e2e:api

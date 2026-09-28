@@ -1,9 +1,23 @@
-import { Body, Controller, Get, HttpCode, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import type {} from 'multer';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { HEARING_TYPES } from '@bhoomisetu/shared';
 import { z } from 'zod';
 import { AuditEntity } from '../common/audit/audit.interceptor';
 import type { AuthUser } from '../common/auth-user';
+import { ProblemException } from '../common/errors/problem';
 import { CurrentUser } from '../common/guards/decorators';
+import { MAX_UPLOAD_BYTES } from '../documents/documents.service';
 import { ZodPipe } from '../common/validation/zod.pipe';
 import { SiaService } from './sia.service';
 
@@ -108,6 +122,18 @@ export class SiaController {
   @HttpCode(200)
   validate(@CurrentUser() u: AuthUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.sia.validateHearing(u, id);
+  }
+
+  @Post('hearings/:id/audio')
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_UPLOAD_BYTES } }))
+  audio(
+    @CurrentUser() u: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @UploadedFile() file: Express.Multer.File | undefined,
+    @Body('title') title: string | undefined,
+  ) {
+    if (!file) throw new ProblemException(400, 'NO_FILE', 'Send the recording as multipart field `file`.');
+    return this.sia.uploadAudio(u, id, { filename: file.originalname, buffer: file.buffer }, title || 'Hearing recording');
   }
 
   @Post('hearings/:id/nullify')
