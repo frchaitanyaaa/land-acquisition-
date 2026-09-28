@@ -5,7 +5,7 @@ import type { Tx } from '../../client';
 import { encryptPii, maskBankRef, maskPhone } from '../../pii';
 import * as s from '../../schema';
 import type { ProjectFixture } from './fixtures';
-import { PROJECTS, VILLAGES } from './fixtures';
+import { VILLAGES } from './fixtures';
 import type { SeedStage } from './history';
 import { GIVEN_FEMALE, GIVEN_MALE, SURNAMES_MH, SURNAMES_OTHER } from './names';
 import { mulberry32, seedOf, type Rng } from './rng';
@@ -64,7 +64,6 @@ function weighted<T>(rng: Rng, xs: Array<[T, number]>): T {
 export async function seedV1(tx: Tx, ctx: SeedCtx) {
   const { now, id } = ctx;
   const daysAgo = (n: number) => new Date(now.getTime() - n * DAY_MS);
-  const post = (key: string) => id(`post:${key}`);
   const summary: Record<string, unknown> = {};
 
   // ---------------------------------------------------------------- 1. geometry

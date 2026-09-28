@@ -1,4 +1,4 @@
-import { decryptPii, landParcels, parcelCorrections, projectParcels, spatialFlags, type Tx } from '@bhoomisetu/db';
+import { decryptPii, landParcels, parcelCorrections, projectParcels, spatialFlags } from '@bhoomisetu/db';
 import { tagEntity, type Role } from '@bhoomisetu/shared';
 import { Injectable } from '@nestjs/common';
 import { and, eq, sql } from 'drizzle-orm';
