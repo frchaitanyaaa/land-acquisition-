@@ -16,6 +16,7 @@ import { RulesModule } from './rules/rules.module';
 import { WorkflowModule } from './workflow/workflow.module';
 import { ProjectsModule } from './projects/projects.module';
 import { GisModule } from './gis/gis.module';
+import { DashboardsModule } from './dashboards/dashboards.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { GisModule } from './gis/gis.module';
     WorkflowModule,
     ProjectsModule,
     GisModule,
+    DashboardsModule,
     JobsModule,
   ],
   controllers: [HealthController],
