@@ -23,6 +23,8 @@ import { AwardModule } from './award/award.module';
 import { DisbursementModule } from './disbursement/disbursement.module';
 import { PublicModule } from './public/public.module';
 import { FieldModule } from './field/field.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { StreamHubModule } from './notifications/stream-hub';
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { FieldModule } from './field/field.module';
     DisbursementModule,
     PublicModule,
     FieldModule,
+    StreamHubModule,
+    NotificationsModule,
     JobsModule,
   ],
   controllers: [HealthController],

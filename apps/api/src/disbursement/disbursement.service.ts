@@ -289,15 +289,13 @@ export class DisbursementService {
       const { token, hash } = newToken();
       const expiresAt = new Date(this.clock.realNow().getTime() + ENROL_LINK_MIN * MINUTE);
       // Real-clock expiry: a frozen demo clock must not keep links alive forever.
-      await tx
-        .insert(accessTokens)
-        .values({
-          purpose: 'enrol',
-          personId,
-          tokenHash: hash,
-          expiresAt: this.shiftToAppClock(expiresAt),
-          issuedByPostId: user.post.id,
-        });
+      await tx.insert(accessTokens).values({
+        purpose: 'enrol',
+        personId,
+        tokenHash: hash,
+        expiresAt: this.shiftToAppClock(expiresAt),
+        issuedByPostId: user.post.id,
+      });
       await this.audit.record({ action: 'ENROL_LINK_ISSUED', entityType: 'person', entityId: personId });
       return { url: `${env().PUBLIC_BASE_URL}/enrol/${token}`, token, expiresInMinutes: ENROL_LINK_MIN };
     });
@@ -320,16 +318,14 @@ export class DisbursementService {
       throw new ProblemException(409, 'NOT_PAYABLE', 'Only a successful DBT payment is acknowledged by the family.');
     const { token, hash } = newToken();
     const expiresAt = new Date(this.clock.now().getTime() + ACK_LINK_DAYS * 24 * 60 * MINUTE);
-    await tx
-      .insert(accessTokens)
-      .values({
-        purpose: 'acknowledge',
-        personId: d.person_id,
-        subjectId: disbursementId,
-        tokenHash: hash,
-        expiresAt,
-        issuedByPostId,
-      });
+    await tx.insert(accessTokens).values({
+      purpose: 'acknowledge',
+      personId: d.person_id,
+      subjectId: disbursementId,
+      tokenHash: hash,
+      expiresAt,
+      issuedByPostId,
+    });
     return { url: `${env().PUBLIC_BASE_URL}/ack/${token}`, token, personId: d.person_id };
   }
 
@@ -342,16 +338,14 @@ export class DisbursementService {
       );
       if (!f) throw new ProblemException(404, 'FAMILY_NOT_FOUND', 'No such family.');
       const { token, hash } = newToken();
-      await tx
-        .insert(accessTokens)
-        .values({
-          purpose: 'passbook',
-          personId: f.head_person_id,
-          subjectId: familyId,
-          tokenHash: hash,
-          expiresAt: new Date(this.clock.now().getTime() + 90 * 24 * 60 * MINUTE),
-          issuedByPostId: user.post.id,
-        });
+      await tx.insert(accessTokens).values({
+        purpose: 'passbook',
+        personId: f.head_person_id,
+        subjectId: familyId,
+        tokenHash: hash,
+        expiresAt: new Date(this.clock.now().getTime() + 90 * 24 * 60 * MINUTE),
+        issuedByPostId: user.post.id,
+      });
       await this.audit.record({ action: 'PASSBOOK_ISSUED', entityType: 'affected_family', entityId: familyId });
       return { url: `${env().PUBLIC_BASE_URL}/passbook/${token}`, token };
     });
@@ -508,7 +502,7 @@ export class DisbursementService {
       tx,
       sql`SELECT e.id, e.affected_family_id AS family_id, e.head_code, e.status,
                  (SELECT d.payment_status FROM disbursements d WHERE d.entitlement_id = e.id ORDER BY d.initiated_at DESC LIMIT 1) AS payment_status
-          FROM entitlements e WHERE e.affected_family_id = ANY(${fams.map((f) => f.id)}::uuid[])`,
+          FROM entitlements e WHERE e.affected_family_id = ANY(string_to_array(${fams.map((f) => f.id).join(',')}, ',')::uuid[])`,
     );
     const vacation = await one<{ ok: boolean }>(
       tx,
@@ -620,51 +614,47 @@ export class DisbursementService {
       const util = pack.clocks.find((c) => c.startsOn === 'POSSESSION_TAKEN' && c.subject === 'PROJECT_PARCEL');
       if (util) {
         const s = startClock(pack, util.code, now, {}, env().STATUTORY_TZ)!;
-        await tx
-          .insert(statutoryDeadlines)
-          .values({
-            projectId: pp.project_id,
-            clockCode: util.code,
-            section: util.section,
-            subjectType: 'PROJECT_PARCEL',
-            subjectId: projectParcelId,
-            rulePackCode: pack.code,
-            rulePackVersion: pack.version,
-            startEvent: 'POSSESSION_TAKEN',
-            startedAt: now,
-            dueAt: s.dueAt,
-            consequence: util.consequence,
-            status: 'SAFE',
-            conditionInputs: {},
-          });
+        await tx.insert(statutoryDeadlines).values({
+          projectId: pp.project_id,
+          clockCode: util.code,
+          section: util.section,
+          subjectType: 'PROJECT_PARCEL',
+          subjectId: projectParcelId,
+          rulePackCode: pack.code,
+          rulePackVersion: pack.version,
+          startEvent: 'POSSESSION_TAKEN',
+          startedAt: now,
+          dueAt: s.dueAt,
+          consequence: util.consequence,
+          status: 'SAFE',
+          conditionInputs: {},
+        });
       }
       const interestClock = pack.clocks.find((c) => c.startsOn === 'POSSESSION_TAKEN' && c.subject === 'ENTITLEMENT');
       if (interestClock) {
         const unpaid = await rows<{ id: string }>(
           tx,
-          sql`SELECT e.id FROM entitlements e WHERE e.id = ANY(${input.entitlements.map((x) => x.id)}::uuid[])
+          sql`SELECT e.id FROM entitlements e WHERE e.id = ANY(string_to_array(${input.entitlements.map((x) => x.id).join(',')}, ',')::uuid[])
                 AND e.amount_awarded_paise > (SELECT coalesce(sum(amount_paise),0) FROM disbursements d WHERE d.entitlement_id = e.id AND d.payment_status = 'SUCCESS')`,
         );
         for (const u of unpaid) {
           const s = startClock(pack, interestClock.code, now, { unpaidAmountExists: true }, env().STATUTORY_TZ);
           if (s)
-            await tx
-              .insert(statutoryDeadlines)
-              .values({
-                projectId: pp.project_id,
-                clockCode: interestClock.code,
-                section: interestClock.section,
-                subjectType: 'ENTITLEMENT',
-                subjectId: u.id,
-                rulePackCode: pack.code,
-                rulePackVersion: pack.version,
-                startEvent: 'POSSESSION_TAKEN',
-                startedAt: now,
-                dueAt: s.dueAt,
-                consequence: interestClock.consequence,
-                status: 'SAFE',
-                conditionInputs: { unpaidAmountExists: true },
-              });
+            await tx.insert(statutoryDeadlines).values({
+              projectId: pp.project_id,
+              clockCode: interestClock.code,
+              section: interestClock.section,
+              subjectType: 'ENTITLEMENT',
+              subjectId: u.id,
+              rulePackCode: pack.code,
+              rulePackVersion: pack.version,
+              startEvent: 'POSSESSION_TAKEN',
+              startedAt: now,
+              dueAt: s.dueAt,
+              consequence: interestClock.consequence,
+              status: 'SAFE',
+              conditionInputs: { unpaidAmountExists: true },
+            });
         }
       }
       await writeOutbox(tx, {

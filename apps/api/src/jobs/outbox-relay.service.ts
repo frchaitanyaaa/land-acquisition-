@@ -5,6 +5,7 @@ import { asc, eq, isNull } from 'drizzle-orm';
 import { ClockService } from '../common/clock/clock.service';
 import { WorkerDbService } from '../common/db/worker-db.service';
 import { env } from '../config/env';
+import { EventHandlers } from './event-handlers.service';
 
 export const DOMAIN_EVENTS_QUEUE = 'domain-events';
 
@@ -50,11 +51,17 @@ export class OutboxRelay implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly worker: WorkerDbService,
     private readonly clock: ClockService,
+    private readonly handlers: EventHandlers,
   ) {}
 
   onModuleInit(): void {
     if (env().OUTBOX_RELAY === 'off') {
       this.logger.warn('OUTBOX_RELAY=off — outbox events will stay in Postgres');
+      return;
+    }
+    if (env().OUTBOX_RELAY === 'inline') {
+      this.logger.warn('OUTBOX_RELAY=inline — consumers run in-process (no Redis)');
+      this.timer = setInterval(() => void this.tickInline(), TICK_MS);
       return;
     }
     this.queue = new Queue(DOMAIN_EVENTS_QUEUE, { connection: redisConnection(env().REDIS_URL) });
@@ -77,6 +84,54 @@ export class OutboxRelay implements OnModuleInit, OnModuleDestroy {
     } finally {
       this.busy = false;
     }
+  }
+
+  private async tickInline(): Promise<void> {
+    if (this.busy) return;
+    this.busy = true;
+    try {
+      await this.relayInline();
+    } catch (e) {
+      this.warnOnce(`inline relay failed: ${(e as Error).message}`);
+    } finally {
+      this.busy = false;
+    }
+  }
+
+  /** Inline mode: hands each event to the in-process consumers, in id order, then marks it processed. */
+  async relayInline(): Promise<number> {
+    const batch = await this.worker.transaction(this.clock.now(), (tx) =>
+      tx.select().from(outboxEvents).where(isNull(outboxEvents.processedAt)).orderBy(asc(outboxEvents.id)).limit(BATCH),
+    );
+    let n = 0;
+    for (const row of batch) {
+      try {
+        await this.handlers.handle({
+          outboxId: row.id,
+          type: row.type,
+          aggregateType: row.aggregateType,
+          aggregateId: row.aggregateId,
+          payload: row.payload as Record<string, unknown>,
+        });
+        await this.worker.transaction(this.clock.now(), (tx) =>
+          tx
+            .update(outboxEvents)
+            .set({ processedAt: this.clock.now(), attempts: row.attempts + 1, lastError: null })
+            .where(eq(outboxEvents.id, row.id)),
+        );
+        n++;
+      } catch (e) {
+        await this.worker.transaction(this.clock.now(), (tx) =>
+          tx
+            .update(outboxEvents)
+            .set({ attempts: row.attempts + 1, lastError: (e as Error).message })
+            .where(eq(outboxEvents.id, row.id)),
+        );
+        this.warnOnce(`consumer failed on ${row.type}#${row.id}: ${(e as Error).message}`);
+        break;
+      }
+    }
+    return n;
   }
 
   /** Publishes up to one batch. Returns how many rows were published. */

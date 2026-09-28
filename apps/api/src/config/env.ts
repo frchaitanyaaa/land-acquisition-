@@ -24,7 +24,10 @@ const EnvSchema = z
       .transform((v) => v || undefined),
     STATUTORY_TZ: z.string().default('Asia/Kolkata'),
     /** Set to `off` to run the API without Redis (the relay then leaves events queued in Postgres). */
-    OUTBOX_RELAY: z.enum(['on', 'off']).default('on'),
+    /** on = publish to BullMQ (Redis); inline = run consumers in-process (no Redis); off = leave events queued. */
+    OUTBOX_RELAY: z.enum(['on', 'inline', 'off']).default('on'),
+    SMTP_HOST: z.string().default('localhost'),
+    SMTP_PORT: z.coerce.number().int().default(1025),
     S3_ENDPOINT: z.string().default('http://localhost:9000'),
     S3_ACCESS_KEY: z.string().default('minio'),
     S3_SECRET_KEY: z.string().default('minio12345'),

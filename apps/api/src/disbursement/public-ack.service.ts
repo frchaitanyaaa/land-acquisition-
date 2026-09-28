@@ -113,7 +113,7 @@ export class PublicAckService {
     const id = await this.db.withScope(null, (tx) =>
       one<{ id: string }>(
         tx,
-        sql`SELECT public_enrol_credential(${hash}, ${cred.id}, ${Buffer.from(cred.publicKey)}, ${cred.counter}, ${(cred.transports ?? []) as string[]}::text[], ${deviceLabel ?? null}) AS id`,
+        sql`SELECT public_enrol_credential(${hash}, ${cred.id}, ${Buffer.from(cred.publicKey)}, ${cred.counter}, string_to_array(${(cred.transports ?? []).join(',')}, ','), ${deviceLabel ?? null}) AS id`,
       ),
     );
     return { enrolled: true, credentialRowId: id?.id };

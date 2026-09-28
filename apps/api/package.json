@@ -30,6 +30,7 @@
     "drizzle-orm": "^0.45.3",
     "helmet": "^8.3.0",
     "jszip": "^3.10.2",
+    "nodemailer": "^10.0.12",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "zod": "^4.6.5"
@@ -41,6 +42,7 @@
     "@types/geojson": "^7946.0.16",
     "@types/multer": "^2.2.0",
     "@types/node": "^24.19.0",
+    "@types/nodemailer": "^8.0.2",
     "typescript": "~5.9.3",
     "vitest": "^4.1.11"
   }
