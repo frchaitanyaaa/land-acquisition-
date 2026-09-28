@@ -41,6 +41,9 @@ importers:
       '@bhoomisetu/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@bhoomisetu/geo':
+        specifier: workspace:*
+        version: link:../../packages/geo
       '@bhoomisetu/rules':
         specifier: workspace:*
         version: link:../../packages/rules

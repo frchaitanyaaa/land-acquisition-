@@ -22,6 +22,7 @@ import { AdaptersModule } from './adapters/adapters.module';
 import { AwardModule } from './award/award.module';
 import { DisbursementModule } from './disbursement/disbursement.module';
 import { PublicModule } from './public/public.module';
+import { FieldModule } from './field/field.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { PublicModule } from './public/public.module';
     AwardModule,
     DisbursementModule,
     PublicModule,
+    FieldModule,
     JobsModule,
   ],
   controllers: [HealthController],
