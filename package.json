@@ -19,7 +19,12 @@
     "db:migrate": "turbo run db:migrate",
     "db:seed": "turbo run db:seed",
     "db:reset": "turbo run db:reset",
-    "rules:check": "turbo run rules:check"
+    "rules:check": "turbo run rules:check",
+    "chain:node": "pnpm --filter @bhoomisetu/chain run node",
+    "chain:deploy": "pnpm --filter @bhoomisetu/chain run deploy",
+    "test:contracts": "pnpm --filter @bhoomisetu/chain test:contracts",
+    "demo:tamper": "pnpm --filter @bhoomisetu/db demo:tamper",
+    "demo:reset": "pnpm db:reset"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",

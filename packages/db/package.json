@@ -19,7 +19,8 @@
     "db:migrate": "tsx src/scripts/migrate.ts",
     "db:seed": "tsx src/scripts/seed.ts",
     "db:reset": "tsx src/scripts/reset.ts",
-    "test:db": "vitest run --config vitest.db.config.mts"
+    "test:db": "vitest run --config vitest.db.config.mts",
+    "demo:tamper": "tsx src/scripts/tamper.ts"
   },
   "dependencies": {
     "@bhoomisetu/rules": "workspace:*",

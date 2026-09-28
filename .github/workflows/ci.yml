@@ -26,6 +26,8 @@ jobs:
       - run: pnpm test
       - name: rules:check (golden statutory test + forbidden-literal scan)
         run: pnpm rules:check
+      - name: contract tests (Hardhat, solc-js)
+        run: pnpm test:contracts
 
   db:
     name: migrate · seed · RLS + SQL tests

@@ -28,6 +28,7 @@
     "bullmq": "^5.81.5",
     "cookie-parser": "^1.4.7",
     "drizzle-orm": "^0.45.3",
+    "ethers": "^6.17.0",
     "helmet": "^8.3.0",
     "jszip": "^3.10.2",
     "nodemailer": "^10.0.12",

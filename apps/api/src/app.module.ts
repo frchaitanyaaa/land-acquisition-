@@ -25,6 +25,7 @@ import { PublicModule } from './public/public.module';
 import { FieldModule } from './field/field.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { StreamHubModule } from './notifications/stream-hub';
+import { ChainModule } from './chain/chain.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { StreamHubModule } from './notifications/stream-hub';
     PublicModule,
     FieldModule,
     StreamHubModule,
+    ChainModule,
     NotificationsModule,
     JobsModule,
   ],
