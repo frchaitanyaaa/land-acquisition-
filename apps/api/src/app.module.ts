@@ -26,6 +26,11 @@ import { FieldModule } from './field/field.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { StreamHubModule } from './notifications/stream-hub';
 import { ChainModule } from './chain/chain.module';
+import { SiaModule } from './sia/sia.module';
+import { ConsentModule } from './consent/consent.module';
+import { RnrModule } from './rnr/rnr.module';
+import { LegalModule } from './legal/legal.module';
+import { ComplianceModule } from './compliance/compliance.module';
 
 @Module({
   imports: [
@@ -46,6 +51,11 @@ import { ChainModule } from './chain/chain.module';
     FieldModule,
     StreamHubModule,
     ChainModule,
+    SiaModule,
+    ConsentModule,
+    RnrModule,
+    LegalModule,
+    ComplianceModule,
     NotificationsModule,
     JobsModule,
   ],
