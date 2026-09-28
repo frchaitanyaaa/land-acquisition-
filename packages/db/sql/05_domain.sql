@@ -1,3 +1,10 @@
+-- A deterministic, RFC 4122-shaped (version 4 / variant 10) uuid from a natural key.
+CREATE OR REPLACE FUNCTION det_uuid(k text) RETURNS uuid LANGUAGE sql IMMUTABLE STRICT AS $$
+  SELECT (substr(h, 1, 12) || '4' || substr(h, 14, 3)
+          || substr('89ab', (('x' || substr(h, 17, 1))::bit(4)::int % 4) + 1, 1) || substr(h, 18, 15))::uuid
+  FROM (SELECT md5(k) AS h) x
+$$;
+
 -- Domain SQL (GIS, §15). SECURITY INVOKER: they run under the caller's RLS scope, so a district
 -- post intersects only the parcels it can see. Seed and jobs call them as app_worker.
 
@@ -13,8 +20,9 @@ BEGIN
     FROM projects p JOIN land_parcels lp ON ST_Intersects(lp.geom, p.footprint)
     WHERE p.id = pid AND p.footprint IS NOT NULL
   )
-  INSERT INTO project_parcels (project_id, parcel_id, affected_geom, affected_area_sqm, affected_pct, chainage_km, status)
-  SELECT project_id, parcel_id, g, area_sqm(g),
+  -- Deterministic ids (md5 of the natural key): re-running is idempotent and seeds are reproducible.
+  INSERT INTO project_parcels (id, project_id, parcel_id, affected_geom, affected_area_sqm, affected_pct, chainage_km, status)
+  SELECT det_uuid('project_parcel:' || project_id || ':' || parcel_id), project_id, parcel_id, g, area_sqm(g),
          least(100, round(100 * ST_Area(g::geography)::numeric / nullif(ST_Area(parcel_geom::geography)::numeric, 0), 2)),
          CASE WHEN is_linear AND alignment IS NOT NULL THEN chainage_km(alignment, g) END,
          'PROPOSED'
@@ -30,8 +38,8 @@ END $$;
 CREATE OR REPLACE FUNCTION create_family_stubs(pid uuid) RETURNS integer LANGUAGE plpgsql AS $$
 DECLARE n integer;
 BEGIN
-  INSERT INTO affected_families (project_id, head_person_id, affected_type, is_sc_st, authorised_recipient_person_id, data_source)
-  SELECT DISTINCT ON (pi.person_id) pid, pi.person_id,
+  INSERT INTO affected_families (id, project_id, head_person_id, affected_type, is_sc_st, authorised_recipient_person_id, data_source)
+  SELECT DISTINCT ON (pi.person_id) det_uuid('affected_family:' || pid || ':' || pi.person_id), pid, pi.person_id,
          CASE WHEN pi.interest_type IN ('OWNER','MORTGAGEE','EASEMENT') THEN 'LAND_LOSER'::affected_type
               WHEN pi.interest_type = 'FOREST_RIGHT_HOLDER' THEN 'FOREST_DWELLER'::affected_type
               ELSE 'LIVELIHOOD_DEPENDENT'::affected_type END,

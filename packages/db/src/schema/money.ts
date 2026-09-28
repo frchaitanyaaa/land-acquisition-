@@ -180,6 +180,8 @@ export const accessTokens = pgTable('access_tokens', {
     .notNull()
     .references(() => persons.id),
   subjectId: uuid(),
+  /** The officer post that issued the link (the enrolment witness, §21.2). */
+  issuedByPostId: uuid().references(() => posts.id),
   tokenHash: text().notNull().unique(),
   expiresAt: timestamptz().notNull(),
   usedAt: timestamptz(),

@@ -17,10 +17,10 @@ const RESOLVERS: Record<string, (projectId: string) => ReturnType<typeof sql>> =
     sql`SELECT coalesce(bool_or(met), false) AS ok FROM v_consent_tally WHERE project_id = ${p} AND status = 'certified'`,
   EXPERT_RECOMMENDATION_SIGNED: (p) =>
     sql`SELECT EXISTS (SELECT 1 FROM expert_recommendations WHERE project_id = ${p} AND signed_at IS NOT NULL) AS ok`,
+  // Signing an award runs the pack checks and refuses on failure unless an override is recorded.
   AWARD_CHECKS_PASSED: (p) =>
     sql`SELECT EXISTS (SELECT 1 FROM awards WHERE project_id = ${p} AND award_type = 'LAND')
-          AND NOT EXISTS (SELECT 1 FROM stage_checklist sc JOIN stage_instances si ON si.id = sc.stage_instance_id
-                          WHERE si.project_id = ${p} AND sc.item_code = 'AWARD_CHECKS_FAILED' AND sc.satisfied) AS ok`,
+          AND NOT EXISTS (SELECT 1 FROM awards WHERE project_id = ${p} AND status <> 'signed') AS ok`,
   ALL_PARCELS_POSSESSED: (p) =>
     sql`SELECT count(*) > 0 AND count(*) FILTER (WHERE status NOT IN ('ACQUIRED_POSSESSED','CLOSED','DENOTIFIED','TERMINATED')) = 0 AS ok
         FROM project_parcels WHERE project_id = ${p}`,

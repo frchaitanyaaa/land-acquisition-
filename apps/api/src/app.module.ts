@@ -18,6 +18,10 @@ import { ProjectsModule } from './projects/projects.module';
 import { GisModule } from './gis/gis.module';
 import { DashboardsModule } from './dashboards/dashboards.module';
 import { DocumentsModule } from './documents/documents.module';
+import { AdaptersModule } from './adapters/adapters.module';
+import { AwardModule } from './award/award.module';
+import { DisbursementModule } from './disbursement/disbursement.module';
+import { PublicModule } from './public/public.module';
 
 @Module({
   imports: [
@@ -31,6 +35,10 @@ import { DocumentsModule } from './documents/documents.module';
     GisModule,
     DashboardsModule,
     DocumentsModule,
+    AdaptersModule,
+    AwardModule,
+    DisbursementModule,
+    PublicModule,
     JobsModule,
   ],
   controllers: [HealthController],

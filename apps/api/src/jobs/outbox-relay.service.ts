@@ -26,7 +26,10 @@ function redisConnection(url: string) {
 }
 
 const withTimeout = <T>(p: Promise<T>, ms: number) =>
-  Promise.race([p, new Promise<never>((_, reject) => setTimeout(() => reject(new Error(`timed out after ${ms} ms`)), ms))]);
+  Promise.race([
+    p,
+    new Promise<never>((_, reject) => setTimeout(() => reject(new Error(`timed out after ${ms} ms`)), ms)),
+  ]);
 
 /**
  * Stub relay (§31 outbox-relay): moves unprocessed outbox_events to the BullMQ `domain-events`
@@ -96,7 +99,12 @@ export class OutboxRelay implements OnModuleInit, OnModuleDestroy {
           await withTimeout(
             queue.add(
               row.type,
-              { outboxId: row.id, aggregateType: row.aggregateType, aggregateId: row.aggregateId, payload: row.payload },
+              {
+                outboxId: row.id,
+                aggregateType: row.aggregateType,
+                aggregateId: row.aggregateId,
+                payload: row.payload,
+              },
               { jobId: `outbox-${row.id}`, removeOnComplete: 1000, removeOnFail: 5000 },
             ),
             PUBLISH_TIMEOUT_MS,

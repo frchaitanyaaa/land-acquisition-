@@ -111,3 +111,6 @@ SELECT pg_temp.scope(t, c) FROM (VALUES
 
 -- A post sees its own inbox.
 SELECT pg_temp.scope('notifications', 'recipient_post_id = app_post_id() OR recipient_user_id = app_user_id()');
+
+-- Idempotency replays are private to the user who made the request.
+SELECT pg_temp.scope('idempotency_keys', 'user_id = app_user_id()');

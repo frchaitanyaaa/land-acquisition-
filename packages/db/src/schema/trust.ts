@@ -173,3 +173,27 @@ export const notifications = pgTable(
   },
   (t) => [index().on(t.recipientPostId, t.readAt)],
 );
+
+/**
+ * Idempotency-Key replay store (§13): required on field sync and payment endpoints. A repeated key
+ * from the same user returns the stored response instead of acting twice.
+ */
+export const idempotencyKeys = pgTable('idempotency_keys', {
+  key: text().primaryKey(),
+  userId: uuid()
+    .notNull()
+    .references(() => users.id),
+  route: text().notNull(),
+  requestSha256: text().notNull(),
+  response: jsonb().notNull(),
+  ...stamps,
+});
+
+/** Mock SMS adapter outbox (§30), visible at /dev/sms in DEMO_MODE. Never real phone numbers. */
+export const devOutboxSms = pgTable('dev_outbox_sms', {
+  id: id(),
+  toMasked: text().notNull(),
+  template: text().notNull(),
+  body: text().notNull(),
+  ...stamps,
+});
