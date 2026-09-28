@@ -9,7 +9,7 @@ Branch: `claude/magical-galileo-j0afiu` (PR frchaitanyaaa/land-acquisition-#2). 
 - Seed replays stage history through the engine (`packages/db/src/scripts/seed/history.ts`).
 
 ## Currently working on
-- (see bottom "Progress log")
+- See "Progress log" (last line = most recent).
 
 ## Commands
 ```bash
@@ -25,3 +25,9 @@ First-time in a fresh cloud container: `apt-get install -y postgresql-16-postgis
 Login: any seeded email (see `packages/db/src/scripts/seed/fixtures.ts` USERS), password `bhoomisetu-demo`. API: POST /api/v1/auth/login → `accessToken` (Bearer).
 
 ## Progress log
+- DONE Module A `apps/api/src/projects/*` (create/patch/alignment GeoJSON|KML|KMZ/prescrutiny/submit/escrow demand|deposit|certify). SQL fn `project_footprint_overlaps` in `packages/db/sql/01_functions.sql`.
+- DONE gate resolvers `apps/api/src/workflow/gates.ts` (ESCROW_*, OBJECTIONS_DISPOSED, CONSENT_THRESHOLD_MET, ALL_PARCELS_*, …).
+- DONE Module B server `apps/api/src/gis/*` + SQL `packages/db/sql/05_domain.sql` (intersect_project_parcels, create_family_stubs, screen_project_constraints). Migration 0002 adds parcel_corrections.proposed_geom.
+- DONE seed v1 `packages/db/src/scripts/seed/{fixtures,v1,history,rng,names}.ts`: 11 projects/5 states, 1510 parcels, 3002 persons, consent registers (NGP 71%, HBL 76%, KRK Gram Sabha), MH-SIN-2025-004 money scenario (demo family / held family / possession-blocked parcel printed by seed), 40 legal cases, exactly 3 BREACHED clocks.
+- DONE `packages/rules/packs/nh-act-1956@1.0.0.json` (illustrative, verify[] notes).
+- DONE Module J `apps/api/src/dashboards/*` (national/state/district/project/collector, /deadlines/board, /analytics/risk, /analytics/bottlenecks, /reports/:type csv|json); `packages/rules/src/risk.ts`.
