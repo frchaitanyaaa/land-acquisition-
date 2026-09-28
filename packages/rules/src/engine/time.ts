@@ -44,3 +44,19 @@ export function deadlineStatus(dueAt: Date, now: Date, dueSoonDays: number, sati
   if (left <= dueSoonDays * MS_PER_DAY) return 'DUE_SOON';
   return 'SAFE';
 }
+
+/**
+ * Inverse of computeDueAt, for seeding "due in N days" fixtures: an instant (10:00 in `tz`) on the
+ * latest calendar day whose clock of `isoDuration` falls due on the same calendar day as `dueDay`.
+ */
+export function startForDueOn(dueDay: Date, isoDuration: string, tz: string = STATUTORY_TZ): Date {
+  const target = DateTime.fromJSDate(dueDay, { zone: tz }).startOf('day');
+  let start = target.minus(parseDuration(isoDuration)).set({ hour: 10 });
+  for (let i = 0; i < 4; i++) {
+    const due = DateTime.fromJSDate(computeDueAt(start.toJSDate(), isoDuration, tz), { zone: tz }).startOf('day');
+    const diff = Math.round(target.diff(due, 'days').days);
+    if (diff === 0) return start.toJSDate();
+    start = start.plus({ days: diff });
+  }
+  throw new Error(`no start date makes ${isoDuration} fall due on ${target.toISODate()}`);
+}

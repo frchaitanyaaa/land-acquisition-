@@ -63,7 +63,15 @@ export type ProjectFixture = {
   totalAreaProposedSqm: string;
   currentStage: string;
   submittedDaysAgo: number;
-  stageStartedDaysAgo: number;
+  /**
+   * Stages approved so far, oldest first. Replayed through the workflow engine (planTransition) so
+   * stage instances and statutory deadlines are exactly what the API would have written. An entry
+   * is dated either `daysAgo`, or by `clockDueInDays` — approved on the day that makes that clock
+   * (started by this approval) fall due N days after DEMO_NOW (§33.6 hooks).
+   */
+  history: Array<
+    { stage: string; daysAgo: number } | { stage: string; clockDueInDays: { clock: string; days: number } }
+  >;
 };
 
 export const PROJECTS: ProjectFixture[] = [
@@ -85,7 +93,14 @@ export const PROJECTS: ProjectFixture[] = [
     totalAreaProposedSqm: '1500000',
     currentStage: 'S07_DECLARATION',
     submittedDaysAgo: 720,
-    stageStartedDaysAgo: 90,
+    history: [
+      { stage: 'S01_PROPOSAL', daysAgo: 700 },
+      { stage: 'S02_SIA', daysAgo: 600 },
+      { stage: 'S03_APPRAISAL', daysAgo: 500 },
+      // Demo beat 2: "Declaration lapses in 34 days — s.19, deemed rescinded".
+      { stage: 'S05_NOTIFICATION', clockDueInDays: { clock: 'DECLARATION', days: 34 } },
+      { stage: 'S06_RNR_SCHEME', daysAgo: 90 },
+    ],
   },
   {
     code: 'MH-NGP-2026-002',
@@ -105,7 +120,11 @@ export const PROJECTS: ProjectFixture[] = [
     totalAreaProposedSqm: '2400000',
     currentStage: 'S04_CONSENT',
     submittedDaysAgo: 300,
-    stageStartedDaysAgo: 60,
+    history: [
+      { stage: 'S01_PROPOSAL', daysAgo: 290 }, // opens S02 and, alongside it, S04 (s.2)
+      { stage: 'S02_SIA', daysAgo: 150 },
+      { stage: 'S03_APPRAISAL', daysAgo: 60 },
+    ],
   },
   {
     code: 'KA-BGM-2026-003',
@@ -125,7 +144,11 @@ export const PROJECTS: ProjectFixture[] = [
     totalAreaProposedSqm: '900000',
     currentStage: 'S05_NOTIFICATION',
     submittedDaysAgo: 400,
-    stageStartedDaysAgo: 30,
+    history: [
+      { stage: 'S01_PROPOSAL', daysAgo: 390 },
+      { stage: 'S02_SIA', daysAgo: 200 },
+      { stage: 'S03_APPRAISAL', daysAgo: 30 },
+    ],
   },
 ];
 

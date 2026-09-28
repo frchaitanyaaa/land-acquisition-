@@ -16,6 +16,7 @@ import {
   USERS,
   VILLAGES,
 } from './fixtures';
+import { replayHistory } from './history';
 
 // Deterministic by construction (§9, §33.1): ids are hashed from SEED + a stable name, every date
 // is an offset from DEMO_NOW, and password salts derive from the email. Two runs → same database.
@@ -74,6 +75,9 @@ export async function runSeed(workerUrl: string, opts: { now: Date; seed: string
 
       for (const p of PROJECTS) {
         const projectId = id(`project:${p.code}`);
+        const pack = packs.get(`${p.pack.code}@${p.pack.version}`);
+        if (!pack) throw new Error(`${p.code}: pack ${p.pack.code}@${p.pack.version} not found`);
+        const history = replayHistory(pack, p, now);
         await tx.insert(s.projects).values({
           id: projectId,
           code: p.code,
@@ -91,19 +95,30 @@ export async function runSeed(workerUrl: string, opts: { now: Date; seed: string
           isLinear: p.isLinear,
           rowWidthM: p.rowWidthM,
           totalAreaProposedSqm: p.totalAreaProposedSqm,
-          status: 'ACTIVE',
+          status: history.projectStatus,
           currentStage: p.currentStage,
           submittedAt: daysAgo(p.submittedDaysAgo),
           dataSource: 'SYNTHETIC_DEMO',
         });
         await tx.insert(s.projectDistricts).values(p.districts.map((districtCode) => ({ projectId, districtCode })));
-        await tx.insert(s.stageInstances).values({
-          id: id(`stage:${p.code}:${p.currentStage}:1`),
-          projectId,
-          stageCode: p.currentStage,
-          status: 'IN_PROGRESS',
-          startedAt: daysAgo(p.stageStartedDaysAgo),
-        });
+        const stageId = (code: string, attempt: number) => id(`stage:${p.code}:${code}:${attempt}`);
+        await tx
+          .insert(s.stageInstances)
+          .values(history.stages.map((st) => ({ id: stageId(st.stageCode, st.attempt), projectId, ...st })));
+        if (history.deadlines.length) {
+          await tx.insert(s.statutoryDeadlines).values(
+            history.deadlines.map(({ subjectStage, ...d }) => ({
+              id: id(`deadline:${p.code}:${d.clockCode}:${subjectStage ?? 'project'}`),
+              projectId,
+              ...d,
+              subjectId: subjectStage ? stageId(subjectStage, 1) : projectId,
+              rulePackCode: pack.code,
+              rulePackVersion: pack.version,
+              breachedAt: d.status === 'BREACHED' ? d.dueAt : null,
+              conditionInputs: {},
+            })),
+          );
+        }
       }
 
       await tx.insert(s.posts).values(

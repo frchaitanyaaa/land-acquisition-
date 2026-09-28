@@ -53,15 +53,32 @@ describe('project visibility (RLS, forced)', () => {
   });
 
   it('child tables inherit the project filter', async () => {
-    const count = (districtCode: string) =>
-      runScoped(
-        db,
-        scope({ level: 'DISTRICT', districtCode }),
-        NOW,
-        async (tx) => (await tx.select({ id: stageInstances.id }).from(stageInstances)).length,
+    const visibleProjects = (districtCode: string) =>
+      runScoped(db, scope({ level: 'DISTRICT', districtCode }), NOW, async (tx) =>
+        [
+          ...new Set(
+            (
+              await tx
+                .select({ code: projects.code })
+                .from(stageInstances)
+                .innerJoin(projects, eq(projects.id, stageInstances.projectId))
+            ).map((r) => r.code),
+          ),
+        ].sort(),
       );
-    expect(await count('SYN-MH-PUNE')).toBe(1);
-    expect(await count('SYN-KA-BELAGAVI')).toBe(1);
+    const rawStageRows = (districtCode: string) =>
+      runScoped(db, scope({ level: 'DISTRICT', districtCode }), NOW, async (tx) =>
+        (await tx.select({ projectId: stageInstances.projectId }).from(stageInstances)).map((r) => r.projectId),
+      );
+    expect(await visibleProjects('SYN-MH-PUNE')).toEqual(['MH-PSX-2026-001']);
+    expect(await visibleProjects('SYN-KA-BELAGAVI')).toEqual(['KA-BGM-2026-003']);
+    // Every stage row the district sees belongs to a project it can see.
+    const own = await runScoped(db, scope({ level: 'DISTRICT', districtCode: 'SYN-MH-PUNE' }), NOW, async (tx) =>
+      (await tx.select({ id: projects.id }).from(projects)).map((r) => r.id),
+    );
+    const rows = await rawStageRows('SYN-MH-PUNE');
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.every((id) => own.includes(id))).toBe(true);
   });
 
   it('cannot write a row into a project outside scope', async () => {

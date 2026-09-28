@@ -1,5 +1,6 @@
 import type { Clock, Pack } from '../../schema/pack.schema';
-import { computeDueAt, STATUTORY_TZ } from './time';
+import type { DeadlineStatus } from '@bhoomisetu/shared';
+import { computeDueAt, deadlineStatus, STATUTORY_TZ } from './time';
 
 export type ConditionInputs = Record<string, boolean | undefined>;
 
@@ -49,4 +50,19 @@ export function startClock(
     consequence: clock.consequence,
     consequenceText: clock.consequenceText,
   };
+}
+
+/**
+ * Status of a deadline instance of `clock`. A clock with no ending event (e.g. the s.15 objection
+ * window) is a period, not a duty: once it runs out it has elapsed — SATISFIED — not been breached.
+ */
+export function clockStatus(
+  clock: Clock | undefined,
+  dueAt: Date,
+  now: Date,
+  dueSoonDays: number,
+  satisfiedAt?: Date | null,
+): DeadlineStatus {
+  if (!satisfiedAt && clock && !clock.endsOn && now.getTime() > dueAt.getTime()) return 'SATISFIED';
+  return deadlineStatus(dueAt, now, dueSoonDays, satisfiedAt);
 }

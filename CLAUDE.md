@@ -1259,6 +1259,13 @@ possessionGate(pack, projectParcel, ctx): GateResult        // see below
 8. Project status is `ACTIVE`.
 9. No `LAPSED` / `DEEMED_RESCINDED` consequence has fired on a clock that blocks this stage.
 
+**Engine decisions recorded here (Phase 1):**
+
+- A clock with no `endsOn` (the s.15 objection window) is a *period*, not a duty: once it runs out, `clockStatus()` reports it `SATISFIED` (elapsed), never `BREACHED`. Only clocks with an ending event can breach.
+- Guard 9 is derived from the pack, not listed by hand: a stage is blocked when a clock whose `endsOn` event that stage emits, and whose consequence is `SIA_LAPSED` / `DEEMED_RESCINDED` / `PROCEEDINGS_LAPSE`, is past due. Only forward actions (SUBMIT / APPROVE / APPROVE_CONDITIONAL / OVERRIDE) are blocked; RETURN and TERMINATE stay available.
+- Checklist items are satisfied by **evidence**, not tick-boxes (`apps/api/src/workflow/workflow.service.ts`): `document` → an attested document of that `docType` on the project; `hearing` → a hearing of that `hearingType` with status `VALID`; `event` / `gate` → the `stage_checklist` row the owning module sets on the current attempt.
+- Seed history is replayed through `planTransition` (`packages/db/src/scripts/seed/history.ts`), and "due in N days" hooks are placed with `startForDueOn()` — the inverse of `computeDueAt()`.
+
 **Possession gate** (per project parcel) — possession may be recorded only when **all** hold:
 
 - Every land head entitlement for families with interests in this parcel is `ACKNOWLEDGED`, `DEPOSITED_WITH_AUTHORITY`, or `UNDER_PROTEST` with payment `SUCCESS`

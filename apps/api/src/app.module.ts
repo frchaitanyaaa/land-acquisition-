@@ -13,9 +13,18 @@ import { HealthController } from './health/health.controller';
 import { JobsModule } from './jobs/jobs.module';
 import { OrgModule } from './org/org.module';
 import { RulesModule } from './rules/rules.module';
+import { WorkflowModule } from './workflow/workflow.module';
 
 @Module({
-  imports: [CommonModule, JwtModule.register({ global: true }), OrgModule, AuthModule, RulesModule, JobsModule],
+  imports: [
+    CommonModule,
+    JwtModule.register({ global: true }),
+    OrgModule,
+    AuthModule,
+    RulesModule,
+    WorkflowModule,
+    JobsModule,
+  ],
   controllers: [HealthController],
   providers: [
     { provide: APP_FILTER, useClass: ProblemFilter },

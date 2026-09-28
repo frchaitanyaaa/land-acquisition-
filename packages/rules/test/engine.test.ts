@@ -4,6 +4,7 @@ import {
   applicableStages,
   availableActions,
   checkGuards,
+  clockStatus,
   computeDueAt,
   deadlineStatus,
   daysRemaining,
@@ -12,6 +13,7 @@ import {
   possessionGate,
   runChecks,
   startClock,
+  startForDueOn,
   type GuardContext,
   type ProjectFacts,
   type StageState,
@@ -556,5 +558,28 @@ describe('possessionGate (s.38)', () => {
   it('needs the vacation certificate and no legal stay', () => {
     const r = possessionGate(pack, { ...base, entitlements: [], vacationCertificateAttested: false, legalStay: true });
     expect(r.failures.map((f) => f.code)).toEqual(['VACATION_CERTIFICATE_MISSING', 'LEGAL_STAY']);
+  });
+});
+
+describe('startForDueOn (seed helper)', () => {
+  it.each(['P12M', 'P60D', 'P6W', 'P1M'])('%s: the returned start falls due on the target day', (dur) => {
+    for (const day of ['2027-01-13T12:00:00Z', '2027-02-28T12:00:00Z', '2027-03-28T12:00:00Z']) {
+      const start = startForDueOn(iso(day), dur);
+      expect(ist(computeDueAt(start, dur)).slice(0, 10)).toBe(ist(iso(day)).slice(0, 10));
+    }
+  });
+  it('throws when no start date can fall due that day (nothing + P1M lands on 31 Mar)', () => {
+    expect(() => startForDueOn(iso('2027-03-31T12:00:00Z'), 'P1M')).toThrow();
+  });
+});
+
+describe('clockStatus', () => {
+  it('a window with no ending event elapses rather than breaches', () => {
+    const window = pack.clocks.find((c) => c.code === 'OBJECTION_WINDOW')!;
+    const decl = pack.clocks.find((c) => c.code === 'DECLARATION')!;
+    const due = iso('2026-01-01T18:29:59Z');
+    const later = iso('2026-02-01T00:00:00Z');
+    expect(clockStatus(window, due, later, 30)).toBe('SATISFIED');
+    expect(clockStatus(decl, due, later, 30)).toBe('BREACHED');
   });
 });
