@@ -1,3 +1,4 @@
+import { Throttle } from '@nestjs/throttler';
 import { Body, Controller, Get, HttpCode, Post, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
@@ -43,8 +44,12 @@ export class AuthController {
 
   @Public()
   @Post('login')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } }) // §29: auth 10/min/IP
   @HttpCode(200)
-  async login(@Body(new ZodPipe(LoginBody)) body: z.infer<typeof LoginBody>, @Res({ passthrough: true }) res: Response) {
+  async login(
+    @Body(new ZodPipe(LoginBody)) body: z.infer<typeof LoginBody>,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     return respond(res, await this.auth.login(body.email, body.password, body.postId));
   }
 

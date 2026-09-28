@@ -1,3 +1,4 @@
+import { Throttle } from '@nestjs/throttler';
 import { Body, Controller, Get, HttpCode, Param, Post, Query } from '@nestjs/common';
 import type { AuthenticationResponseJSON, RegistrationResponseJSON } from '@simplewebauthn/server';
 import { sql } from 'drizzle-orm';
@@ -23,6 +24,7 @@ const PROVENANCE =
  */
 @Controller('public')
 @Public()
+@Throttle({ default: { ttl: 60_000, limit: 60 } })
 @AuditEntity('public')
 export class PublicController {
   constructor(
@@ -71,6 +73,39 @@ export class PublicController {
       ),
     );
     return { ...this.meta(), data };
+  }
+
+  /** File an objection while the s.15 window is open (§25). Rate-limited like every public route. */
+  @Post('objections')
+  async objection(
+    @Body(
+      new ZodPipe(
+        z.strictObject({
+          projectCode: z.string().max(40),
+          villageCode: z.string().max(64),
+          surveyNo: z.string().max(32),
+          name: z.string().max(120).optional(),
+          body: z.string().min(10).max(10_000),
+          language: z.enum(['en', 'hi', 'mr']).default('en'),
+        }),
+      ),
+    )
+    b: {
+      projectCode: string;
+      villageCode: string;
+      surveyNo: string;
+      name?: string;
+      body: string;
+      language: string;
+    },
+  ) {
+    const r = await this.db.withScope(null, (tx) =>
+      rows<{ id: string }>(
+        tx,
+        sql`SELECT public_file_objection(${b.projectCode}, ${b.villageCode}, ${b.surveyNo}, ${b.name ?? null}, ${b.body}, ${b.language}) AS id`,
+      ),
+    );
+    return { ...this.meta(), filed: true, reference: r[0]?.id.slice(0, 8).toUpperCase() };
   }
 
   // ---- enrolment (beneficiary's own phone)

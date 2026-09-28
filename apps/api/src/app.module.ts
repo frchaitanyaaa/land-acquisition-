@@ -32,6 +32,8 @@ import { RnrModule } from './rnr/rnr.module';
 import { LegalModule } from './legal/legal.module';
 import { ComplianceModule } from './compliance/compliance.module';
 import { AssistantModule } from './assistant/assistant.module';
+import { DevController } from './dev/dev.controller';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -58,13 +60,16 @@ import { AssistantModule } from './assistant/assistant.module';
     LegalModule,
     ComplianceModule,
     AssistantModule,
+    // §29: public 60/min/IP; login is further limited in AuthController.
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 600 }]),
     NotificationsModule,
     JobsModule,
   ],
-  controllers: [HealthController],
+  controllers: [HealthController, DevController],
   providers: [
     { provide: APP_FILTER, useClass: ProblemFilter },
     // Guards run in this order: token → post held today → role.
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtGuard },
     { provide: APP_GUARD, useClass: PostGuard },
     { provide: APP_GUARD, useClass: PermissionGuard },

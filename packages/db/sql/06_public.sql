@@ -204,3 +204,29 @@ BEGIN
     EXECUTE format('GRANT EXECUTE ON FUNCTION %s TO app_user', f);
   END LOOP;
 END $$;
+
+-- Citizen objection during an open s.15 window (§25). Identifies the project and parcel by public
+-- codes; refuses once the OBJECTION_WINDOW (or its sector-act equivalent) has elapsed.
+SET ROLE app_worker;
+CREATE OR REPLACE FUNCTION public_file_objection(p_project_code text, p_village_code text, p_survey_no text,
+                                                 p_name text, p_body text, p_language text)
+RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+DECLARE pid uuid; parcel uuid; oid uuid; open_window boolean;
+BEGIN
+  SELECT id INTO pid FROM projects WHERE code = p_project_code AND status = 'ACTIVE';
+  IF pid IS NULL THEN RAISE EXCEPTION 'no active project with that code' USING ERRCODE = 'P0001'; END IF;
+  SELECT EXISTS (SELECT 1 FROM statutory_deadlines d WHERE d.project_id = pid AND d.clock_code IN ('OBJECTION_WINDOW','NH_OBJECTION_WINDOW')
+                 AND d.started_at <= app_now() AND d.due_at >= app_now()) INTO open_window;
+  IF NOT open_window THEN RAISE EXCEPTION 'the objection window for this project is not open' USING ERRCODE = 'P0001'; END IF;
+  SELECT lp.id INTO parcel FROM land_parcels lp JOIN project_parcels pp ON pp.parcel_id = lp.id AND pp.project_id = pid
+  WHERE lp.village_code = p_village_code AND lp.survey_number || coalesce('/' || lp.sub_division, '') = p_survey_no LIMIT 1;
+  INSERT INTO objections (project_id, parcel_id, channel, filed_at, language, body, status)
+  VALUES (pid, parcel, 'portal', app_now(), p_language, left(coalesce(p_name, 'Anonymous') || ': ' || p_body, 20000), 'FILED')
+  RETURNING id INTO oid;
+  INSERT INTO audit_log (at, action, entity_type, entity_id, after) VALUES (app_now(), 'OBJECTION_FILED_PUBLIC', 'objection', oid, jsonb_build_object('projectId', pid));
+  INSERT INTO outbox_events (type, aggregate_type, aggregate_id, payload) VALUES ('OBJECTION_FILED', 'objection', oid, jsonb_build_object('projectId', pid, 'channel', 'portal'));
+  RETURN oid;
+END $$;
+RESET ROLE;
+REVOKE ALL ON FUNCTION public_file_objection(text, text, text, text, text, text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public_file_objection(text, text, text, text, text, text) TO app_user;

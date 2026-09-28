@@ -50,6 +50,8 @@ const PG_ERRORS: Record<string, [status: number, code: string, detail: string]> 
   '23503': [422, 'REFERENCE_INVALID', 'The request refers to a record that does not exist or is not visible to you.'],
   '23514': [422, 'CONSTRAINT_VIOLATED', 'The values break a rule the record must satisfy.'],
   '23502': [422, 'REQUIRED_VALUE_MISSING', 'A required value is missing.'],
+  // RAISE ... USING ERRCODE = 'P0001' from public_* functions: a business rule refused the request.
+  P0001: [422, 'REQUEST_REFUSED', 'The request was refused.'],
 };
 
 function pgCode(e: unknown): string | undefined {
@@ -60,10 +62,24 @@ function pgCode(e: unknown): string | undefined {
   return undefined;
 }
 
+function pgMessage(e: unknown): string | undefined {
+  for (let cur: unknown = e, depth = 0; cur && depth < 4; cur = (cur as { cause?: unknown }).cause, depth++) {
+    if ((cur as { code?: unknown }).code === 'P0001') return String((cur as { message?: unknown }).message ?? '');
+  }
+  return undefined;
+}
+
 export function toProblem(e: unknown): Problem {
   if (e instanceof ProblemException) {
     const status = e.getStatus();
-    return { type: problemType(e.code), title: titleFor(status), status, detail: e.message, code: e.code, ...e.extensions };
+    return {
+      type: problemType(e.code),
+      title: titleFor(status),
+      status,
+      detail: e.message,
+      code: e.code,
+      ...e.extensions,
+    };
   }
 
   if (e instanceof ZodError) {
@@ -85,7 +101,9 @@ export function toProblem(e: unknown): Problem {
 
   const pg = pgCode(e);
   if (pg && PG_ERRORS[pg]) {
-    const [status, code, detail] = PG_ERRORS[pg];
+    const [status, code, generic] = PG_ERRORS[pg];
+    // Our own RAISE messages are written for the user; driver errors are never echoed.
+    const detail = pg === 'P0001' ? (pgMessage(e) ?? generic) : generic;
     return { type: problemType(code), title: titleFor(status), status, detail, code };
   }
 
