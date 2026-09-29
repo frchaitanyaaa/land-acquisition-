@@ -7,3 +7,4 @@ export * from './time';
 export type Paise = bigint;
 export * from './money';
 export * from './declarations';
+export * from './project-categories';

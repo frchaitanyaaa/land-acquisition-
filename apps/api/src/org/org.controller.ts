@@ -15,4 +15,19 @@ export class OrgController {
   posts() {
     return this.org.listPosts(this.clock.now());
   }
+
+  @Get('requiring-bodies')
+  requiringBodies() {
+    return this.org.listRequiringBodies();
+  }
+
+  @Get('states')
+  states() {
+    return this.org.listStates();
+  }
+
+  @Get('districts')
+  districts() {
+    return this.org.listDistricts();
+  }
 }

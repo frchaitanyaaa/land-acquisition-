@@ -1,4 +1,4 @@
-import { postAssignments, posts, users } from '@bhoomisetu/db';
+import { districts, postAssignments, posts, requiringBodies, states, users } from '@bhoomisetu/db';
 import { Injectable } from '@nestjs/common';
 import { and, asc, eq, gt, isNull, lte, or } from 'drizzle-orm';
 import type { AuthUser, PostInfo } from '../common/auth-user';
@@ -77,5 +77,31 @@ export class OrgService {
       byPost.set(post.id, entry);
     }
     return [...byPost.values()];
+  }
+
+  /** Reference data for the intake form's pickers (§14) — no RLS scope, just lookup tables. */
+  listRequiringBodies() {
+    return this.db.withScope(null, (tx) =>
+      tx
+        .select({ id: requiringBodies.id, name: requiringBodies.name, shortCode: requiringBodies.shortCode, type: requiringBodies.type })
+        .from(requiringBodies)
+        .orderBy(asc(requiringBodies.name)),
+    );
+  }
+
+  listStates() {
+    return this.db.withScope(null, (tx) =>
+      tx.select({ code: states.code, name: states.name }).from(states).orderBy(asc(states.name)),
+    );
+  }
+
+  listDistricts() {
+    return this.db.withScope(null, (tx) =>
+      tx
+        .select({ code: districts.code, name: districts.name, stateCode: districts.stateCode, stateName: states.name })
+        .from(districts)
+        .innerJoin(states, eq(states.code, districts.stateCode))
+        .orderBy(asc(states.name), asc(districts.name)),
+    );
   }
 }

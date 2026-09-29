@@ -3,3 +3,16 @@
 :root {
   color-scheme: light;
 }
+
+.input {
+  display: block;
+  width: 100%;
+  border-radius: 0.375rem;
+  border: 1px solid var(--color-slate-300);
+  padding: 0.375rem 0.5rem;
+  font-size: 0.875rem;
+}
+.input:focus {
+  outline: 1px solid var(--color-teal-600);
+  border-color: var(--color-teal-600);
+}
