@@ -111,6 +111,11 @@ export class DisbursementController {
     return this.svc.passbookLink(user, id);
   }
 
+  @Get('families/:id/passbook')
+  familyPassbook(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string) {
+    return this.svc.familyPassbook(user, id);
+  }
+
   @Get('families/:id/money')
   money(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.svc.familyMoney(user, id);

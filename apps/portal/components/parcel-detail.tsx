@@ -1,6 +1,7 @@
 'use client';
 
 import { formatDate } from '@bhoomisetu/shared';
+import Link from 'next/link';
 import { useState } from 'react';
 import { ChainBadge } from '@/components/chain-badge';
 import { ApiProblem } from '@/lib/api';
@@ -34,8 +35,16 @@ export function ParcelDetail({ parcelId, projectId, onClose }: { parcelId: strin
     <Panel onClose={onClose}>
       <h3 className="text-sm font-semibold text-slate-900">{data.survey_no}</h3>
       <p className="text-xs text-slate-500">{data.village_name} · v{data.version}</p>
-      <div className="mt-2">
+      <div className="mt-2 flex flex-wrap items-center gap-3">
         <ChainBadge entityType="land_parcel" entityId={data.id} version={data.version} />
+        {(() => {
+          const pp = data.projects.find((p) => p.project_id === projectId);
+          return pp ? (
+            <Link href={`/project-parcels/${pp.project_parcel_id}/possession`} className="text-xs font-medium text-teal-700 hover:underline">
+              Possession gate →
+            </Link>
+          ) : null;
+        })()}
       </div>
 
       <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">

@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseEnv } from 'node:util';
 import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
 
 // The repo-root .env is the one config file (CLAUDE.md §7); Next only reads its own directory.
 const rootEnv = join(process.cwd(), '..', '..', '.env');
@@ -37,4 +38,8 @@ const config: NextConfig = {
   },
 };
 
-export default config;
+// en / hi / mr for the public portal (§25). No locale in the URL — the choice is a cookie, so
+// token links sent to families (/ack/…, /passbook/…) stay the same in every language.
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
+
+export default withNextIntl(config);

@@ -414,6 +414,43 @@ export class DisbursementService {
     });
   }
 
+  // ------------------------------------------------------------------ passbook (§19)
+
+  /**
+   * The officer's view of the family's passbook: the same document public_passbook() renders for
+   * the family (heads, amounts, status per head with acknowledgement, due dates, site, contact),
+   * read under the officer's RLS scope. Like the public one it never includes hold reasons (§19).
+   */
+  familyPassbook(user: AuthUser, familyId: string) {
+    return this.db.withScope(user, async (tx) => {
+      const r = await one<{ p: unknown }>(
+        tx,
+        sql`SELECT jsonb_build_object(
+              'family', jsonb_build_object('headFirstName', split_part(pe.full_name, ' ', 1), 'projectCode', p.code, 'projectName', p.name,
+                                           'isDisplaced', af.is_displaced),
+              'entitlements', coalesce((SELECT jsonb_agg(jsonb_build_object(
+                    'headCode', e.head_code, 'amountPaise', e.amount_awarded_paise::text, 'status',
+                    CASE WHEN e.status IN ('ASSESSED','SANCTIONED') THEN 'PAYMENT_IN_PROCESS' ELSE e.status::text END,
+                    'dueBy', e.due_by,
+                    'paidPaise', (SELECT coalesce(sum(d.amount_paise),0)::text FROM disbursements d WHERE d.entitlement_id = e.id AND d.payment_status = 'SUCCESS'),
+                    'acknowledged', EXISTS (SELECT 1 FROM disbursements d JOIN acknowledgements a ON a.disbursement_id = d.id WHERE d.entitlement_id = e.id))
+                    ORDER BY e.head_code) FROM entitlements e WHERE e.affected_family_id = af.id), '[]'::jsonb),
+              'annuity', (SELECT jsonb_build_object('paid', count(*) FILTER (WHERE s.status = 'paid'), 'total', count(*),
+                                                    'nextDue', min(s.due_on) FILTER (WHERE s.status = 'scheduled'))
+                          FROM annuity_schedules s JOIN entitlements e ON e.id = s.entitlement_id WHERE e.affected_family_id = af.id),
+              'site', (SELECT jsonb_build_object('name', rs.name,
+                               'readinessPct', round(100.0 * count(m.*) FILTER (WHERE m.status = 'complete') / nullif(count(m.*), 0)))
+                       FROM resettlement_sites rs LEFT JOIN amenity_milestones m ON m.site_id = rs.id WHERE rs.id = af.resettlement_site_id GROUP BY rs.name),
+              'contact', 'Office of the Collector / Administrator for R&R',
+              'asOf', ${this.clock.now().toISOString()}::timestamptz) AS p
+            FROM affected_families af JOIN persons pe ON pe.id = af.head_person_id JOIN projects p ON p.id = af.project_id
+            WHERE af.id = ${familyId}`,
+      );
+      if (!r?.p) throw new ProblemException(404, 'FAMILY_NOT_FOUND', 'No such family in your jurisdiction.');
+      return r.p;
+    });
+  }
+
   // ------------------------------------------------------------------ family money view
 
   familyMoney(user: AuthUser, familyId: string) {
@@ -542,6 +579,8 @@ export class DisbursementService {
       const { pack, input, pp } = await this.gateInput(tx, projectParcelId);
       return {
         projectParcelId,
+        projectId: pp.project_id,
+        parcelId: pp.parcel_id,
         status: pp.status,
         ...possessionGate(pack, input),
         families: input.families.length,

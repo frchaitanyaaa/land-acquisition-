@@ -4,7 +4,11 @@ import type { ActionOption } from '@bhoomisetu/rules';
 import { useState } from 'react';
 import { AttestationModal } from '@/components/attestation-modal';
 import { ApiProblem } from '@/lib/api';
-import { useActOnStage, useStageActions, useTimeline, type TimelineStage } from '@/lib/project-api';
+import { useActOnStage, useStageActions, useTimeline, type StageActionBody, type TimelineStage } from '@/lib/project-api';
+
+/** A stage action, or any other recorded act (e.g. signing an award) rendered through the same form. */
+export type PanelAction = Omit<ActionOption, 'action'> & { action: string; writtenReasonsLabel?: string };
+type Submit = (body: StageActionBody) => Promise<unknown>;
 
 const REASONED = new Set(['RETURN', 'REJECT', 'NULLIFY', 'TERMINATE']);
 
@@ -15,6 +19,7 @@ const REASONED = new Set(['RETURN', 'REJECT', 'NULLIFY', 'TERMINATE']);
 export function ActionPanel({ projectId, stageCode, stages }: { projectId: string; stageCode: string; stages: TimelineStage[] }) {
   const { data, isLoading } = useStageActions(projectId, stageCode);
   const timeline = useTimeline(projectId);
+  const act = useActOnStage(projectId, stageCode);
 
   if (isLoading || !data) return <p className="text-sm text-slate-500">Loading actions…</p>;
 
@@ -52,6 +57,7 @@ export function ActionPanel({ projectId, stageCode, stages }: { projectId: strin
             projectId={projectId}
             stageCode={stageCode}
             stages={stages}
+            submit={(body) => act.mutateAsync(body)}
             onDone={() => void timeline.refetch()}
           />
         ))}
@@ -65,13 +71,17 @@ function ActionButton({
   projectId,
   stageCode,
   stages,
+  submit,
   onDone,
+  attachment,
 }: {
-  action: ActionOption;
+  action: PanelAction;
   projectId: string;
   stageCode: string;
   stages: TimelineStage[];
+  submit: Submit;
   onDone: () => void;
+  attachment?: { entityType: string; entityId: string };
 }) {
   const [open, setOpen] = useState(false);
   const failureText = action.failures.map((f) => f.message).join('; ');
@@ -96,6 +106,8 @@ function ActionButton({
           projectId={projectId}
           stageCode={stageCode}
           stages={stages}
+          submit={submit}
+          attachment={attachment}
           onClose={() => setOpen(false)}
           onDone={() => {
             setOpen(false);
@@ -112,17 +124,21 @@ function ActionForm({
   projectId,
   stageCode,
   stages,
+  submit: send,
+  attachment,
   onClose,
   onDone,
 }: {
-  action: ActionOption;
+  action: PanelAction;
   projectId: string;
   stageCode: string;
   stages: TimelineStage[];
+  submit: Submit;
+  attachment?: { entityType: string; entityId: string };
   onClose: () => void;
   onDone: () => void;
 }) {
-  const act = useActOnStage(projectId, stageCode);
+  const [pending, setPending] = useState(false);
   const [reasonCode, setReasonCode] = useState('');
   const [remarks, setRemarks] = useState('');
   const [targetStageCode, setTargetStageCode] = useState('');
@@ -144,8 +160,9 @@ function ActionForm({
 
   async function submit() {
     setFailures([]);
+    setPending(true);
     try {
-      await act.mutateAsync({
+      await send({
         action: action.action,
         reasonCode: needsReason ? reasonCode : null,
         remarks: remarks || null,
@@ -162,6 +179,8 @@ function ActionForm({
       } else {
         setFailures([{ code: 'ERROR', message: e instanceof Error ? e.message : 'Action failed.' }]);
       }
+    } finally {
+      setPending(false);
     }
   }
 
@@ -207,7 +226,9 @@ function ActionForm({
 
       {needsWritten && (
         <label className="mt-3 block text-sm">
-          <span className="text-slate-700">Written reasons {action.action === 'OVERRIDE' && '(s.8(2), required)'}</span>
+          <span className="text-slate-700">
+            {action.writtenReasonsLabel ?? <>Written reasons {action.action === 'OVERRIDE' && '(s.8(2), required)'}</>}
+          </span>
           <textarea
             value={writtenReasons}
             onChange={(e) => setWrittenReasons(e.target.value)}
@@ -266,23 +287,87 @@ function ActionForm({
         </button>
         <button
           onClick={() => void submit()}
-          disabled={!canSubmit || act.isPending}
+          disabled={!canSubmit || pending}
           className="rounded-md bg-teal-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-teal-800 disabled:opacity-50"
         >
-          {act.isPending ? 'Submitting…' : 'Submit'}
+          {pending ? 'Submitting…' : 'Submit'}
         </button>
       </div>
 
       <AttestationModal
         projectId={projectId}
-        entityType="project"
-        entityId={projectId}
+        entityType={attachment?.entityType ?? 'project'}
+        entityId={attachment?.entityId ?? projectId}
         docType="OTHER"
         title="Supporting document"
         open={showUpload}
         onClose={() => setShowUpload(false)}
         onUploaded={(id) => setDocumentIds((ids) => [...ids, id])}
       />
+    </div>
+  );
+}
+
+/**
+ * The same action panel for acts that are not workflow-stage transitions — signing an award (§20)
+ * uses this rather than a bespoke button, so it gets the same reason / written-reasons /
+ * attestation / supporting-document form and the same failure rendering.
+ */
+export function RecordActionPanel({
+  title,
+  subtitle,
+  projectId,
+  entityType,
+  entityId,
+  actions,
+  submit,
+  onDone,
+}: {
+  title: string;
+  subtitle?: string;
+  projectId: string;
+  entityType: string;
+  entityId: string;
+  actions: PanelAction[];
+  submit: (action: string, body: StageActionBody) => Promise<unknown>;
+  onDone?: () => void;
+}) {
+  return (
+    <div className="border border-slate-200 bg-white">
+      <div className="border-b border-slate-200 px-4 py-3">
+        <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+        {subtitle && <p className="text-xs text-slate-500">{subtitle}</p>}
+      </div>
+      {actions.some((a) => !a.allowed && a.failures.length) && (
+        <ul className="divide-y divide-slate-100 border-b border-slate-200">
+          {actions.flatMap((a) =>
+            a.allowed
+              ? []
+              : a.failures.map((f) => (
+                  <li key={`${a.action}:${f.code}`} className="flex items-center gap-2 px-4 py-2 text-sm text-slate-500">
+                    <span aria-hidden className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[10px]">
+                      ·
+                    </span>
+                    {f.message}
+                  </li>
+                )),
+          )}
+        </ul>
+      )}
+      <div className="flex flex-wrap gap-2 px-4 py-3">
+        {actions.map((a) => (
+          <ActionButton
+            key={a.action}
+            action={a}
+            projectId={projectId}
+            stageCode=""
+            stages={[]}
+            attachment={{ entityType, entityId }}
+            submit={(body) => submit(a.action, body)}
+            onDone={() => onDone?.()}
+          />
+        ))}
+      </div>
     </div>
   );
 }

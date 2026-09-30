@@ -1,0 +1,109 @@
+{
+  "common": {
+    "title": "BhoomiSetu — Public information",
+    "search": "Search",
+    "village": "Village",
+    "surveyNo": "Survey number",
+    "optional": "optional",
+    "loading": "Loading…",
+    "notFound": "Nothing found.",
+    "error": "Something went wrong. Please try again.",
+    "language": "Language",
+    "project": "Project",
+    "stage": "Stage",
+    "status": "Status",
+    "amount": "Amount",
+    "head": "Head",
+    "dueBy": "Due by",
+    "paidOn": "Paid on",
+    "district": "District",
+    "publishedOn": "Published on",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "nav": {
+    "search": "Parcel status",
+    "notices": "Notices",
+    "objection": "File an objection"
+  },
+  "footer": {
+    "provenance": "This portal displays information as recorded by the concerned authority. For the authoritative record, contact the office of the Collector.",
+    "asOf": "Data shown as of {when}."
+  },
+  "search": {
+    "heading": "Check the status of your land",
+    "villageHint": "Type at least 2 letters of the village name",
+    "pickVillage": "Choose a village",
+    "results": "Parcels",
+    "affected": "Share of parcel affected",
+    "frozen": "Transfer frozen",
+    "lastNotice": "Last public notice"
+  },
+  "notices": {
+    "heading": "Published notices",
+    "docType": "Notice",
+    "fingerprint": "Document fingerprint (SHA-256)",
+    "hint": "Copies are available at the office of the Collector. The fingerprint lets you check that a copy is unaltered."
+  },
+  "objection": {
+    "heading": "File an objection",
+    "intro": "You can file an objection only while the objection window for the project is open.",
+    "projectCode": "Project code",
+    "name": "Your name",
+    "body": "Your objection",
+    "submit": "Submit objection",
+    "filed": "Your objection has been filed. Reference: {ref}",
+    "closed": "The objection window for this project is not open."
+  },
+  "ack": {
+    "heading": "Confirm your payment",
+    "question": "Did you receive this amount?",
+    "for": "For",
+    "paid": "Paid",
+    "inProcess": "Payment in process",
+    "confirmPasskey": "Yes — confirm with fingerprint / face",
+    "confirmOtp": "Yes — confirm with a code sent by SMS",
+    "sendOtp": "Send code",
+    "otpLabel": "6-digit code",
+    "verifyOtp": "Confirm",
+    "demoOtp": "Demo mode — your code is {otp}",
+    "notReceived": "I did NOT receive this",
+    "disputeReason": "Tell us what happened",
+    "sendDispute": "Send to the Collector's office",
+    "done": "Thank you. Your confirmation has been recorded.",
+    "already": "This payment is already confirmed.",
+    "disputed": "Your report has been sent to the office of the Collector.",
+    "invalid": "This link is not valid, has been used, or has expired.",
+    "notPaid": "This payment has not been completed yet — you can confirm it once it is paid.",
+    "noPasskey": "No fingerprint/face is registered on this phone for your family — use the SMS code."
+  },
+  "enrol": {
+    "heading": "Register your phone",
+    "intro": "Hello {name}. Register this phone's fingerprint or face unlock so you can confirm payments yourself. Your fingerprint never leaves your phone.",
+    "start": "Register this phone",
+    "done": "This phone is registered. You can now confirm payments with your fingerprint or face.",
+    "invalid": "This registration link is not valid, has been used, or has expired.",
+    "unsupported": "This phone or browser cannot do fingerprint/face registration. Please ask the officer about the SMS code option."
+  },
+  "passbook": {
+    "heading": "R&R passbook",
+    "family": "Family",
+    "entitlements": "Your entitlements",
+    "acknowledged": "Confirmed by you",
+    "notAcknowledged": "Not yet confirmed",
+    "annuity": "Annuity",
+    "annuityPaid": "{paid} of {total} paid",
+    "nextDue": "next due {date}",
+    "site": "Resettlement site",
+    "ready": "{pct}% ready",
+    "contact": "Contact",
+    "invalid": "This passbook link is not valid or has expired.",
+    "statuses": {
+      "PAYMENT_IN_PROCESS": "Payment in process",
+      "DISBURSED": "Paid",
+      "ACKNOWLEDGED": "Paid and confirmed",
+      "DEPOSITED_WITH_AUTHORITY": "Deposited with the Authority",
+      "UNDER_PROTEST": "Paid (accepted under protest)"
+    }
+  }
+}

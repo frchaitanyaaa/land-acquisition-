@@ -85,7 +85,8 @@ export class AwardService {
       rows(
         tx,
         sql`SELECT a.*, (SELECT count(*)::int FROM entitlements e WHERE e.award_id = a.id) AS entitlements,
-                   (SELECT coalesce(sum(amount_awarded_paise),0)::bigint FROM entitlements e WHERE e.award_id = a.id) AS total_paise
+                   (SELECT coalesce(sum(amount_awarded_paise),0)::bigint FROM entitlements e WHERE e.award_id = a.id) AS total_paise,
+                   (SELECT x.id FROM ocr_extractions x WHERE x.document_id = a.document_id ORDER BY x.created_at DESC LIMIT 1) AS ocr_extraction_id
             FROM awards a WHERE a.project_id = ${projectId} ORDER BY a.created_at`,
       ),
     );
