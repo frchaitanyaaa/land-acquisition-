@@ -313,7 +313,9 @@ export class FieldService {
         capturedAt: v.capturedAt,
       })),
       { gpsAccuracyWarnM: pack.thresholds.gpsAccuracyWarnM, gpsAccuracyRejectM: pack.thresholds.gpsAccuracyRejectM },
-      now,
+      // CLOCK_SKEW compares the phone's clock with the wall clock, like a token expiry — not a
+      // statutory date — so it must not use the frozen DEMO_NOW clock, or every real walk is flagged.
+      this.clock.realNow(),
     );
     if (result.reject)
       throw new ProblemException(422, 'TOO_FEW_POINTS', result.flags.TOO_FEW_POINTS ?? 'Too few usable vertices.');

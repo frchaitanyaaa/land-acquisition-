@@ -25,6 +25,7 @@
     "chain:deploy": "pnpm --filter @bhoomisetu/chain run deploy",
     "test:contracts": "pnpm --filter @bhoomisetu/chain test:contracts",
     "demo:tamper": "pnpm --filter @bhoomisetu/db demo:tamper",
+    "demo:tunnel": "node scripts/demo-tunnel.mjs",
     "demo:reset": "pnpm db:reset"
   },
   "devDependencies": {
