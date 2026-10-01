@@ -1,4 +1,12 @@
-# 03 — Madhav · branch `madhav`
+# 03 — Madhav · branch `madhav` (you create it)
+
+> **First time only — create your own branch** (it does not exist on GitHub yet):
+> ```bash
+> git clone https://github.com/frchaitanyaaa/land-acquisition-.git bhoomisetu && cd bhoomisetu
+> git checkout -b madhav origin/atulit
+> git push -u origin madhav
+> ```
+> After that, every checkpoint: `git fetch origin && git merge origin/atulit`, then push and open a PR `madhav → atulit`.
 
 You own everything a citizen touches, the front door (landing + login), citizen accounts, the grievance module,
 and the AI layer UI. Read `00-shared-context.md` first. Load the `ux4g-design` skill before UI work (theme already

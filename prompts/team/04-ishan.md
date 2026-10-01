@@ -1,4 +1,12 @@
-# 04 — Ishan · branch `ishan`
+# 04 — Ishan · branch `ishan` (you create it)
+
+> **First time only — create your own branch** (it does not exist on GitHub yet):
+> ```bash
+> git clone https://github.com/frchaitanyaaa/land-acquisition-.git bhoomisetu && cd bhoomisetu
+> git checkout -b ishan origin/atulit
+> git push -u origin ishan
+> ```
+> After that, every checkpoint: `git fetch origin && git merge origin/atulit`, then push and open a PR `ishan → atulit`.
 
 You own **deployment** (priority 1: without it nothing gets submitted) and the **trust layer UI** on top of the
 blockchain code that already works. Read `00-shared-context.md` first. Load the `ux4g-design` skill before UI work.

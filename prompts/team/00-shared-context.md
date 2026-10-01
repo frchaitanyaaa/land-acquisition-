@@ -23,14 +23,15 @@
 |---|---|---|---|
 | Chaitanya (lead) | `atulit` | `01-chaitanya.md` | design system + shell, national/state/district/collector dashboards, project workspace, merges |
 | Atulit | `atulit` | `02-atulit.md` | GIS maps, field officer portal, field phone app, money screens |
-| Madhav | `madhav` | `03-madhav.md` | landing, login, citizen accounts, grievances, public portal, AI layer UI |
-| Ishan | `ishan` | `04-ishan.md` | free deployment, trust/blockchain UI |
+| Madhav | `madhav` (he creates it from `atulit`) | `03-madhav.md` | landing, login, citizen accounts, grievances, public portal, AI layer UI |
+| Ishan | `ishan` (he creates it from `atulit`) | `04-ishan.md` | free deployment, trust/blockchain UI |
 
 Rules:
 1. Work only inside the paths your brief says you own. If you must touch another person's file, keep the change
    minimal, say so in the commit/PR description, and tell that person.
 2. Chaitanya and Atulit push to `atulit` directly in small commits; `git pull --rebase origin atulit` before each push.
-3. Madhav and Ishan: `git merge origin/atulit` into your branch at every checkpoint; open a PR into `atulit`.
+3. Madhav and Ishan: create your branch yourself the first time (`git checkout -b <name> origin/atulit && git push -u origin <name>`),
+   then `git merge origin/atulit` into it at every checkpoint and open a PR into `atulit`.
    Chaitanya merges.
 4. Only Madhav adds a database migration this sprint (`packages/db/drizzle/0005_*`). Anyone else needing a schema
    change asks Madhav to add it.
