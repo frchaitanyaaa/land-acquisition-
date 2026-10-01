@@ -10,7 +10,7 @@ services:
       DB_OWNER_PASSWORD: owner_pass
       DB_APP_PASSWORD: app_pass
       DB_WORKER_PASSWORD: worker_pass
-    ports: ['5434:5432']
+    ports: ['5432:5432']
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./docker/postgres/init.sh:/docker-entrypoint-initdb.d/10-bhoomisetu.sh:ro
