@@ -28,6 +28,12 @@ export function OfficerShell({ children }: { children: ReactNode }) {
             <Link href="/projects/new" className="text-slate-700 hover:text-slate-950">
               New proposal
             </Link>
+            <Link href="/gis" className="text-slate-700 hover:text-slate-950">
+              GIS
+            </Link>
+            <Link href="/field-office" className="text-slate-700 hover:text-slate-950">
+              Field office
+            </Link>
             <Link href="/rule-packs" className="text-slate-700 hover:text-slate-950">
               Rule packs
             </Link>

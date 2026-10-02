@@ -162,17 +162,19 @@ export const chainageKey = (projectId: string, binM: number) => ['project', proj
 export const flagsKey = (projectId: string) => ['project', projectId, 'flags'] as const;
 export const parcelKey = (id: string) => ['parcel', id] as const;
 
-export function useParcels(projectId: string, colorBy: ColorBy) {
+export function useParcels(projectId: string, colorBy: ColorBy, enabled = true) {
   return useQuery({
     queryKey: parcelsKey(projectId, colorBy),
     queryFn: () => api<ParcelsGeoJson>(`/projects/${projectId}/parcels?colorBy=${colorBy}`),
+    enabled: enabled && !!projectId,
   });
 }
 
-export function useChainage(projectId: string, binM = 500) {
+export function useChainage(projectId: string, binM = 500, enabled = true) {
   return useQuery({
     queryKey: chainageKey(projectId, binM),
     queryFn: () => api<ChainageBin[]>(`/projects/${projectId}/chainage?binM=${binM}`),
+    enabled: enabled && !!projectId,
   });
 }
 

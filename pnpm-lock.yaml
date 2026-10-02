@@ -247,6 +247,9 @@ importers:
 
   apps/portal:
     dependencies:
+      '@bhoomisetu/geo':
+        specifier: workspace:*
+        version: link:../../packages/geo
       '@bhoomisetu/rules':
         specifier: workspace:*
         version: link:../../packages/rules
@@ -283,6 +286,9 @@ importers:
       react-leaflet:
         specifier: ^5.0.0
         version: 5.0.0(leaflet@1.9.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      ux4g-web-components:
+        specifier: ^3.0.0
+        version: 3.0.0
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.3.3
@@ -6843,6 +6849,9 @@ packages:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
     deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
+
+  ux4g-web-components@3.0.0:
+    resolution: {integrity: sha512-ZVw6hhKVzEv7OFU9TWbjSUv7ymXrstOZz9d9f8lYReY38Cg7HrH2a6zMwgkRpV4znpBL5Eei028AR2DFk9us2A==}
 
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
@@ -14496,6 +14505,8 @@ snapshots:
   util-deprecate@1.0.2: {}
 
   uuid@8.3.2: {}
+
+  ux4g-web-components@3.0.0: {}
 
   vary@1.1.2: {}
 

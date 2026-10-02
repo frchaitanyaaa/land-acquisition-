@@ -43,10 +43,10 @@ export default function AwardPage({ params }: { params: Promise<{ id: string }> 
         {awards.data?.map((a) => (
           <button
             key={a.id}
+            type="button"
             onClick={() => setSelected(a.id)}
-            className={`rounded-md px-3 py-1.5 text-sm ${
-              award?.id === a.id ? 'bg-slate-800 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50'
-            }`}
+            aria-pressed={award?.id === a.id}
+            className={`ux4g-filter-chip-m ${award?.id === a.id ? 'active' : ''}`}
           >
             {a.award_type} {a.award_no} · {a.status}
           </button>
@@ -73,7 +73,7 @@ function NewAward({ projectId, onCreated }: { projectId: string; onCreated: (id:
 
   if (!open)
     return (
-      <button onClick={() => setOpen(true)} className="rounded-md bg-teal-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-teal-800">
+      <button type="button" onClick={() => setOpen(true)} className="ux4g-btn-primary ux4g-btn-s">
         Upload signed award PDF
       </button>
     );
@@ -82,23 +82,23 @@ function NewAward({ projectId, onCreated }: { projectId: string; onCreated: (id:
     <div className="flex flex-wrap items-end gap-2 border border-slate-200 bg-white p-3">
       <label className="text-sm">
         <span className="block text-xs text-slate-500">Type</span>
-        <select value={awardType} onChange={(e) => setAwardType(e.target.value as 'LAND' | 'RNR')} className="rounded-md border border-slate-300 px-2 py-1.5 text-sm">
+        <select value={awardType} onChange={(e) => setAwardType(e.target.value as 'LAND' | 'RNR')} className="ux4g-dropdown-control">
           <option value="LAND">Land (s.23)</option>
           <option value="RNR">R&amp;R (s.31)</option>
         </select>
       </label>
       <label className="text-sm">
         <span className="block text-xs text-slate-500">Award number</span>
-        <input value={awardNo} onChange={(e) => setAwardNo(e.target.value)} maxLength={100} className="rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+        <input value={awardNo} onChange={(e) => setAwardNo(e.target.value)} maxLength={100} className="ux4g-input" />
       </label>
       <button
         disabled={!awardNo.trim() || create.isPending}
         onClick={() => setUpload(true)}
-        className="rounded-md bg-teal-700 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+        className="ux4g-btn-primary ux4g-btn-s"
       >
         Choose PDF &amp; attest…
       </button>
-      <button onClick={() => setOpen(false)} className="text-sm text-slate-500">
+      <button type="button" onClick={() => setOpen(false)} className="ux4g-btn-text-neutral ux4g-btn-s">
         Cancel
       </button>
       {error && <p className="w-full text-sm text-red-700">{error}</p>}
@@ -476,7 +476,7 @@ function FieldRow({
                   void doAccept();
                 }}
                 disabled={accept.isPending}
-                className="rounded-md border border-teal-700 px-2 py-1 text-xs font-medium text-teal-800 hover:bg-teal-50 disabled:opacity-50"
+                className="ux4g-btn-outline-primary ux4g-btn-xs"
               >
                 {typed ? 'Accept edited' : 'Accept'}
               </button>

@@ -1,0 +1,339 @@
+{
+ "type": "FeatureCollection",
+ "name": "districts-demo",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "code": "SYN-MH-PUNE",
+    "state_code": "27",
+    "name": "Pune",
+    "data_source": "SYNTHETIC_DEMO",
+    "note": "SYNTHETIC_DEMO \u2014 hand-drawn approximate outline for the demo map. Not an official boundary; do not use for any legal or survey purpose."
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       73.3,
+       18.195
+      ],
+      [
+       75.2,
+       18.195
+      ],
+      [
+       75.2,
+       19.4
+      ],
+      [
+       73.3,
+       19.4
+      ],
+      [
+       73.3,
+       18.195
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "code": "SYN-MH-SATARA",
+    "state_code": "27",
+    "name": "Satara",
+    "data_source": "SYNTHETIC_DEMO",
+    "note": "SYNTHETIC_DEMO \u2014 hand-drawn approximate outline for the demo map. Not an official boundary; do not use for any legal or survey purpose."
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       73.5,
+       17.1
+      ],
+      [
+       74.95,
+       17.1
+      ],
+      [
+       74.95,
+       18.195
+      ],
+      [
+       73.5,
+       18.195
+      ],
+      [
+       73.5,
+       17.1
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "code": "SYN-MH-NAGPUR",
+    "state_code": "27",
+    "name": "Nagpur",
+    "data_source": "SYNTHETIC_DEMO",
+    "note": "SYNTHETIC_DEMO \u2014 hand-drawn approximate outline for the demo map. Not an official boundary; do not use for any legal or survey purpose."
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       78.25,
+       20.6
+      ],
+      [
+       79.65,
+       20.6
+      ],
+      [
+       79.65,
+       21.6
+      ],
+      [
+       78.25,
+       21.6
+      ],
+      [
+       78.25,
+       20.6
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "code": "SYN-MH-GADCHIROLI",
+    "state_code": "27",
+    "name": "Gadchiroli",
+    "data_source": "SYNTHETIC_DEMO",
+    "note": "SYNTHETIC_DEMO \u2014 hand-drawn approximate outline for the demo map. Not an official boundary; do not use for any legal or survey purpose."
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       79.75,
+       18.85
+      ],
+      [
+       80.45,
+       18.85
+      ],
+      [
+       80.45,
+       20.75
+      ],
+      [
+       79.75,
+       20.75
+      ],
+      [
+       79.75,
+       18.85
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "code": "SYN-KA-BELAGAVI",
+    "state_code": "29",
+    "name": "Belagavi",
+    "data_source": "SYNTHETIC_DEMO",
+    "note": "SYNTHETIC_DEMO \u2014 hand-drawn approximate outline for the demo map. Not an official boundary; do not use for any legal or survey purpose."
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       74.12,
+       15.45
+      ],
+      [
+       75.3,
+       15.45
+      ],
+      [
+       75.3,
+       16.95
+      ],
+      [
+       74.12,
+       16.95
+      ],
+      [
+       74.12,
+       15.45
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "code": "SYN-KA-DHARWAD",
+    "state_code": "29",
+    "name": "Dharwad",
+    "data_source": "SYNTHETIC_DEMO",
+    "note": "SYNTHETIC_DEMO \u2014 hand-drawn approximate outline for the demo map. Not an official boundary; do not use for any legal or survey purpose."
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       74.75,
+       14.95
+      ],
+      [
+       75.7,
+       14.95
+      ],
+      [
+       75.7,
+       15.45
+      ],
+      [
+       74.75,
+       15.45
+      ],
+      [
+       74.75,
+       14.95
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "code": "SYN-GJ-AHMEDABAD",
+    "state_code": "24",
+    "name": "Ahmedabad",
+    "data_source": "SYNTHETIC_DEMO",
+    "note": "SYNTHETIC_DEMO \u2014 hand-drawn approximate outline for the demo map. Not an official boundary; do not use for any legal or survey purpose."
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       71.6,
+       21.95
+      ],
+      [
+       72.9,
+       21.95
+      ],
+      [
+       72.9,
+       23.4
+      ],
+      [
+       71.6,
+       23.4
+      ],
+      [
+       71.6,
+       21.95
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "code": "SYN-RJ-JAISALMER",
+    "state_code": "08",
+    "name": "Jaisalmer",
+    "data_source": "SYNTHETIC_DEMO",
+    "note": "SYNTHETIC_DEMO \u2014 hand-drawn approximate outline for the demo map. Not an official boundary; do not use for any legal or survey purpose."
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       70.3,
+       26.0
+      ],
+      [
+       72.4,
+       26.0
+      ],
+      [
+       72.4,
+       27.6
+      ],
+      [
+       70.3,
+       27.6
+      ],
+      [
+       70.3,
+       26.0
+      ]
+     ]
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "code": "SYN-UP-GBN",
+    "state_code": "09",
+    "name": "Gautam Buddh Nagar",
+    "data_source": "SYNTHETIC_DEMO",
+    "note": "SYNTHETIC_DEMO \u2014 hand-drawn approximate outline for the demo map. Not an official boundary; do not use for any legal or survey purpose."
+   },
+   "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+     [
+      [
+       77.45,
+       28.1
+      ],
+      [
+       77.75,
+       28.1
+      ],
+      [
+       77.75,
+       28.6
+      ],
+      [
+       77.45,
+       28.6
+      ],
+      [
+       77.45,
+       28.1
+      ]
+     ]
+    ]
+   }
+  }
+ ]
+}

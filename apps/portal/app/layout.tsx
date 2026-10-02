@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { Ux4gRuntime } from '@/components/shell/ux4g-runtime';
 import { QueryProvider } from '@/lib/query-provider';
+import 'ux4g-web-components/styles.css';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -16,6 +18,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className="min-h-screen bg-slate-50 text-slate-900 antialiased">
+        <Ux4gRuntime />
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>

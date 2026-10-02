@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { use, useMemo, useState } from 'react';
-import { MoneyState } from '@/components/money-state';
+import { KpiCard, MoneyState } from '@/components/money-state';
 import { useProjectFamilies } from '@/lib/award-api';
 import { formatMoney } from '@/lib/format';
 import { useLiveUpdates } from '@/lib/use-live-updates';
@@ -19,23 +19,35 @@ export default function FamiliesPage({ params }: { params: Promise<{ id: string 
 
   if (error) return <p className="text-red-700">Could not load families.</p>;
   if (isLoading) return <p className="text-slate-500">Loading…</p>;
+  // Totals of what the API returned per family — display sums, not a computed award (G1).
+  const sum = (k: 'assessed_paise' | 'disbursed_paise' | 'acknowledged_paise' | 'unconfirmed_paise' | 'held_paise') =>
+    (data ?? []).reduce((t, f) => t + BigInt(f[k] ?? 0), 0n).toString();
   return (
     <div className="space-y-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <KpiCard label="Assessed" value={formatMoney(sum('assessed_paise'))} sub={`${data?.length ?? 0} families`} />
+        <KpiCard label="Disbursed" value={formatMoney(sum('disbursed_paise'))} tone="info" />
+        <KpiCard label="Acknowledged" value={formatMoney(sum('acknowledged_paise'))} tone="success" />
+        <KpiCard label="Disbursed, not acknowledged" value={formatMoney(sum('unconfirmed_paise'))} tone="warning" />
+        <KpiCard label="On hold" value={formatMoney(sum('held_paise'))} tone="error" />
+      </div>
       <div className="flex flex-wrap gap-1">
         {FILTERS.map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
-            className={`rounded-full px-3 py-1 text-xs ${filter === f ? 'bg-slate-800 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200'}`}
+            type="button"
+            aria-pressed={filter === f}
+            className={`ux4g-filter-chip-s ${filter === f ? 'active' : ''}`}
           >
             {f === 'ALL' ? 'All' : f.replace(/_/g, ' ').toLowerCase()}
             {f !== 'ALL' && ` (${(data ?? []).filter((r) => r.money_state === f).length})`}
           </button>
         ))}
       </div>
-      <div className="overflow-x-auto border border-slate-200 bg-white">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+      <div className="ux4g-table-responsive border border-slate-200 bg-white">
+        <table className="ux4g-table ux4g-table-s ux4g-table-interactive w-full">
+          <thead>
             <tr>
               <th className="px-3 py-2">Head of family</th>
               <th className="px-3 py-2">State</th>
@@ -49,7 +61,7 @@ export default function FamiliesPage({ params }: { params: Promise<{ id: string 
             {rows.map((f) => (
               <tr key={f.id} className="hover:bg-slate-50">
                 <td className="px-3 py-2">
-                  <Link href={`/families/${f.id}/money`} className="font-medium text-teal-800 hover:underline">
+                  <Link href={`/families/${f.id}/money`} className="ux4g-text-link ux4g-text-link-s">
                     {f.head_name}
                   </Link>
                   <span className="ml-2 text-xs text-slate-500">

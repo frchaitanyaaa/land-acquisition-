@@ -2,14 +2,14 @@
 // pnpm demo:tunnel (CLAUDE.md §16.1, §294) — one HTTPS origin for phones.
 //
 //  1. builds the field PWA into apps/portal/public/field (served by the portal under /field)
-//  2. copies data/tiles/demo-region.pmtiles into apps/portal/public/tiles if it isn't there yet
+//  2. checks apps/portal/public/tiles/demo-region.pmtiles is there (made by scripts/extract-tiles.sh)
 //  3. opens a cloudflared quick tunnel to the portal (:3000) and prints the URLs + .env lines
 //
 // Run the API and the portal first (pnpm dev). Needs `cloudflared` on PATH
 // (https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/).
 // Skip the build with --no-build when only restarting the tunnel.
 import { spawn, spawnSync } from 'node:child_process';
-import { copyFileSync, existsSync, mkdirSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -22,16 +22,10 @@ if (!process.argv.includes('--no-build')) {
   if (b.status !== 0) process.exit(b.status ?? 1);
 }
 
-const tilesSrc = join(root, 'data', 'tiles', 'demo-region.pmtiles');
-const tilesDst = join(root, 'apps', 'portal', 'public', 'tiles', 'demo-region.pmtiles');
-if (!existsSync(tilesDst)) {
-  if (existsSync(tilesSrc)) {
-    mkdirSync(dirname(tilesDst), { recursive: true });
-    copyFileSync(tilesSrc, tilesDst);
-    console.log('› copied data/tiles/demo-region.pmtiles → apps/portal/public/tiles/');
-  } else {
-    console.warn('! no demo-region.pmtiles (§16.5) — maps will be blank but capture still works.');
-  }
+const tiles = join(root, 'apps', 'portal', 'public', 'tiles', 'demo-region.pmtiles');
+if (!existsSync(tiles)) {
+  console.warn('! apps/portal/public/tiles/demo-region.pmtiles is missing (§16.5) — run scripts/extract-tiles.sh.');
+  console.warn('  Maps will be blank offline; capture and sync still work.');
 }
 
 console.log(`› starting cloudflared → http://localhost:${port}`);

@@ -12,7 +12,7 @@ import { nationalKey, useNationalDashboard } from '@/lib/dashboards-api';
 import { ApiProblem } from '@/lib/api';
 import { useLiveUpdates } from '@/lib/use-live-updates';
 
-const ProjectMap = dynamic(() => import('@/components/project-map').then((m) => m.ProjectMap), {
+const ProjectMap = dynamic(() => import('@/components/gis/project-map').then((m) => m.ProjectMap), {
   ssr: false,
   loading: () => <div className="h-96 w-full animate-pulse border border-slate-200 bg-slate-100" />,
 });

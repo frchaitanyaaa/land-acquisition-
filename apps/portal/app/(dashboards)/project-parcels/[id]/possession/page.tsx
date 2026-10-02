@@ -2,6 +2,7 @@
 
 import { use, useState } from 'react';
 import { AttestationModal } from '@/components/attestation-modal';
+import { MoneyHero } from '@/components/money-state';
 import { ApiProblem } from '@/lib/api';
 import { usePossessionGate, useTakePossession } from '@/lib/money-api';
 
@@ -68,15 +69,13 @@ export default function PossessionPage({ params }: { params: Promise<{ id: strin
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-xl font-semibold">Possession</h1>
-        <p className="text-sm text-slate-600">
-          Project parcel · status {gate.status.replace(/_/g, ' ').toLowerCase()} · {gate.families} famil{gate.families === 1 ? 'y' : 'ies'},{' '}
-          {gate.entitlements} entitlement heads
-        </p>
-      </div>
+      <MoneyHero
+        eyebrow="Possession (s.38)"
+        title={gate.allowed ? 'Possession gate passes' : `${gate.failures.length} condition(s) block possession`}
+        subtitle={`Project parcel · status ${gate.status.replace(/_/g, ' ').toLowerCase()} · ${gate.families} famil${gate.families === 1 ? 'y' : 'ies'}, ${gate.entitlements} entitlement heads`}
+      />
 
-      <section className="border border-slate-200 bg-white">
+      <section className="ux4g-card ux4g-card-outline ux4g-card-vertical">
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
           <h2 className="text-sm font-semibold">Possession gate (s.38)</h2>
           <span className={`rounded px-2 py-0.5 text-xs font-semibold ${gate.allowed ? 'bg-teal-50 text-teal-800' : 'bg-red-50 text-red-800'}`}>
@@ -100,9 +99,11 @@ export default function PossessionPage({ params }: { params: Promise<{ id: strin
                   <span className={fails.length ? 'text-slate-900' : 'text-slate-600'}>{c.label}</span>
                 </div>
                 {fails.length > 0 && (
-                  <ul className="ml-6 mt-1 list-disc space-y-0.5 pl-4 text-xs text-red-800">
+                  <ul className="ml-6 mt-1 space-y-1">
                     {fails.map((f, i) => (
-                      <li key={i}>{f.message}</li>
+                      <li key={i} role="alert" className="ux4g-alert ux4g-alert-error">
+                        {f.message}
+                      </li>
                     ))}
                   </ul>
                 )}
@@ -112,17 +113,17 @@ export default function PossessionPage({ params }: { params: Promise<{ id: strin
           {gate.failures
             .filter((f) => !CONDITIONS.some((c) => c.codes.includes(f.code)))
             .map((f, i) => (
-              <li key={`x${i}`} className="px-4 py-2.5 text-sm text-red-800">
-                ✗ {f.message}
+              <li key={`x${i}`} role="alert" className="ux4g-alert ux4g-alert-error mx-4 my-2">
+                {f.message}
               </li>
             ))}
         </ul>
       </section>
 
       {possessed ? (
-        <p className="border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900">Possession has been taken for this parcel.</p>
+        <div className="ux4g-alert ux4g-alert-success">Possession has been taken for this parcel.</div>
       ) : (
-        <section className="space-y-3 border border-slate-200 bg-white p-4">
+        <section className="ux4g-card ux4g-card-outline ux4g-card-vertical ux4g-p-m space-y-3">
           <h2 className="text-sm font-semibold">Panchnama and certificates</h2>
           <ul className="space-y-2 text-sm">
             {(Object.keys(DOCS) as DocKey[]).map((k) => (
@@ -134,7 +135,7 @@ export default function PossessionPage({ params }: { params: Promise<{ id: strin
                 {docs[k] ? (
                   <span className="text-xs text-teal-800">✓ attested &amp; uploaded</span>
                 ) : (
-                  <button onClick={() => setUploading(k)} className="text-xs font-medium text-teal-700 hover:underline">
+                  <button type="button" onClick={() => setUploading(k)} className="ux4g-btn-outline-primary ux4g-btn-xs">
                     Upload
                   </button>
                 )}
@@ -151,13 +152,13 @@ export default function PossessionPage({ params }: { params: Promise<{ id: strin
             onClick={() => void submit()}
             disabled={!canSubmit || take.isPending}
             title={gate.allowed ? undefined : 'The possession gate does not pass'}
-            className="rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+            className="ux4g-btn-primary ux4g-btn-m"
           >
             {take.isPending ? 'Recording…' : 'Take possession'}
           </button>
           {!gate.allowed && <p className="text-xs text-slate-500">Disabled until every condition above passes.</p>}
           {result && (
-            <ul className={`space-y-1 border p-2 text-sm ${result.ok ? 'border-teal-200 bg-teal-50 text-teal-900' : 'border-red-200 bg-red-50 text-red-800'}`}>
+            <ul role="alert" className={`ux4g-alert space-y-1 ${result.ok ? 'ux4g-alert-success' : 'ux4g-alert-error'}`}>
               {result.lines.map((l, i) => (
                 <li key={i}>{l}</li>
               ))}

@@ -18,11 +18,22 @@ function sqm(v: string | null): string {
   return `${Number(v).toLocaleString('en-IN', { maximumFractionDigits: 1 })} m²`;
 }
 
-export function ParcelDetail({ parcelId, projectId, onClose }: { parcelId: string; projectId: string; onClose: () => void }) {
+export function ParcelDetail({
+  parcelId,
+  projectId,
+  onClose,
+  embedded = false,
+}: {
+  parcelId: string;
+  projectId: string;
+  onClose: () => void;
+  /** Inside the GIS record panel: no frame, no repeated header — just the working sections. */
+  embedded?: boolean;
+}) {
   const { data, isLoading, error } = useParcel(parcelId);
 
-  if (error) return <Panel onClose={onClose}><p className="text-red-700">Could not load this parcel.</p></Panel>;
-  if (isLoading || !data) return <Panel onClose={onClose}><p className="text-slate-500">Loading…</p></Panel>;
+  if (error) return <Panel onClose={onClose} embedded={embedded}><p className="text-red-700">Could not load this parcel.</p></Panel>;
+  if (isLoading || !data) return <Panel onClose={onClose} embedded={embedded}><p className="text-slate-500">Loading…</p></Panel>;
 
   const allFlags = [
     ...new Set([
@@ -30,6 +41,16 @@ export function ParcelDetail({ parcelId, projectId, onClose }: { parcelId: strin
       ...data.surveys.flatMap((s) => Object.keys(s.plausibility?.flags ?? {})),
     ]),
   ];
+
+  if (embedded)
+    return (
+      <Panel onClose={onClose} embedded>
+        <VertexList data={data} />
+        <NoticeStatus data={data} />
+        <VerifyForm parcelId={parcelId} projectId={projectId} requiresOverride={allFlags.length > 0} />
+        <Corrections data={data} parcelId={parcelId} />
+      </Panel>
+    );
 
   return (
     <Panel onClose={onClose}>
@@ -85,7 +106,8 @@ export function ParcelDetail({ parcelId, projectId, onClose }: { parcelId: strin
   );
 }
 
-function Panel({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+function Panel({ children, onClose, embedded = false }: { children: React.ReactNode; onClose: () => void; embedded?: boolean }) {
+  if (embedded) return <div>{children}</div>;
   return (
     <div className="w-full max-w-sm shrink-0 border border-slate-200 bg-white p-4">
       <button onClick={onClose} className="float-right text-xs text-slate-400 hover:text-slate-700">

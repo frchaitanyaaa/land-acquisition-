@@ -21,7 +21,7 @@ export function Header({ title, back, demoMode }: { title: string; back?: string
   const online = useOnline();
   const pending = useLive(() => db.outbox.where('status').anyOf('queued', 'uploading', 'rejected').count(), []);
   return (
-    <header className="sticky top-0 z-[1500] flex items-center gap-2 bg-teal-700 px-3 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] text-white">
+    <header className="sticky top-0 z-[1500] flex items-center gap-2 ux4g-bg-primary-stronger ux4g-text-neutral-inverse px-3 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] text-white">
       {back && (
         <button type="button" onClick={() => go(back)} className="-ml-1 px-2 text-lg leading-none" aria-label="Back">
           ‹

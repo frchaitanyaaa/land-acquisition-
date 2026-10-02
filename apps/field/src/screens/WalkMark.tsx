@@ -173,7 +173,7 @@ export function WalkMark({ survey, pack }: SurveyProps) {
               onPointerUp={cancelHold}
               onPointerCancel={cancelHold}
               onContextMenu={(e) => e.preventDefault()}
-              className="no-callout relative w-full overflow-hidden rounded-xl bg-teal-700 py-5 text-base font-semibold text-white disabled:bg-slate-400"
+              className="no-callout relative w-full overflow-hidden rounded-xl ux4g-bg-primary-stronger ux4g-text-neutral-inverse py-5 text-base font-semibold disabled:opacity-60"
             >
               <span
                 className="absolute inset-y-0 left-0 bg-teal-900/60"

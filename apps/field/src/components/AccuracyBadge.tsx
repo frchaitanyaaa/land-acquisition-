@@ -1,18 +1,19 @@
 import { accuracyTier } from '../lib/geo';
 import type { Thresholds } from '../lib/types';
 
+// UX4G filled tags: green / amber / red, readable in sunlight.
 const TIER = {
-  good: 'bg-emerald-600 text-white',
-  warn: 'bg-amber-400 text-amber-950',
-  bad: 'bg-red-600 text-white',
+  good: 'ux4g-tag-filled-success',
+  warn: 'ux4g-tag-filled-warning',
+  bad: 'ux4g-tag-filled-error',
 } as const;
 
 /** Green ≤ 10 m, amber ≤ gpsAccuracyWarnM, red above (§16.2) — thresholds from the offline pack's rule pack. */
 export function AccuracyBadge({ accuracy, thresholds }: { accuracy: number | null; thresholds: Thresholds }) {
   if (accuracy == null)
-    return <span className="rounded-full bg-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-800">No GPS</span>;
+    return <span className="ux4g-tag-filled-neutral">No GPS</span>;
   return (
-    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold tabular-nums ${TIER[accuracyTier(accuracy, thresholds)]}`}>
+    <span className={`${TIER[accuracyTier(accuracy, thresholds)]} tabular-nums`}>
       ±{accuracy < 100 ? accuracy.toFixed(1) : Math.round(accuracy)} m
     </span>
   );

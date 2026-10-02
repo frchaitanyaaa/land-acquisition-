@@ -4,9 +4,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { use, useEffect, useState } from 'react';
 import { ChainBadge } from '@/components/chain-badge';
-import { MoneyState } from '@/components/money-state';
+import { KpiCard, MockBadge, MoneyHero, MoneyState, isMockProvider } from '@/components/money-state';
 import { QrCode } from '@/components/qr-code';
-import { StatTile } from '@/components/stat-tile';
 import { ApiProblem } from '@/lib/api';
 import { formatMoney } from '@/lib/format';
 import {
@@ -77,45 +76,42 @@ export default function FamilyMoneyPage({ params }: { params: Promise<{ id: stri
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-xs text-slate-500">
-            <Link href={`/project/${family.project_id}/families`} className="hover:underline">
-              {family.project_code} — {family.project_name}
-            </Link>
-          </p>
-          <h1 className="text-xl font-semibold">{family.head_name}</h1>
-          <p className="text-sm text-slate-600">
+      <MoneyHero
+        eyebrow={
+          <Link href={`/project/${family.project_id}/families`} className="ux4g-text-link-inverse ux4g-text-link-s">
+            {family.project_code} — {family.project_name}
+          </Link>
+        }
+        title={family.head_name}
+        subtitle={
+          <>
             {family.is_displaced ? 'Displaced family' : 'Affected family'}
             {family.is_sc_st ? ' · SC/ST' : ''}
-            {family.phone_masked ? ` · ${family.phone_masked}` : ''} ·{' '}
-            {family.has_passkey ? (
-              <span className="text-teal-800">passkey enrolled</span>
-            ) : (
-              <span className="text-amber-800">no passkey enrolled</span>
-            )}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link href={`/families/${id}/passbook`} className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">
-            Passbook
-          </Link>
-          <button onClick={() => void viewAsPublic()} className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm hover:bg-slate-50">
-            View as the public sees it ↗
-          </button>
-          <button onClick={() => void showEnrol()} disabled={enrol.isPending} className="rounded-md bg-slate-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-50">
-            {family.has_passkey ? 'Enrol another phone' : 'Create enrolment link'}
-          </button>
-        </div>
-      </div>
-      {linkError && <p className="text-sm text-red-700">{linkError}</p>}
+            {family.phone_masked ? ` · ${family.phone_masked}` : ''} · {family.has_passkey ? 'passkey enrolled' : 'no passkey enrolled'}
+          </>
+        }
+        actions={
+          <>
+            <Link href={`/families/${id}/passbook`} className="ux4g-btn-tonal-primary ux4g-btn-s">
+              Passbook
+            </Link>
+            <button type="button" onClick={() => void viewAsPublic()} className="ux4g-btn-tonal-primary ux4g-btn-s">
+              View as the public sees it ↗
+            </button>
+            <button type="button" onClick={() => void showEnrol()} disabled={enrol.isPending} className="ux4g-btn-tonal-primary ux4g-btn-s">
+              {family.has_passkey ? 'Enrol another phone' : 'Create enrolment link'}
+            </button>
+          </>
+        }
+      />
+      {linkError && <div role="alert" className="ux4g-alert ux4g-alert-error">{linkError}</div>}
       {enrolLink && (
         <div className="flex flex-wrap items-start gap-4 border border-slate-200 bg-white p-4">
           <QrCode url={enrolLink.url} caption="Family scans with their own phone to register fingerprint / face" expiresInMinutes={enrolLink.expiresInMinutes} />
           <p className="max-w-sm text-sm text-slate-600">
             The beneficiary opens this on their own phone and uses its fingerprint or face unlock. Nothing biometric is stored — only the
             credential id and public key (G6).{' '}
-            <button className="text-teal-700 underline" onClick={() => setEnrolLink(null)}>
+            <button type="button" className="ux4g-btn-text-primary ux4g-btn-xs" onClick={() => setEnrolLink(null)}>
               Close
             </button>
           </p>
@@ -123,19 +119,24 @@ export default function FamilyMoneyPage({ params }: { params: Promise<{ id: stri
       )}
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile label="Assessed" value={formatMoney(money.assessed_paise)} />
-        <StatTile label="Sanctioned" value={formatMoney(money.sanctioned_paise)} />
-        <StatTile label="Disbursed" value={formatMoney(money.disbursed_paise)} />
-        <StatTile label="Acknowledged" value={formatMoney(money.acknowledged_paise)} />
-        <StatTile label="Disbursed, not acknowledged" value={formatMoney(money.unconfirmed_paise)} />
-        <StatTile label="On hold" value={formatMoney(money.held_paise)} />
-        <StatTile label="Deposited with Authority" value={formatMoney(money.deposited_paise)} />
-        <StatTile label={label} value={formatMoney(estimatedInterestLiability?.estimated_interest_paise ?? '0')} />
+        <KpiCard label="Assessed" value={formatMoney(money.assessed_paise)} />
+        <KpiCard label="Sanctioned" value={formatMoney(money.sanctioned_paise)} tone="info" />
+        <KpiCard label="Disbursed" value={formatMoney(money.disbursed_paise)} tone="info" />
+        <KpiCard label="Acknowledged" value={formatMoney(money.acknowledged_paise)} tone="success" sub="confirmed by the family" />
+        <KpiCard
+          label="Disbursed, not acknowledged"
+          value={formatMoney(money.unconfirmed_paise)}
+          tone={BigInt(money.unconfirmed_paise) > 0n ? 'warning' : 'neutral'}
+          sub="the office says paid; the family has not confirmed"
+        />
+        <KpiCard label="On hold" value={formatMoney(money.held_paise)} tone={BigInt(money.held_paise) > 0n ? 'error' : 'neutral'} />
+        <KpiCard label="Deposited with Authority" value={formatMoney(money.deposited_paise)} />
+        <KpiCard label={label} value={formatMoney(estimatedInterestLiability?.estimated_interest_paise ?? '0')} tone="warning" />
       </div>
 
       <div className="space-y-4">
         {entitlements.map((e) => (
-          <section key={e.entitlement_id} className="border border-slate-200 bg-white">
+          <section key={e.entitlement_id} className="ux4g-card ux4g-card-outline ux4g-card-vertical">
             <div className="flex flex-wrap items-center gap-3 border-b border-slate-200 px-4 py-3">
               <div className="flex-1">
                 <p className="font-medium">{e.head_code.replace(/_/g, ' ')}</p>
@@ -189,24 +190,29 @@ function DisbursementRow({ d, onLinkShown }: { d: Disbursement; onLinkShown: () 
         <MoneyState state={d.paymentStatus} />
         <span className="text-xs text-slate-500">
           {d.instrument === 'DBT' ? 'DBT' : 'Deposit with Authority'}
+          {d.adapterProvider && (
+            <>
+              {' · via '}
+              {d.adapterProvider} {isMockProvider(d.adapterProvider) && <MockBadge title="Payment adapter is a mock — not a live bank or treasury system" />}
+            </>
+          )}
           {d.paidOn ? ` · paid ${dateIST(d.paidOn)}` : ''}
           {d.acceptanceType === 'UNDER_PROTEST' ? ' · accepted under protest' : ''}
         </span>
         <span className="ml-auto flex items-center gap-2">
           {d.acknowledgement ? (
-            <span className="rounded bg-teal-50 px-2 py-0.5 text-xs font-medium text-teal-800 ring-1 ring-inset ring-teal-200">
+            <span className="ux4g-tag-tonal-success ux4g-tag-s">
               ✓ Acknowledged by family · {d.acknowledgement.method} · {dateTimeIST(d.acknowledgement.confirmedAt)}
+              {d.acknowledgement.method === 'OTP' && <> <MockBadge title="OTP sent through the mock SMS adapter" /></>}
             </span>
           ) : d.paymentStatus === 'SUCCESS' && d.instrument === 'DBT' ? (
-            <span className="rounded bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-900 ring-1 ring-inset ring-amber-200">
-              Disbursed, not acknowledged
-            </span>
+            <span className="ux4g-tag-tonal-warning ux4g-tag-s">Disbursed, not acknowledged</span>
           ) : null}
           {d.paymentStatus === 'SUCCESS' && <ChainBadge entityType="disbursement" entityId={d.id} />}
         </span>
       </div>
       {hasHold && (
-        <p className="border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-900">
+        <p role="alert" className="ux4g-alert ux4g-alert-error">
           On hold{d.holdReasonCode ? ` — ${d.holdReasonCode}` : ''}
           {d.holdReason ? `: ${d.holdReason}` : ''}
         </p>
@@ -221,7 +227,7 @@ function DisbursementRow({ d, onLinkShown }: { d: Disbursement; onLinkShown: () 
             </p>
           </div>
         ) : (
-          <button onClick={() => void showQr()} disabled={ack.isPending} className="text-xs font-medium text-teal-700 hover:underline">
+          <button type="button" onClick={() => void showQr()} disabled={ack.isPending} className="ux4g-btn-outline-primary ux4g-btn-xs">
             Show acknowledgement QR
           </button>
         ))}

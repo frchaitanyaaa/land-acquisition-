@@ -42,7 +42,8 @@ export default defineConfig(({ mode }) => {
         },
         injectManifest: {
           globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
-          maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
+          // UX4G's stylesheet alone is ~8 MB (embedded fonts) and must be precached for offline use.
+          maximumFileSizeToCacheInBytes: 16 * 1024 * 1024,
         },
         devOptions: { enabled: false },
       }),
