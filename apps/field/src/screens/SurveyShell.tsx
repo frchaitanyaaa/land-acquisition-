@@ -48,7 +48,7 @@ export function SurveyShell({ clientId, tab, demoMode }: { clientId: string; tab
             key={key}
             type="button"
             onClick={() => go(`survey/${clientId}/${key}`)}
-            className={`flex-1 px-1 py-2.5 ${tab === key ? 'border-b-2 border-teal-700 font-semibold text-teal-800' : 'text-slate-600'}`}
+            className={`flex-1 px-1 py-2.5 ${tab === key ? 'border-b-2 border-[#1f3c8f] font-semibold text-[#13245a]' : 'text-slate-600'}`}
           >
             {label}
           </button>

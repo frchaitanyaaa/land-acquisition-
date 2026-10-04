@@ -57,12 +57,12 @@ export function Assignments({ profile, demoMode }: { profile: Profile; demoMode:
   return (
     <div className="min-h-full bg-slate-50">
       <Header title="Assignments" demoMode={demoMode} />
-      <main className="space-y-3 p-4">
+      <main className="mx-auto w-full max-w-2xl space-y-3 p-4">
         <div className="flex items-center justify-between text-sm">
           <span className="text-slate-700">
             {profile.user.fullName} · <span className="text-slate-500">{profile.activePost.designation}</span>
           </span>
-          <button type="button" onClick={signOut} className="text-teal-800 underline">
+          <button type="button" onClick={signOut} className="text-[#13245a] underline">
             Sign out
           </button>
         </div>

@@ -21,7 +21,7 @@ export function Header({ title, back, demoMode }: { title: string; back?: string
   const online = useOnline();
   const pending = useLive(() => db.outbox.where('status').anyOf('queued', 'uploading', 'rejected').count(), []);
   return (
-    <header className="sticky top-0 z-[1500] flex items-center gap-2 ux4g-bg-primary-stronger ux4g-text-neutral-inverse px-3 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] text-white">
+    <header className="sticky top-0 z-[1500] flex items-center gap-2 border-b-[3px] border-b-[#ff9933] bg-[#13245a] px-3 pb-2.5 pt-[max(0.625rem,env(safe-area-inset-top))] text-white">
       {back && (
         <button type="button" onClick={() => go(back)} className="-ml-1 px-2 text-lg leading-none" aria-label="Back">
           ‹
@@ -29,7 +29,9 @@ export function Header({ title, back, demoMode }: { title: string; back?: string
       )}
       <h1 className="truncate text-base font-semibold">{title}</h1>
       {demoMode && (
-        <span className="rounded bg-amber-300 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950">Demo data</span>
+        <span className="rounded bg-amber-300 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950">
+          Demo data
+        </span>
       )}
       <button
         type="button"
@@ -39,7 +41,8 @@ export function Header({ title, back, demoMode }: { title: string; back?: string
       >
         Sync{pending ? ` · ${pending}` : ''}
       </button>
-      <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${online ? 'bg-emerald-100 text-emerald-900' : 'bg-slate-200 text-slate-800'}`}>
+      <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium">
+        <span className={`h-2 w-2 rounded-full ${online ? 'bg-emerald-400' : 'bg-slate-400'}`} aria-hidden />
         {online ? 'Online' : 'Offline'}
       </span>
     </header>

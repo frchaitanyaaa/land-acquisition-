@@ -51,7 +51,7 @@ export function SyncStatus({ demoMode }: { demoMode: boolean }) {
   return (
     <div className="min-h-full bg-slate-50">
       <Header title="Sync" back="assignments" demoMode={demoMode} />
-      <main className="space-y-3 p-4">
+      <main className="mx-auto w-full max-w-2xl space-y-3 p-4">
         <Button className="w-full py-3" disabled={busy || !online} onClick={run}>
           {busy ? 'Syncing…' : online ? 'Sync now' : 'Offline — Sync now when connected'}
         </Button>
@@ -83,7 +83,7 @@ function SurveyCard({ survey, ops, photos }: { survey: SurveyRow; ops: OutboxRow
   return (
     <Card className="space-y-2 text-sm">
       <div className="flex items-center justify-between">
-        <button type="button" className="text-left font-medium text-teal-800 underline" onClick={() => go(`survey/${survey.clientId}/review`)}>
+        <button type="button" className="text-left font-medium text-[#13245a] underline" onClick={() => go(`survey/${survey.clientId}/review`)}>
           Survey {survey.clientId.slice(0, 8)}
         </button>
         <StatusPill status={status} />

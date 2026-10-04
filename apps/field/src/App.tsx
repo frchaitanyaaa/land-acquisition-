@@ -40,7 +40,7 @@ export function App() {
 
   if (!profile) {
     if (route[0] !== 'login') go('login');
-    return <Login />;
+    return <Login demoMode={demoMode} />;
   }
 
   const [screen, id, tab] = route;

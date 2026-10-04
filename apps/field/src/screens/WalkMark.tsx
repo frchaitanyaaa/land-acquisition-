@@ -176,7 +176,7 @@ export function WalkMark({ survey, pack }: SurveyProps) {
               className="no-callout relative w-full overflow-hidden rounded-xl ux4g-bg-primary-stronger ux4g-text-neutral-inverse py-5 text-base font-semibold disabled:opacity-60"
             >
               <span
-                className="absolute inset-y-0 left-0 bg-teal-900/60"
+                className="absolute inset-y-0 left-0 bg-[#13245a]/60"
                 style={{ width: `${(hold?.progress ?? 0) * 100}%` }}
                 aria-hidden
               />

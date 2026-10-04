@@ -1,4 +1,39 @@
+/* Cascade order: Tailwind reset (base) < UX4G < Tailwind utilities. UX4G must sit in its own layer or its
+   unlayered reset beats every Tailwind width/margin/padding (the same fix as apps/portal/app/globals.css). */
+@layer theme, base, ux4g, components, utilities;
+@import 'ux4g-web-components/styles.css' layer(ux4g);
 @import 'tailwindcss';
+
+/* BhoomiSetu theme — navy primary + saffron secondary, identical to the portal. */
+:root {
+  /* navy — primary */
+  --ux4g-color-primary-50: #eef2fb !important;
+  --ux4g-color-primary-100: #d6e0f5 !important;
+  --ux4g-color-primary-200: #adc0eb !important;
+  --ux4g-color-primary-300: #7f9bdc !important;
+  --ux4g-color-primary-400: #4f72c8 !important;
+  --ux4g-color-primary-500: #2c51ad !important;
+  --ux4g-color-primary-600: #1f3c8f !important;
+  --ux4g-color-primary-700: #182f72 !important;
+  --ux4g-color-primary-800: #13245a !important;
+  --ux4g-color-primary-900: #0e1a43 !important;
+  --ux4g-color-primary-950: #08102b !important;
+  /* saffron — secondary */
+  --ux4g-color-secondary-50: #fff6ec !important;
+  --ux4g-color-secondary-100: #ffe9cf !important;
+  --ux4g-color-secondary-200: #ffd29e !important;
+  --ux4g-color-secondary-300: #ffb866 !important;
+  --ux4g-color-secondary-400: #ff9933 !important;
+  --ux4g-color-secondary-500: #f07f0f !important;
+  --ux4g-color-secondary-600: #a85406 !important;
+  --ux4g-color-secondary-700: #9c4d06 !important;
+  --ux4g-color-secondary-800: #733805 !important;
+  --ux4g-color-secondary-900: #4d2603 !important;
+  --ux4g-color-secondary-950: #2b1501 !important;
+  /* Design.md §9: the resting control border (1.21:1) fails WCAG 1.4.11. Point it at Strong. */
+  --ux4g-control-border-default: var(--ux4g-border-color-neutral-strong) !important;
+  color-scheme: light;
+}
 
 html,
 body,
