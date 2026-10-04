@@ -1,3 +1,8 @@
+/* Cascade order: Tailwind reset (base) < UX4G < Tailwind utilities. Unlayered CSS beats every @layer, so the
+   ~8 MB UX4G bundle must be imported into its own layer — otherwise its reset wipes out every Tailwind
+   margin/padding/max-width on screens not yet converted to UX4G. Remove Tailwind once all screens are UX4G. */
+@layer theme, base, ux4g, components, utilities;
+@import 'ux4g-web-components/styles.css' layer(ux4g);
 @import 'tailwindcss';
 
 :root {
