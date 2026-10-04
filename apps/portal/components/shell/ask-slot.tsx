@@ -1,7 +1,13 @@
-/**
- * Mount point for Madhav's AskDrawer ("Ask AI" quick action, C4 §4). Renders nothing until his
- * component lands; he replaces the body with `return <AskDrawer />` (or a trigger button for it).
- */
-export function AskSlot() {
-  return null;
+import Link from 'next/link';
+
+/** "Ask AI" quick action → the analytics assistant (advisory, read-only tools under the caller's scope). */
+export function AskSlot({ onNavigate }: { onNavigate?: () => void }) {
+  return (
+    <Link href="/assistant" onClick={onNavigate} className="ux4g-btn ux4g-btn-tonal-primary ux4g-btn-s ux4g-w-100">
+      <span className="ux4g-icon-outlined" aria-hidden="true">
+        auto_awesome
+      </span>
+      Ask AI
+    </Link>
+  );
 }

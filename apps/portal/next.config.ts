@@ -19,7 +19,11 @@ const config: NextConfig = {
   allowedDevOrigins: ['*.trycloudflare.com', '*.ngrok-free.app', '*.ngrok.app'],
   // The field PWA lives at /field/index.html (inside its service worker's /field/ scope).
   async redirects() {
-    return [{ source: '/field', destination: '/field/index.html', permanent: false }];
+    return [
+      { source: '/field', destination: '/field/index.html', permanent: false },
+      // One public portal: Madhav's /portal replaced the earlier /public page.
+      { source: '/public', destination: '/portal', permanent: false },
+    ];
   },
   // One origin for browser, phones (via the tunnel) and WebAuthn: the portal proxies the API and
   // serves the built field app from public/field (§16.1).

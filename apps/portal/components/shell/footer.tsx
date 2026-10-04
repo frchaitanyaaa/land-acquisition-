@@ -12,7 +12,7 @@ export function Footer() {
           <Link href="/rule-packs" className="ux4g-text-link-inverse ux4g-body-s-default">
             Rule packs
           </Link>
-          <Link href="/public" className="ux4g-text-link-inverse ux4g-body-s-default">
+          <Link href="/portal" className="ux4g-text-link-inverse ux4g-body-s-default">
             Public portal
           </Link>
           <a href="/api/docs" className="ux4g-text-link-inverse ux4g-body-s-default">

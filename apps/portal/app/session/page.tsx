@@ -1,11 +1,13 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { PageHeader } from '@/components/shell/page-header';
 import { useLogout, useMe, useSwitchPost } from '@/components/shell/shell-data';
 import { jurisdictionOf } from '@/components/shell/top-bar';
 import { ApiProblem } from '@/lib/api';
+import { homeFor } from '@/lib/roles';
 
 /**
  * Who am I, and through which post? Switching post changes what the API returns immediately:
@@ -99,6 +101,18 @@ export default function SessionPage() {
           </ul>
         </div>
       </section>
+
+      <div className="ux4g-d-flex ux4g-flex-wrap ux4g-gap-s">
+        {homeFor(activePost) !== '/session' && (
+          <Link href={homeFor(activePost)} className="ux4g-btn ux4g-btn-primary ux4g-btn-s">
+            Open my dashboard
+          </Link>
+        )}
+        {/* Beat 7: the citizen portal calls the API without cookies, so it shows only what public_* views allow. */}
+        <Link href="/portal" className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-s">
+          View the citizen portal
+        </Link>
+      </div>
     </div>
   );
 }

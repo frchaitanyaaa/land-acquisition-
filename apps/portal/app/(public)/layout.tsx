@@ -28,7 +28,7 @@ export default async function PublicLayout({ children }: { children: ReactNode }
       <div className="flex min-h-screen flex-col">
         <header className="border-b border-slate-200 bg-white">
           <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3">
-            <Link href="/public" className="text-base font-semibold tracking-tight text-teal-800">
+            <Link href="/portal" className="text-base font-semibold tracking-tight text-teal-800">
               {t('common.title')}
             </Link>
             {serverEnv.demoMode && (

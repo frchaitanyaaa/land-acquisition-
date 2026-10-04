@@ -118,7 +118,7 @@ export function SidebarNav({
           </span>
           {QUICK_ACTIONS.newProject.label}
         </Link>
-        <AskSlot />
+        <AskSlot onNavigate={onNavigate} />
       </div>
     </>
   );
