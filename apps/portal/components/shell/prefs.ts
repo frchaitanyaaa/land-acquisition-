@@ -22,7 +22,7 @@ export const TEXT_SIZES: readonly TextSize[] = ['s', 'm', 'l', 'xl'];
  * (UX4G's dark tokens only exist at :root, so a section cannot be scoped back to light).
  * Whoever converts a screen adds its route prefix here in the same commit.
  */
-export const DARK_READY_ROUTES: readonly string[] = ['/session'];
+export const DARK_READY_ROUTES: readonly string[] = ['/session', '/ui-kit'];
 
 export function isDarkReady(pathname: string): boolean {
   return DARK_READY_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`));
