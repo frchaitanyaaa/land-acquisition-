@@ -37,6 +37,12 @@ export function OfficerShell({ children }: { children: ReactNode }) {
             <Link href="/rule-packs" className="text-slate-700 hover:text-slate-950">
               Rule packs
             </Link>
+            <Link href="/assistant" className="text-slate-700 hover:text-slate-950">
+              Ask AI
+            </Link>
+            <Link href="/portal" className="text-slate-700 hover:text-slate-950">
+              Citizen portal
+            </Link>
             <Link href="/public" className="text-slate-700 hover:text-slate-950">
               Public portal
             </Link>
