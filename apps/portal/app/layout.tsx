@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import { PREFS_BOOT_SCRIPT } from '@/components/shell/prefs';
 import { Ux4gRuntime } from '@/components/shell/ux4g-runtime';
 import { QueryProvider } from '@/lib/query-provider';
-import 'ux4g-web-components/styles.css';
 import './globals.css';
 
 export const metadata: Metadata = {
