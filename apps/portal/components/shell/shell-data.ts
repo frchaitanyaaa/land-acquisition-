@@ -31,9 +31,14 @@ export function useProjectList(enabled: boolean) {
   });
 }
 
+/** Opened by default when nothing is chosen yet: the demo corridor (CLAUDE.md §33.6) if it is in scope. */
+const DEFAULT_PROJECT_CODE = 'MH-PSX-2026-001';
+
 /**
  * The project the officer is working on. Priority: the /project/[id] route, then `?project=`,
- * then the last choice remembered in this browser. Selecting writes `?project=` and remembers it.
+ * then the last choice remembered in this browser (if still in the post's scope), then a default —
+ * the demo corridor, else the first active project in scope — so project pages are never a dead end.
+ * Selecting writes `?project=` and remembers it.
  *
  * `?project=` is read from window.location on every navigation rather than with useSearchParams,
  * which would force a Suspense boundary around the whole shell.
@@ -45,6 +50,7 @@ export function useSelectedProject(): [string | null, (id: string | null) => voi
   const routeId = pathname.startsWith('/project/') ? (params.id ?? null) : null;
   const [queryId, setQueryId] = useState<string | null>(null);
   const [remembered, setRemembered] = useState<string | null>(null);
+  const { data: projects } = useProjectList(true);
 
   useEffect(() => {
     const read = () => setQueryId(new URLSearchParams(window.location.search).get('project'));
@@ -80,7 +86,14 @@ export function useSelectedProject(): [string | null, (id: string | null) => voi
     [pathname, routeId, router],
   );
 
-  return [routeId ?? queryId ?? remembered, select];
+  // A remembered choice from another post (different RLS scope) is dropped once the list shows it is not visible.
+  const rememberedInScope =
+    projects && remembered && !projects.some((p) => p.project_id === remembered) ? null : remembered;
+  const fallback =
+    projects?.find((p) => p.code === DEFAULT_PROJECT_CODE) ??
+    projects?.find((p) => p.status === 'ACTIVE') ??
+    projects?.[0];
+  return [routeId ?? queryId ?? rememberedInScope ?? fallback?.project_id ?? null, select];
 }
 
 export interface NotificationRow {
