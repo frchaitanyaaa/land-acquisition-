@@ -189,6 +189,9 @@ importers:
       react-leaflet:
         specifier: ^5.0.0
         version: 5.0.0(leaflet@1.9.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      ux4g-web-components:
+        specifier: ^3.0.0
+        version: 3.0.0
       workbox-cacheable-response:
         specifier: ^7.3.0
         version: 7.4.1

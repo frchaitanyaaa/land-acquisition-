@@ -17,7 +17,7 @@ interface Feature {
   properties: Record<string, unknown>;
   geometry: unknown;
 }
-interface FeatureCollection {
+export interface FeatureCollection {
   type: 'FeatureCollection';
   features: Feature[];
 }
