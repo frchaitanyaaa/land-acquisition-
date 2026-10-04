@@ -3,11 +3,17 @@
 import type { ActionOption } from '@bhoomisetu/rules';
 import { useState } from 'react';
 import { AttestationModal } from '@/components/attestation-modal';
+import { ChecklistRow } from '@/components/checklist-row';
 import { ApiProblem } from '@/lib/api';
+import { roleLabel } from '@/lib/roles';
 import { useActOnStage, useStageActions, useTimeline, type StageActionBody, type TimelineStage } from '@/lib/project-api';
 
 /** A stage action, or any other recorded act (e.g. signing an award) rendered through the same form. */
-export type PanelAction = Omit<ActionOption, 'action'> & { action: string; writtenReasonsLabel?: string };
+export type PanelAction = Omit<ActionOption, 'action' | 'roles'> & {
+  action: string;
+  writtenReasonsLabel?: string;
+  roles?: string[];
+};
 type Submit = (body: StageActionBody) => Promise<unknown>;
 
 const REASONED = new Set(['RETURN', 'REJECT', 'NULLIFY', 'TERMINATE']);
@@ -17,7 +23,7 @@ const REASONED = new Set(['RETURN', 'REJECT', 'NULLIFY', 'TERMINATE']);
  * "approve X" button: it reads whatever GET .../actions returns and renders exactly that.
  */
 export function ActionPanel({ projectId, stageCode, stages }: { projectId: string; stageCode: string; stages: TimelineStage[] }) {
-  const { data, isLoading } = useStageActions(projectId, stageCode);
+  const { data, isLoading, refetch } = useStageActions(projectId, stageCode);
   const timeline = useTimeline(projectId);
   const act = useActOnStage(projectId, stageCode);
 
@@ -33,23 +39,13 @@ export function ActionPanel({ projectId, stageCode, stages }: { projectId: strin
       {data.checklist.length > 0 && (
         <ul className="divide-y divide-slate-100 border-b border-slate-200">
           {data.checklist.map((c) => (
-            <li key={c.code} className="flex items-center gap-2 px-4 py-2 text-sm">
-              <span
-                aria-hidden
-                className={`inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] ${
-                  c.satisfied ? 'bg-teal-100 text-teal-800' : 'bg-slate-100 text-slate-500'
-                }`}
-              >
-                {c.satisfied ? '✓' : '·'}
-              </span>
-              <span className={c.satisfied ? 'text-slate-700' : 'text-slate-500'}>{c.code}</span>
-            </li>
+            <ChecklistRow key={c.code} projectId={projectId} stageCode={stageCode} item={c} onChanged={() => void refetch()} />
           ))}
         </ul>
       )}
 
-      <div className="flex flex-wrap gap-2 px-4 py-3">
-        {data.actions.length === 0 && <p className="text-sm text-slate-500">No actions available to your post.</p>}
+      <div className="flex flex-wrap gap-2 px-4 pt-3">
+        {data.actions.length === 0 && <p className="text-sm text-slate-500">No actions defined for this stage.</p>}
         {data.actions.map((a) => (
           <ActionButton
             key={a.action}
@@ -61,6 +57,27 @@ export function ActionPanel({ projectId, stageCode, stages }: { projectId: strin
             onDone={() => void timeline.refetch()}
           />
         ))}
+      </div>
+
+      {/* Why a button is grey, in plain sight (not only in a tooltip), and who can press it. */}
+      <div className="space-y-2 px-4 py-3 text-xs">
+        <p className="text-slate-600">
+          Who acts:{' '}
+          {data.actions
+            .map((a) => `${a.action} — ${a.roles.map(roleLabel).join(' / ')}${a.makerChecker ? ' (not the person who submitted)' : ''}`)
+            .join(' · ')}
+        </p>
+        {data.actions.some((a) => !a.allowed) && (
+          <ul className="space-y-1 rounded border border-amber-200 bg-amber-50 p-2 text-amber-950">
+            {data.actions
+              .filter((a) => !a.allowed)
+              .map((a) => (
+                <li key={a.action}>
+                  <strong>{a.action}</strong> blocked: {a.failures.map((f) => f.message).join('; ')}
+                </li>
+              ))}
+          </ul>
+        )}
       </div>
     </div>
   );

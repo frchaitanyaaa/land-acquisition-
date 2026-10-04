@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Injectable, Logger } from '@nestjs/common';
 import type { AuthUser } from '../common/auth-user';
+import { ClockService } from '../common/clock/clock.service';
 import { DbService } from '../common/db/db.service';
 import { ProblemException } from '../common/errors/problem';
 import { toJsonSafe } from '../common/json';
@@ -30,6 +31,7 @@ export class AssistantService {
     private readonly db: DbService,
     private readonly dashboards: DashboardsService,
     private readonly analytics: AnalyticsService,
+    private readonly clock: ClockService,
   ) {}
 
   private async runTool(user: AuthUser, name: string, input: unknown): Promise<unknown> {
@@ -155,8 +157,22 @@ export class AssistantService {
         .slice(0, 5)
         .map((x) => `${x.district} (${x.value ?? 0})`)
         .join(', ')}.`;
+    } else if (/\b(date|today|todays|time|day)\b/.test(q)) {
+      // No tool needed: the statutory clock is the system's own "now" (G16), frozen in the demo.
+      const now = this.clock.now();
+      const ist = new Intl.DateTimeFormat('en-IN', { dateStyle: 'full', timeStyle: 'short', timeZone: 'Asia/Kolkata' }).format(now);
+      answer = `The statutory clock reads ${ist} (India Standard Time)${this.clock.frozen ? ', frozen for the demo so countdowns are reproducible' : ''}. Every deadline countdown is measured from this time.`;
     } else {
       const code = /([A-Z]{2}-[A-Z0-9]{3}-\d{4}-\d{3})/.exec(question)?.[1];
+      if (!code && !/overview|summary|summarise|summarize|figure|kpi|status|how many|scope|progress|key|number|total/.test(q)) {
+        return {
+          answer:
+            'I can answer questions about statutory deadlines that are breached or due, the gap between compensation disbursed and acknowledged, stages where files are stuck, districts ranked by breaches, one project by its code (for example MH-PSX-2026-001), or an overview of the figures in your scope.',
+          toolCalls: calls,
+          provider: 'MOCK',
+          note: 'Mock mode — deterministic answers from tool results. Set LLM_PROVIDER=real for the language model.',
+        };
+      }
       if (code) {
         const s = (await call('project_summary', { projectCode: code })) as Record<string, Record<string, unknown>>;
         answer = s.kpis

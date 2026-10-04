@@ -256,6 +256,8 @@ export interface ActionOption {
   requiresWrittenReasons: boolean;
   requiresAttestation: boolean;
   makerChecker: boolean;
+  /** Roles the pack allows to take this action (for "who can act" hints; the guards still decide). */
+  roles: Role[];
 }
 
 /** Every action defined on the stage, with guard results evaluated for inputs the UI will supply
@@ -279,6 +281,7 @@ export function availableActions(pack: Pack, stageCode: string, ctx: GuardContex
       requiresWrittenReasons: !!def.requiresWrittenReasons,
       requiresAttestation: !!def.requiresAttestation,
       makerChecker: !!def.makerChecker,
+      roles: [...def.roles],
     };
   });
 }
