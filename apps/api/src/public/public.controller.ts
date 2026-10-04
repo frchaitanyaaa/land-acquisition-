@@ -68,6 +68,7 @@ export class PublicController {
         if (a.status !== 'ANCHORED') return { ...a, onChainHash: null, result: 'PENDING' as const };
         try {
           const onChain = await this.chain.readAnchor(entityType, entityId, a.entity_version);
+          if (onChain.anchoredAt === 0) return { ...a, onChainHash: null, result: 'PENDING' as const }; // chain reset; re-anchoring
           return { ...a, onChainHash: onChain.dataHash, result: onChain.dataHash === a.data_hash ? ('MATCH' as const) : ('MISMATCH' as const) };
         } catch {
           return { ...a, onChainHash: null, result: 'UNREACHABLE' as const };

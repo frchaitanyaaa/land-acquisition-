@@ -1,7 +1,7 @@
 import { chainEvents, type Tx } from '@bhoomisetu/db';
 import { Injectable, Logger } from '@nestjs/common';
 import { Contract, JsonRpcProvider, Wallet } from 'ethers';
-import { and, asc, eq, inArray, lt, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, lt, sql } from 'drizzle-orm';
 import type { AuthUser } from '../common/auth-user';
 import { DbService } from '../common/db/db.service';
 import { ProblemException } from '../common/errors/problem';
@@ -228,6 +228,37 @@ export class ChainService {
     return n;
   }
 
+  /**
+   * The dev/demo chain (Hardhat) keeps its state in memory: after the node restarts, the contract is redeployed
+   * empty while chain_events still say ANCHORED, and every verify would read as MISMATCH. Detect that by reading
+   * the newest anchored row back from the chain; if the chain does not have it, put every anchored row back in
+   * the queue so the job re-anchors it. The stored data_hash is re-anchored as it was (never recomputed), so a
+   * record edited behind the system's back still shows MISMATCH afterwards. Returns the rows re-queued.
+   */
+  async recoverAfterChainReset(tx: Tx): Promise<number> {
+    if (!this.configured()) return 0;
+    const [latest] = await tx
+      .select()
+      .from(chainEvents)
+      .where(eq(chainEvents.status, 'ANCHORED'))
+      .orderBy(desc(chainEvents.anchoredAt))
+      .limit(1);
+    if (!latest) return 0;
+    let onChain: Awaited<ReturnType<ChainService['readAnchor']>>;
+    try {
+      onChain = await this.readAnchor(latest.entityType, latest.entityId, latest.entityVersion);
+    } catch {
+      return 0; // chain unreachable: nothing to decide yet (G5 — proofs simply stay as they are)
+    }
+    if (onChain.anchoredAt !== 0) return 0;
+    const reset = await tx
+      .update(chainEvents)
+      .set({ status: 'QUEUED', txHash: null, blockNumber: null, anchoredAt: null, attempts: 0, lastError: null })
+      .where(inArray(chainEvents.status, ['ANCHORED', 'SUBMITTED']))
+      .returning({ id: chainEvents.id });
+    return reset.length;
+  }
+
   async readAnchor(entityType: string, entityId: string, version: number) {
     const a = await timeout(
       this.contract().getFunction('getAnchor')(anchorKey(entityType, entityId), version),
@@ -273,6 +304,10 @@ export class ChainService {
       } catch (err) {
         return { ...base, result: 'PENDING' as const, chainStatus: 'UNREACHABLE', lastError: (err as Error).message };
       }
+      // An empty slot means the chain lost its state (in-memory dev node restarted) and re-anchoring is due —
+      // that is "proof pending", not tampering. MISMATCH only when the chain holds a different hash.
+      if (onChain.anchoredAt === 0)
+        return { ...base, result: 'PENDING' as const, chainStatus: 'MISSING_ON_CHAIN', lastError: null };
       const result = onChain.dataHash === currentHash ? ('VERIFIED' as const) : ('MISMATCH' as const);
       return {
         ...base,

@@ -1,0 +1,51 @@
+# Publishes main to the Hugging Face Space (deploy/hf/). The Space rebuilds its image on every push.
+# Setup (once): repo Settings → Secrets and variables → Actions:
+#   secret   HF_TOKEN  = a Hugging Face access token with "write" permission
+#   variable HF_SPACE  = <hf-username>/bhoomisetu
+# Without them this workflow does nothing, so CI stays green before the Space exists.
+name: Deploy to Hugging Face Space
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-hf
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check configuration
+        id: cfg
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_SPACE: ${{ vars.HF_SPACE }}
+        run: |
+          if [ -z "$HF_TOKEN" ] || [ -z "$HF_SPACE" ]; then
+            echo "::notice::HF_TOKEN / HF_SPACE not set — skipping the Space deploy (see deploy/README.md)."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.cfg.outputs.skip != 'true'
+      - name: Push to the Space
+        if: steps.cfg.outputs.skip != 'true'
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_SPACE: ${{ vars.HF_SPACE }}
+        run: |
+          # The Space expects Dockerfile + README.md (with its config header) at the root, and refuses binary
+          # files pushed without LFS — the only tracked binary (.tools/pmtiles) is not needed to run the app.
+          cp deploy/hf/Dockerfile Dockerfile
+          cp deploy/hf/README.md README.md
+          cp deploy/hf/dockerignore .dockerignore
+          rm -rf .tools
+          git config user.name "BhoomiSetu deploy"
+          git config user.email "deploy@users.noreply.github.com"
+          git checkout --orphan space
+          git add -A
+          git commit -q -m "Deploy ${GITHUB_SHA::7} from GitHub main"
+          git push --force "https://hf:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE}" space:main
+          echo "::notice::Pushed to https://huggingface.co/spaces/${HF_SPACE} — the Space is rebuilding."

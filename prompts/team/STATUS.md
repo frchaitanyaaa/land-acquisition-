@@ -50,7 +50,11 @@ build · browser smoke test of every sidebar page, landing, login, `/portal/*`, 
 - No `data/tiles` basemap file unless Atulit committed it; satellite basemap needs internet.
 
 ## Deploying
-`deploy/README.md` — laptop + Cloudflare tunnel, production mode, step by step. Chaitanya owns it.
+`deploy/README.md`. **A: Hugging Face Space** (free, no card, always reachable; `deploy/hf/` + GitHub Action
+`deploy-hf.yml` redeploys on every push to `main` once `HF_TOKEN`/`HF_SPACE` are set). **B: laptop + Cloudflare
+tunnel** for live presentations. The demo blockchain node keeps its state in memory; after any restart the API
+notices the empty chain and re-anchors every record within about a minute (proofs show "pending", never
+"mismatch", meanwhile).
 
 ## Demo logins (password `bhoomisetu-demo`, all `@bhoomisetu.local`)
 One account per screen, listed on the landing page and as chips on `/login` (single source:
