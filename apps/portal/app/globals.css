@@ -91,7 +91,7 @@ body {
 .input {
   display: block;
   width: 100%;
-  border-radius: var(--ux4g-radius-s, 0.375rem);
+  border-radius: var(--ux4g-radius-sm);
   border: 1px solid var(--ux4g-control-border-default);
   background: var(--ux4g-bg-neutral-elevated);
   color: var(--ux4g-text-neutral-primary);

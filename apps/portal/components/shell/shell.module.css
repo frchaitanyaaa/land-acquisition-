@@ -1,0 +1,50 @@
+/*
+ * Shell layout only. Everything visual comes from UX4G classes; these rules cover what UX4G has
+ * no class or token for (C1, documented in components/ui/README.md).
+ */
+
+/* National tricolour strip, 4 px, decorative. Fixed flag colours — not theme tokens on purpose. */
+.tricolour {
+  height: 4px;
+  background: linear-gradient(
+    to right,
+    #ff9933 0 33.333%,
+    #ffffff 33.333% 66.666%,
+    #138808 66.666% 100%
+  );
+}
+
+/*
+ * UX4G's ux4g-dashboard-sidebar is a static flex column; officer pages are long, so the menu must
+ * stay in view: sticky + its own scroll. (The pattern already hides itself at <= 768 px, where the
+ * drawer takes over.)
+ */
+.sidebar {
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  max-height: 100vh;
+  overflow-y: auto;
+}
+
+/* ux4g-dashboard-main-content has no max width; keep long lines readable on very wide screens. */
+.main {
+  width: 100%;
+  max-width: 100rem;
+}
+
+/*
+ * The notifications popover is anchored to a 40 px bell, so UX4G's percentage min/max widths would
+ * resolve against the bell. Size it against the viewport instead.
+ */
+.popoverPanel {
+  width: min(26rem, calc(100vw - 2rem));
+  max-width: none;
+  min-width: 0;
+  margin-top: var(--ux4g-spacing-3, 6px);
+}
+
+/* The mobile drawer holds the full sidebar; UX4G's drawer has no width for nav use. */
+.drawerPanel {
+  max-width: min(20rem, calc(100vw - 3.125rem));
+}
