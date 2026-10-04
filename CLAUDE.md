@@ -1882,6 +1882,10 @@ POST /assistant/query               GET /stream    (SSE: kpi.updated, notificati
 - **Landing page** `/` with two entry cards (Officer portal — restricted; Public portal — open) and **one login page** with
   tabs Officer / Citizen. Officers choose **"Login as" role** first; the server picks their active post with that role
   and rejects the login if they hold none (the dropdown lists roles, never a person's posts).
+- **Release status (4 Oct 2026):** the public portal is **`/portal`** (route group `app/(portal)`); `/public` redirects
+  to it. Citizen sign-in and grievances below are **not built as a backend** in this release — a browser-only MOCK
+  (`apps/portal/lib/mock-citizen.ts`, labelled MOCK on every screen) shows the intended flow at `/portal/login`,
+  `/portal/grievance`, `/portal/track` and the officer inbox `/grievances`. The design below is the target.
 - **Citizen accounts** (decided 1 Oct 2026): phone + password, phone verified by OTP (SmsAdapter, MOCK in MVP), PII
   encrypted like `persons` (§11.5). An account is linked to a `persons` row only after OTP match **and** officer
   confirmation. Citizens read only their own records through definer functions (G22); separate JWT audience, never an
@@ -1966,6 +1970,9 @@ contract AnchorRegistry is AccessControl {
 ```
 
 Production direction: Hyperledger Besu permissioned network, one validator/anchorer identity per authority (centre, state, district). **Not built.** Hardhat local node only.
+
+**Release status (4 Oct 2026):** anchoring job, verify endpoint and `ChainBadge` ship as built. The trust-center UI and
+public verify page were dropped from this release.
 
 ### 27.2 Canonical payloads (what gets hashed)
 
@@ -2261,7 +2268,7 @@ The deck, the MVP and the submission video tell this **same** story. It is also 
 | 4 | Phone A, airplane mode ON | Walk & Mark 4 corners with photos → submit → airplane OFF → Sync | "Works in a village with no signal." |
 | 5 | Portal parcel view | Parcel appears; click a corner → its photo opens; verify → chain badge turns ✓ | "Every corner has evidence. Every approval has proof." |
 | 6 | Family money view + Phone B | Disbursed, not acknowledged → fingerprint on Phone B → row flips to acknowledged; national gap updates | "Disbursed is what the office says. Acknowledged is what the family says." |
-| 7 | Role switcher Collector → Public | Hold reason visible → disappears; public page shows "payment in process" | "Privacy enforced in the database, not the screen." |
+| 7 | Role switcher Collector → citizen portal `/portal` | Hold reason visible → disappears; public page shows "payment in process" | "Privacy enforced in the database, not the screen." |
 | 8 | Rule pack viewer | Same engine: `larr-2013-maharashtra` vs `nh-act-1956`; stages and clocks differ | "Section 24 exists because the law already changed once. We change configuration, not code." |
 | + | Q&A reserve | `pnpm demo:tamper` → Mismatch; legit correction → v2 anchored | "Corrections are provable. Silent edits are detectable." |
 
@@ -2326,9 +2333,12 @@ merges and owns this file. Full task lists, owned paths and checkpoints: `prompt
 | **Chaitanya** (lead) | `atulit` | `01-chaitanya.md` | UX4G foundation + app shell, national/state/district/collector dashboards, project workspace, proposals, intake + rule-pack restyle, integration, `CLAUDE.md` |
 | **Atulit** | `atulit` | `02-atulit.md` | Basemap + boundary data, `/gis` 3-pane map, national map, parcel 360°, land registry, field-officer workspace `/field-office`, field PWA + money screens restyle |
 | **Madhav** | `madhav` | `03-madhav.md` | Landing + login (role first), citizen accounts, grievance module, citizen dashboard, public portal restyle, hi/mr, AI layer UI (Ask drawer, AI suggestion accept, risk explanation, objection triage) |
-| **Ishan** | `ishan` | `04-ishan.md` | Free deployment (Vercel portal + one VM for API/DB/Redis/MinIO/chain), trust center, public verify page + QR, anchoring coverage, tamper demo |
+| ~~Ishan~~ | — | `04-ishan.md` | **Dropped 4 Oct.** Trust UI not built; deployment taken over by Chaitanya (`deploy/README.md`) |
 
 Earlier WS1–WS5 split (Phases 0–3) is superseded by the table above for this sprint.
+
+**4 Oct 2026:** all branches merged into **`main`**, which is now the only branch. Current state, mocks and gaps:
+`prompts/team/STATUS.md`.
 
 ### Working agreements (for humans and Claude Code)
 

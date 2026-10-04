@@ -1,5 +1,7 @@
 # 00 — Shared context (every teammate pastes this first)
 
+> **4 Oct 2026: read `prompts/team/STATUS.md` first** — it describes what was actually built, merged and mocked.
+
 > **How to use**: open a new Claude Code chat on your own branch, then paste:
 > "Read `prompts/team/00-shared-context.md`, then `prompts/team/<your file>.md`, then `CLAUDE.md` §1.
 > Do the tasks in my file in order. Stop and ask me only when a decision is not covered."
