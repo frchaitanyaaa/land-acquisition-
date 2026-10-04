@@ -4,10 +4,11 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { TokenLinkForm } from '@/components/public/token-link-form';
 import { usePortal } from '../portal-shell';
+import { GrievanceDesk } from './grievance-desk';
 
 /**
- * Grievance hub. It does not record anything itself — there is no grievance register in the
- * schema — it routes each kind of grievance to the existing legal channel:
+ * Grievance hub. The top section (GrievanceDesk) is a browser-only MOCK of the grievance register
+ * (lib/mock-citizen.ts). Below it, each kind of grievance is routed to the existing legal channel:
  *   objection        → POST /public/objections (open s.15 window only)
  *   payment dispute  → WS3 acknowledgement page ("I did not receive this" → public_dispute)
  *   entitlement check→ WS3 passbook page
@@ -29,6 +30,9 @@ export default function GrievancePage() {
         <p className="text-slate-700">{t('grievance.intro')}</p>
       </div>
 
+      <GrievanceDesk />
+
+      <h2 className="text-lg font-semibold text-slate-950">Other ways to get help</h2>
       <div className="divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white">
         <Route title={t('grievance.objectionTitle')} desc={t('grievance.objectionDesc')}>
           <Link href="/portal/objection" className="inline-block rounded-md bg-teal-700 px-4 py-1.5 text-sm font-medium text-white hover:bg-teal-800">

@@ -42,6 +42,8 @@ const NAV: Array<{ href: string; key: MsgKey }> = [
   { href: '/portal/notices', key: 'nav.notices' },
   { href: '/portal/my-land', key: 'nav.myLand' },
   { href: '/portal/grievance', key: 'nav.grievance' },
+  { href: '/portal/track', key: 'nav.track' },
+  { href: '/portal/login', key: 'nav.signIn' },
 ];
 
 export function PortalShell({

@@ -24,6 +24,8 @@ const en = {
   'nav.notices': 'Notices',
   'nav.myLand': 'My land & compensation',
   'nav.grievance': 'Grievances & help',
+  'nav.track': 'Track grievance',
+  'nav.signIn': 'Citizen sign-in',
   'nav.objection': 'File an objection',
   'nav.label': 'Public portal sections',
   'lang.label': 'Language',
@@ -140,7 +142,7 @@ const en = {
 
   'grievance.title': 'Grievances & help',
   'grievance.intro':
-    'This portal does not keep a separate complaint register. Each kind of grievance has its own legal channel, handled by the office responsible for it. Choose the one that matches your problem.',
+    'File a grievance below and follow it with its tracking number, or use one of the legal channels further down.',
   'grievance.objectionTitle': 'I object to my land being acquired',
   'grievance.objectionDesc':
     'The Collector hears objections, but only while the objection window after the preliminary notification is open.',
@@ -206,6 +208,8 @@ const hi: Messages = {
   'nav.notices': 'सूचनाएँ',
   'nav.myLand': 'मेरी ज़मीन और मुआवज़ा',
   'nav.grievance': 'शिकायत और सहायता',
+  'nav.track': 'शिकायत की स्थिति',
+  'nav.signIn': 'नागरिक लॉगिन',
   'nav.objection': 'आपत्ति दर्ज करें',
   'nav.label': 'सार्वजनिक पोर्टल के भाग',
   'lang.label': 'भाषा',
@@ -322,7 +326,7 @@ const hi: Messages = {
 
   'grievance.title': 'शिकायत और सहायता',
   'grievance.intro':
-    'यह पोर्टल अलग शिकायत रजिस्टर नहीं रखता। हर तरह की शिकायत का अपना कानूनी रास्ता है, जिसे संबंधित कार्यालय देखता है। अपनी समस्या से मेल खाता विकल्प चुनें।',
+    'नीचे शिकायत दर्ज करें और ट्रैकिंग नंबर से उसकी स्थिति देखें, या नीचे दिए गए कानूनी माध्यमों में से किसी एक का उपयोग करें।',
   'grievance.objectionTitle': 'मुझे अपनी ज़मीन के अधिग्रहण पर आपत्ति है',
   'grievance.objectionDesc':
     'आपत्तियों की सुनवाई कलेक्टर करते हैं, लेकिन केवल तब तक जब तक प्रारंभिक अधिसूचना के बाद आपत्ति अवधि खुली है।',
@@ -385,6 +389,8 @@ const mr: Messages = {
   'nav.notices': 'सूचना',
   'nav.myLand': 'माझी जमीन व मोबदला',
   'nav.grievance': 'तक्रारी व मदत',
+  'nav.track': 'तक्रारीची स्थिती',
+  'nav.signIn': 'नागरिक लॉगिन',
   'nav.objection': 'हरकत नोंदवा',
   'nav.label': 'सार्वजनिक पोर्टलचे विभाग',
   'lang.label': 'भाषा',
@@ -501,7 +507,7 @@ const mr: Messages = {
 
   'grievance.title': 'तक्रारी व मदत',
   'grievance.intro':
-    'हे पोर्टल वेगळे तक्रार रजिस्टर ठेवत नाही. प्रत्येक प्रकारच्या तक्रारीचा स्वतःचा कायदेशीर मार्ग आहे, जो संबंधित कार्यालय हाताळते. तुमच्या समस्येशी जुळणारा पर्याय निवडा.',
+    'खाली तक्रार नोंदवा आणि ट्रॅकिंग क्रमांकाने तिची स्थिती पाहा, किंवा खाली दिलेल्या कायदेशीर मार्गांपैकी एक वापरा.',
   'grievance.objectionTitle': 'माझ्या जमिनीच्या संपादनावर माझी हरकत आहे',
   'grievance.objectionDesc':
     'हरकतींची सुनावणी जिल्हाधिकारी घेतात, पण फक्त प्राथमिक अधिसूचनेनंतरचा हरकत कालावधी सुरू असेपर्यंत.',
