@@ -1,0 +1,35 @@
+# Keeps the free Render demo awake (it sleeps after 15 min without visitors; waking takes ~3 min) and reports its
+# health. One always-on free service uses ~744 of Render's 750 free hours a month.
+# GitHub may delay scheduled runs; an external pinger (UptimeRobot / cron-job.org, see deploy/README.md) is the
+# primary keep-awake, this is the backup and the health log.
+# URL: repository variable PUBLIC_URL, else the default below.
+name: Keep demo awake
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: keep-awake
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Ping and report
+        env:
+          URL: ${{ vars.PUBLIC_URL || 'https://bhoomisetu-latest.onrender.com' }}
+        run: |
+          # A sleeping instance takes a few minutes to answer; keep trying for up to ~6 minutes.
+          for i in $(seq 1 24); do
+            code=$(curl -s -o /dev/null -m 30 -w '%{http_code}' "$URL/") || code=000
+            [ "$code" = 200 ] && break
+            echo "attempt $i: HTTP $code — waiting"; sleep 15
+          done
+          echo "landing: HTTP $code"
+          echo "health:  $(curl -s -m 30 "$URL/api/v1/health" || echo unreachable)"
+          echo "ledger:  $(curl -s -m 30 "$URL/api/v1/public/chain-summary" | grep -o '"ledger":{[^}]*}' || echo unavailable)"
+          [ "$code" = 200 ] || { echo "::error::$URL did not answer with 200"; exit 1; }

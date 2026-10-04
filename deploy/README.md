@@ -30,9 +30,13 @@ The whole stack (Postgres/PostGIS, blockchain node, API, portal, field app) runs
    From then on every push to `main` builds a new image and Render redeploys it (~15–20 min in total).
 
 **What to expect**
-- Free instances sleep after 15 minutes without visitors. The next visit wakes it: about 1 minute for Render plus
-  about 2 minutes for our services, during which Render shows a loading page. **Open the link a few minutes before
-  evaluators or judges use it.**
+- Free instances sleep after 15 minutes without visitors; waking takes about 3 minutes. Because evaluators may open
+  the link at any time, keep it awake (one always-on service uses ~744 of the 750 free hours a month):
+  - **Primary:** a free uptime monitor, no card — https://uptimerobot.com (HTTP(s) monitor, interval 5 min) or
+    https://cron-job.org (every 10 min) on `https://bhoomisetu-latest.onrender.com/api/v1/health`.
+  - **Backup:** `.github/workflows/keep-awake.yml` pings every 10 minutes and logs health and the anchored count
+    (GitHub can delay scheduled runs, so it is not enough on its own). Set the repository variable `PUBLIC_URL` if
+    the Render URL changes.
 - On wake-up the records are re-anchored on a fresh blockchain in the background (about 3 minutes); until then the
   landing page shows fewer anchored records and Trust → Check may say *pending*.
 - Storage is not kept between restarts: each start begins from the seeded demo (MH-PSX at "34 days"). Anything an
