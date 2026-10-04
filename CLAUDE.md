@@ -1971,8 +1971,10 @@ contract AnchorRegistry is AccessControl {
 
 Production direction: Hyperledger Besu permissioned network, one validator/anchorer identity per authority (centre, state, district). **Not built.** Hardhat local node only.
 
-**Release status (4 Oct 2026):** anchoring job, verify endpoint and `ChainBadge` ship as built. The trust-center UI and
-public verify page were dropped from this release.
+**Release status (4 Oct 2026):** anchoring job, verify endpoint and `ChainBadge` ship as built, plus the Trust UI built
+on 4 Oct: `/trust` (node state, ledger, verify any record + QR), `/trust/audit` (audit hash chain, oversight posts
+only) and the no-login `/verify/[type]/[id]` page, which reads only `public_chain_anchor` (G22) and compares the ledger
+hash with the on-chain hash. `demo:tamper` falls back to an anchored payment when no parcel has been verified yet.
 
 ### 27.2 Canonical payloads (what gets hashed)
 
@@ -2333,7 +2335,7 @@ merges and owns this file. Full task lists, owned paths and checkpoints: `prompt
 | **Chaitanya** (lead) | `atulit` | `01-chaitanya.md` | UX4G foundation + app shell, national/state/district/collector dashboards, project workspace, proposals, intake + rule-pack restyle, integration, `CLAUDE.md` |
 | **Atulit** | `atulit` | `02-atulit.md` | Basemap + boundary data, `/gis` 3-pane map, national map, parcel 360°, land registry, field-officer workspace `/field-office`, field PWA + money screens restyle |
 | **Madhav** | `madhav` | `03-madhav.md` | Landing + login (role first), citizen accounts, grievance module, citizen dashboard, public portal restyle, hi/mr, AI layer UI (Ask drawer, AI suggestion accept, risk explanation, objection triage) |
-| ~~Ishan~~ | — | `04-ishan.md` | **Dropped 4 Oct.** Trust UI not built; deployment taken over by Chaitanya (`deploy/README.md`) |
+| ~~Ishan~~ | — | `04-ishan.md` | **Dropped 4 Oct.** Trust UI built by Chaitanya's session instead; deployment taken over by Chaitanya (`deploy/README.md`) |
 
 Earlier WS1–WS5 split (Phases 0–3) is superseded by the table above for this sprint.
 
