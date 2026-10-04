@@ -9,7 +9,9 @@
     "noEmit": true,
     "isolatedModules": true,
     "skipLibCheck": true,
-    "types": ["vite/client", "vite-plugin-pwa/client"]
+    "types": ["vite/client", "vite-plugin-pwa/client"],
+    "paths": { "@bhoomisetu/geo": ["../../packages/geo/src/index.ts"] }
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src", "vite.config.ts"],
+  "exclude": ["src/sw.ts"]
 }

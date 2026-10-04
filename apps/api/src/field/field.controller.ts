@@ -8,6 +8,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -21,8 +22,16 @@ import { idempotent } from '../common/idempotency/idempotency';
 import { CurrentUser } from '../common/guards/decorators';
 import { ZodPipe } from '../common/validation/zod.pipe';
 import { DocumentsService, MAX_UPLOAD_BYTES } from '../documents/documents.service';
+import { FieldOfficeService } from './field-office.service';
 import { FieldService, SyncOp } from './field.service';
 
+const SurveyQueueQuery = z.object({
+  status: z.enum(['submitted', 'verified', 'returned']).default('submitted'),
+  projectId: z.uuid().optional(),
+  limit: z.coerce.number().int().min(1).max(500).default(200),
+});
+const CorrectionsQuery = z.object({ status: z.enum(['requested', 'approved', 'rejected']).default('requested') });
+const ReturnBody = z.strictObject({ reason: z.string().trim().min(5).max(4000) });
 const SyncBody = z.object({ ops: z.array(SyncOp).min(1).max(500) });
 const PhotoFields = z.object({
   projectId: z.uuid(),
@@ -44,7 +53,35 @@ export class FieldController {
     private readonly field: FieldService,
     private readonly docs: DocumentsService,
     private readonly db: DbService,
+    private readonly office: FieldOfficeService,
   ) {}
+
+  // ---- field office work queue (A4)
+
+  @Get('surveys')
+  surveys(@CurrentUser() user: AuthUser, @Query(new ZodPipe(SurveyQueueQuery)) q: z.infer<typeof SurveyQueueQuery>) {
+    return this.office.list(user, q);
+  }
+
+  @Get('corrections')
+  corrections(@CurrentUser() user: AuthUser, @Query(new ZodPipe(CorrectionsQuery)) q: z.infer<typeof CorrectionsQuery>) {
+    return this.office.corrections(user, q.status);
+  }
+
+  @Get('surveys/:id')
+  survey(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string) {
+    return this.office.get(user, id);
+  }
+
+  @Post('surveys/:id/return')
+  @HttpCode(200)
+  returnSurvey(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(new ZodPipe(ReturnBody)) body: z.infer<typeof ReturnBody>,
+  ) {
+    return this.office.returnSurvey(user, id, body.reason);
+  }
 
   @Get('assignments')
   assignments(@CurrentUser() user: AuthUser) {

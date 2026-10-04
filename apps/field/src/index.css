@@ -1,1 +1,15 @@
 @import 'tailwindcss';
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* Long-press on "Mark Point" must not select text or open the iOS callout. */
+.no-callout {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: none;
+}

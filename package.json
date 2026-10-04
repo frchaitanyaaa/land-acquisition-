@@ -14,7 +14,7 @@
     "typecheck": "turbo run typecheck",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "infra:up": "docker compose up -d --build",
+    "infra:up": "docker compose up -d --build --wait",
     "infra:down": "docker compose down",
     "db:generate": "turbo run db:generate",
     "db:migrate": "turbo run db:migrate",
@@ -25,6 +25,7 @@
     "chain:deploy": "pnpm --filter @bhoomisetu/chain run deploy",
     "test:contracts": "pnpm --filter @bhoomisetu/chain test:contracts",
     "demo:tamper": "pnpm --filter @bhoomisetu/db demo:tamper",
+    "demo:tunnel": "node scripts/demo-tunnel.mjs",
     "demo:reset": "pnpm db:reset"
   },
   "devDependencies": {

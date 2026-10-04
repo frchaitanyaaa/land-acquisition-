@@ -1,60 +1,51 @@
 import { useEffect, useState } from 'react';
+import { useOnline } from './components/Header';
+import { db } from './lib/db';
+import { go, useRoute } from './lib/router';
+import { resumeSession, useProfile } from './lib/session';
+import { syncNow } from './lib/sync-trigger';
+import { Assignments } from './screens/Assignments';
+import { Login } from './screens/Login';
+import { SurveyShell } from './screens/SurveyShell';
+import { SyncStatus } from './screens/SyncStatus';
 
 type Health = { status: string; demoMode: boolean; clock: { now: string; frozen: boolean } };
 
-function useOnline(): boolean {
-  const [online, setOnline] = useState(navigator.onLine);
-  useEffect(() => {
-    const update = () => setOnline(navigator.onLine);
-    window.addEventListener('online', update);
-    window.addEventListener('offline', update);
-    return () => {
-      window.removeEventListener('online', update);
-      window.removeEventListener('offline', update);
-    };
-  }, []);
-  return online;
-}
-
-/** Phase 0 shell: installable, knows whether it is online, and can reach the API. */
+/**
+ * Field PWA (CLAUDE.md §16): login → assignments → offline pack → Walk & Mark → s.12 notice →
+ * joint inspection → review → submit → sync. Everything after login works in airplane mode.
+ */
 export function App() {
   const online = useOnline();
-  const [health, setHealth] = useState<Health | null>(null);
+  const profile = useProfile();
+  const route = useRoute();
+  const [demoMode, setDemoMode] = useState(false);
 
+  // Online again: fetch a fresh access token (refresh cookie) and flush the queue. The Sync now
+  // button stays the guaranteed path (§16.4) — this is a convenience.
   useEffect(() => {
     if (!online) return;
     fetch('/api/v1/health')
       .then((r) => (r.ok ? (r.json() as Promise<Health>) : null))
-      .then(setHealth)
-      .catch(() => setHealth(null));
-  }, [online]);
+      .then((h) => setDemoMode(!!h?.demoMode))
+      .catch(() => undefined);
+    if (!profile) return;
+    void (async () => {
+      if (!(await resumeSession().catch(() => true))) return; // offline-ish failures keep the cached profile
+      const queued = await db.outbox.where('status').equals('queued').count();
+      if (queued) await syncNow();
+    })();
+    // Only on connectivity changes / sign-in, not every render.
+  }, [online, profile?.user.id]);
 
-  return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="flex items-center gap-2 bg-teal-700 px-4 py-3 text-white">
-        <h1 className="text-base font-semibold">BhoomiSetu Field</h1>
-        {health?.demoMode && (
-          <span className="rounded bg-amber-300 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-950">
-            Demo data
-          </span>
-        )}
-        <span
-          className={`ml-auto rounded-full px-2 py-0.5 text-xs font-medium ${online ? 'bg-emerald-100 text-emerald-900' : 'bg-slate-200 text-slate-800'}`}
-        >
-          {online ? 'Online' : 'Offline'}
-        </span>
-      </header>
-      <main className="space-y-3 p-4 text-sm">
-        <p className="text-slate-700">Assignments and offline boundary capture will appear here after sign-in.</p>
-        <p className="text-slate-500">
-          Server:{' '}
-          {!online
-            ? 'offline — work is kept on this device'
-            : health
-              ? `reachable (${health.status})`
-              : 'not reachable'}
-        </p>
-      </main>
-    </div>
-  );
+  if (!profile) {
+    if (route[0] !== 'login') go('login');
+    return <Login />;
+  }
+
+  const [screen, id, tab] = route;
+  if (screen === 'survey' && id) return <SurveyShell clientId={id} tab={tab ?? 'walk'} demoMode={demoMode} />;
+  if (screen === 'sync') return <SyncStatus demoMode={demoMode} />;
+  if (screen !== 'assignments') go('assignments');
+  return <Assignments profile={profile} demoMode={demoMode} />;
 }

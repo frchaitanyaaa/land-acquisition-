@@ -16,10 +16,13 @@ services:
       - ./docker/postgres/init.sh:/docker-entrypoint-initdb.d/10-bhoomisetu.sh:ro
       - ./docker/postgres/roles.sql:/bhoomisetu/roles.sql:ro
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres -d bhoomisetu']
+      # Over TCP: during first-start init the image runs a temporary socket-only server, which
+      # must not count as ready (pnpm infra:up waits on this before db:reset connects).
+      test: ['CMD-SHELL', 'pg_isready -h 127.0.0.1 -U postgres -d bhoomisetu']
       interval: 5s
       timeout: 5s
       retries: 20
+      start_period: 30s
 
   redis:
     image: redis:7-alpine

@@ -10,6 +10,8 @@ import { useProject } from '@/lib/project-api';
 const TABS = [
   { href: 'timeline', label: 'Timeline' },
   { href: 'parcels', label: 'Parcels' },
+  { href: 'award', label: 'Award' },
+  { href: 'families', label: 'Families & money' },
 ];
 
 export function ProjectHeader({ projectId, children }: { projectId: string; children: ReactNode }) {

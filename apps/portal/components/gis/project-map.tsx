@@ -4,7 +4,7 @@ import { GeoJSON as LeafletGeoJSON } from 'react-leaflet';
 import type { Layer, PathOptions } from 'leaflet';
 import type { Feature, Geometry } from 'geojson';
 import { useRouter } from 'next/navigation';
-import { BaseMap } from '@/components/base-map';
+import { BaseMap } from '@/components/gis/base-map';
 import { STATUS_COLOR } from '@/components/status';
 import type { ProjectMapRow } from '@/lib/dashboards-api';
 

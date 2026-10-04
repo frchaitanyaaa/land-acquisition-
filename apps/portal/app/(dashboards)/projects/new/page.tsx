@@ -19,7 +19,7 @@ import {
   type PrescrutinyResult,
 } from '@/lib/intake-api';
 
-const AlignmentMap = dynamic(() => import('@/components/alignment-map').then((m) => m.AlignmentMap), {
+const AlignmentMap = dynamic(() => import('@/components/gis/alignment-map').then((m) => m.AlignmentMap), {
   ssr: false,
   loading: () => <div className="h-64 w-full animate-pulse border border-slate-200 bg-slate-100" />,
 });

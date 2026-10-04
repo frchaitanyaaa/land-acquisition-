@@ -1,6 +1,7 @@
 'use client';
 
 import { formatDate } from '@bhoomisetu/shared';
+import Link from 'next/link';
 import { useState } from 'react';
 import { ChainBadge } from '@/components/chain-badge';
 import { ApiProblem } from '@/lib/api';
@@ -17,11 +18,22 @@ function sqm(v: string | null): string {
   return `${Number(v).toLocaleString('en-IN', { maximumFractionDigits: 1 })} m²`;
 }
 
-export function ParcelDetail({ parcelId, projectId, onClose }: { parcelId: string; projectId: string; onClose: () => void }) {
+export function ParcelDetail({
+  parcelId,
+  projectId,
+  onClose,
+  embedded = false,
+}: {
+  parcelId: string;
+  projectId: string;
+  onClose: () => void;
+  /** Inside the GIS record panel: no frame, no repeated header — just the working sections. */
+  embedded?: boolean;
+}) {
   const { data, isLoading, error } = useParcel(parcelId);
 
-  if (error) return <Panel onClose={onClose}><p className="text-red-700">Could not load this parcel.</p></Panel>;
-  if (isLoading || !data) return <Panel onClose={onClose}><p className="text-slate-500">Loading…</p></Panel>;
+  if (error) return <Panel onClose={onClose} embedded={embedded}><p className="text-red-700">Could not load this parcel.</p></Panel>;
+  if (isLoading || !data) return <Panel onClose={onClose} embedded={embedded}><p className="text-slate-500">Loading…</p></Panel>;
 
   const allFlags = [
     ...new Set([
@@ -30,12 +42,30 @@ export function ParcelDetail({ parcelId, projectId, onClose }: { parcelId: strin
     ]),
   ];
 
+  if (embedded)
+    return (
+      <Panel onClose={onClose} embedded>
+        <VertexList data={data} />
+        <NoticeStatus data={data} />
+        <VerifyForm parcelId={parcelId} projectId={projectId} requiresOverride={allFlags.length > 0} />
+        <Corrections data={data} parcelId={parcelId} />
+      </Panel>
+    );
+
   return (
     <Panel onClose={onClose}>
       <h3 className="text-sm font-semibold text-slate-900">{data.survey_no}</h3>
       <p className="text-xs text-slate-500">{data.village_name} · v{data.version}</p>
-      <div className="mt-2">
+      <div className="mt-2 flex flex-wrap items-center gap-3">
         <ChainBadge entityType="land_parcel" entityId={data.id} version={data.version} />
+        {(() => {
+          const pp = data.projects.find((p) => p.project_id === projectId);
+          return pp ? (
+            <Link href={`/project-parcels/${pp.project_parcel_id}/possession`} className="text-xs font-medium text-teal-700 hover:underline">
+              Possession gate →
+            </Link>
+          ) : null;
+        })()}
       </div>
 
       <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
@@ -76,7 +106,8 @@ export function ParcelDetail({ parcelId, projectId, onClose }: { parcelId: strin
   );
 }
 
-function Panel({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+function Panel({ children, onClose, embedded = false }: { children: React.ReactNode; onClose: () => void; embedded?: boolean }) {
+  if (embedded) return <div>{children}</div>;
   return (
     <div className="w-full max-w-sm shrink-0 border border-slate-200 bg-white p-4">
       <button onClick={onClose} className="float-right text-xs text-slate-400 hover:text-slate-700">

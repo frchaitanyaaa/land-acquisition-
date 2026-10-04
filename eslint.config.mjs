@@ -15,6 +15,7 @@ export default defineConfig(
       '**/next-env.d.ts',
       'packages/db/drizzle/**',
       'packages/chain/**',
+      'apps/portal/public/field/**',
     ],
   },
   {

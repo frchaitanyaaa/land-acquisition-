@@ -155,7 +155,7 @@ One language (TypeScript) across the whole repo. Pin **major** versions; let the
 | Object storage | MinIO (S3-compatible) | Presigned URLs, short TTL |
 | Portal frontend | Next.js 16 (App Router), React 19 | Dashboards, workflow, public portal. The field app uses React 19 too. |
 | Field app | Vite + React PWA | `vite-plugin-pwa` (Workbox), Dexie (IndexedDB) |
-| UI | Tailwind CSS + shadcn/ui | |
+| UI | **UX4G** (`ux4g-web-components` 3.x) | Decided 1 Oct 2026: replaces Tailwind + shadcn/ui (Tailwind removed screen by screen). CSS + runtime imported once at the root. Theme: navy primary + saffron secondary via `--ux4g-color-primary-*` / `--ux4g-color-secondary-*` root overrides. Identity: text + tricolour strip, **no State Emblem**. See `prompts/team/00-shared-context.md` |
 | Data fetching | TanStack Query | |
 | Forms / validation | react-hook-form + zod | zod schemas shared from `packages/shared` |
 | Maps | Leaflet + react-leaflet | `preferCanvas: true`; protomaps-leaflet for PMTiles basemap |
@@ -1553,6 +1553,7 @@ Bulk downloading `tile.openstreetmap.org` violates the OSM tile usage policy. In
 - Render with `protomaps-leaflet`
 - Workbox caches the PMTiles file (range requests) for offline use
 - Satellite imagery: portal only, online only, with the provider's attribution, per its terms. Never cache it offline.
+- **Decided 1 Oct 2026:** the officer portal opens on Esri World Imagery (online, attribution visible) with a toggle to the offline PMTiles map; the field PWA uses PMTiles only.
 
 ### Done when
 
@@ -1868,7 +1869,7 @@ POST /assistant/query               GET /stream    (SSE: kpi.updated, notificati
 
 ---
 
-## 25. PUBLIC PORTAL (no login) `[MVP]`
+## 25. PUBLIC PORTAL (no login) + CITIZEN ACCOUNTS `[MVP]`
 
 - Route group `apps/portal/app/(public)` — separate layout, no auth, rate-limited
 - **Search**: village (LGD picker) + survey number → `public_parcel_status`: project, stage, parcel status, published notices, contact office
@@ -1878,6 +1879,17 @@ POST /assistant/query               GET /stream    (SSE: kpi.updated, notificati
 - Footer provenance note on every page:
   > This portal displays information as recorded by the concerned authority. For the authoritative record, contact the office of the Collector. Data shown as of [timestamp].
 - Languages: en / hi / mr switcher
+- **Landing page** `/` with two entry cards (Officer portal — restricted; Public portal — open) and **one login page** with
+  tabs Officer / Citizen. Officers choose **"Login as" role** first; the server picks their active post with that role
+  and rejects the login if they hold none (the dropdown lists roles, never a person's posts).
+- **Citizen accounts** (decided 1 Oct 2026): phone + password, phone verified by OTP (SmsAdapter, MOCK in MVP), PII
+  encrypted like `persons` (§11.5). An account is linked to a `persons` row only after OTP match **and** officer
+  confirmation. Citizens read only their own records through definer functions (G22); separate JWT audience, never an
+  officer post. Throttling + lockout as for officers.
+- **Grievances**: any citizen (account or phone OTP) files a grievance → tracking number; routed to the responsible
+  post (district LAO, else Collector); SLA is an administrative target held in one constant in `packages/shared`
+  (not statutory); public status page by tracking number shows no PII; officer inbox with SLA indicator; every
+  mutation audited and notified.
 
 ---
 
@@ -2305,20 +2317,23 @@ Risk scoring + bottlenecks; AI assistant (mock + real); MIS exports; public port
 
 ## 36. TEAM WORKSTREAMS
 
-Five developers, one Claude Code account. Split by **module boundary** so Claude Code sessions rarely touch the same files. Chaitanya leads and owns integration; assign the rest by strength.
+Final sprint (1–3 Oct 2026, submission 4 Oct). Four developers, one Claude Code account, each in a separate chat with
+their brief from `prompts/team/`. Split by **path ownership** so sessions rarely touch the same files. Chaitanya leads,
+merges and owns this file. Full task lists, owned paths and checkpoints: `prompts/team/0*.md`.
 
-| WS | Scope | Owns (paths) | Owner |
+| Person | Branch | Brief | Scope |
 |---|---|---|---|
-| **WS1 Platform & Rules** | Repo, infra, DB schema & SQL, auth/posts, RLS, ClockService, audit, outbox, rule packs + engine, workflow, deadlines, demo reset, integration | `packages/rules`, `packages/db`, `apps/api/src/{common,auth,org,rules,workflow,jobs,demo}` | Chaitanya (lead) |
-| **WS2 GIS & Field** | Module B, field PWA, tiles, intersection, constraints, plausibility, verification, corrections | `apps/field`, `packages/geo`, `apps/api/src/{gis,field}`, portal map components | ______ |
-| **WS3 Money & Acknowledgement** | Modules E, F, G: escrow, award + OCR review, entitlements, disbursement, WebAuthn, passbook, possession gate, interest | `apps/api/src/{rnr,award,disbursement}`, portal money screens, public ack/enrol/passbook pages | ______ |
-| **WS4 Statutory & Trust** | Modules C, D: hearings, expert group, consent, s.11, objections; documents + attestation; blockchain | `packages/chain`, `apps/api/src/{sia,consent,notice,documents,chain}` | ______ |
-| **WS5 Dashboards & Intelligence** | Module J, H/I dashboards, public portal, analytics, AI assistant, MIS, notifications UI, i18n | `apps/portal/app/(dashboards)`, `apps/portal/app/(public)`, `apps/api/src/{dashboards,analytics,assistant,public,notifications,legal,compliance}` | ______ |
+| **Chaitanya** (lead) | `atulit` | `01-chaitanya.md` | UX4G foundation + app shell, national/state/district/collector dashboards, project workspace, proposals, intake + rule-pack restyle, integration, `CLAUDE.md` |
+| **Atulit** | `atulit` | `02-atulit.md` | Basemap + boundary data, `/gis` 3-pane map, national map, parcel 360°, land registry, field-officer workspace `/field-office`, field PWA + money screens restyle |
+| **Madhav** | `madhav` | `03-madhav.md` | Landing + login (role first), citizen accounts, grievance module, citizen dashboard, public portal restyle, hi/mr, AI layer UI (Ask drawer, AI suggestion accept, risk explanation, objection triage) |
+| **Ishan** | `ishan` | `04-ishan.md` | Free deployment (Vercel portal + one VM for API/DB/Redis/MinIO/chain), trust center, public verify page + QR, anchoring coverage, tamper demo |
+
+Earlier WS1–WS5 split (Phases 0–3) is superseded by the table above for this sprint.
 
 ### Working agreements (for humans and Claude Code)
 
 1. **Contracts first.** Phase 0 freezes the DB schema and shared zod schemas for all `[MVP]` tables so streams build in parallel. Schema changes after that go through WS1 review.
-2. One branch per task: `feat/<ws>-<thing>`. Small PRs. Another stream reviews.
+2. One branch per task: `feat/<ws>-<thing>`. Small PRs. Another stream reviews. **Final sprint exception:** Chaitanya and Atulit commit to `atulit`; Madhav and Ishan work on `madhav` / `ishan` and open PRs into `atulit`; `atulit` merges into `main` at release.
 3. Before a Claude Code session, tell it which workstream and module you are on. It must not edit another stream's paths without saying so in the PR description.
 4. Shared files (`packages/shared`, `CLAUDE.md`, migrations) change only via PR with WS1 approval.
 5. Every PR: tests for new rules/money/geo/redaction logic; `pnpm lint && pnpm typecheck && pnpm test` green; no statutory literals.

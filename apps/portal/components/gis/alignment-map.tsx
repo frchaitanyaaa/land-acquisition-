@@ -2,7 +2,7 @@
 
 import { GeoJSON as LeafletGeoJSON } from 'react-leaflet';
 import type { Feature, Geometry } from 'geojson';
-import { BaseMap } from '@/components/base-map';
+import { BaseMap } from '@/components/gis/base-map';
 
 export function AlignmentMap({ footprint, alignment }: { footprint: unknown; alignment: unknown }) {
   const bounds = bboxOf(footprint);
