@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { OfficerShell } from '@/components/officer-shell';
+import { AppShell } from '@/components/shell/app-shell';
 
 export default function DashboardsLayout({ children }: { children: ReactNode }) {
-  return <OfficerShell>{children}</OfficerShell>;
+  return <AppShell>{children}</AppShell>;
 }
