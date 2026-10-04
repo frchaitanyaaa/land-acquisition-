@@ -12,6 +12,7 @@ const TABS = [
   { href: 'parcels', label: 'Parcels' },
   { href: 'award', label: 'Award' },
   { href: 'families', label: 'Families & money' },
+  { href: 'objections', label: 'Objections' },
 ];
 
 export function ProjectHeader({ projectId, children }: { projectId: string; children: ReactNode }) {

@@ -63,7 +63,9 @@ export function SidebarNav({
     <>
       <nav aria-label="Main" className="ux4g-dashboard-sidebar-nav">
         {NAV_GROUPS.map((group) => {
-          const items = visibleItems(group, post.role);
+          // A post-scoped page the post has no target for (e.g. "State dashboard" for a national post) is left out
+          // rather than shown disabled; project pages stay listed with "Select a project" until one is chosen.
+          const items = visibleItems(group, post.role).filter((i) => i.projectScoped || resolveHref(i, ctx));
           if (items.length === 0) return null;
           const isCollapsed = collapsed[group.key] ?? false;
           const listId = `nav-group-${group.key}`;

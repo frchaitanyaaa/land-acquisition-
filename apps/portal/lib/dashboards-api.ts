@@ -179,3 +179,12 @@ export function useCollectorDashboard() {
     queryFn: () => api<CollectorDashboard>('/dashboards/collector'),
   });
 }
+
+/** State / district dashboards: same response shape as national, filtered (dashboards.service.ts dash()). */
+export function useScopeDashboard(level: 'state' | 'district', code: string) {
+  return useQuery({
+    queryKey: ['dashboards', level, code],
+    queryFn: () => api<NationalDashboard>(`/dashboards/${level}/${encodeURIComponent(code)}`),
+    enabled: !!code,
+  });
+}

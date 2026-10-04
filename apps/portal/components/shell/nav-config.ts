@@ -70,7 +70,6 @@ export const NAV_GROUPS: NavGroup[] = [
         description: 'Your state, district by district',
         icon: 'map',
         href: (ctx) => (ctx.post.stateCode ? `/state/${ctx.post.stateCode}` : null),
-        pending: true,
       },
       {
         key: 'district',
@@ -78,7 +77,6 @@ export const NAV_GROUPS: NavGroup[] = [
         description: 'Projects and deadlines in your district',
         icon: 'location_city',
         href: (ctx) => (ctx.post.districtCode ? `/district/${ctx.post.districtCode}` : null),
-        pending: true,
       },
       {
         key: 'collector',
@@ -94,7 +92,6 @@ export const NAV_GROUPS: NavGroup[] = [
         description: 'Submitted, returned and accepted',
         icon: 'inbox',
         href: '/proposals',
-        pending: true,
       },
     ],
   },
@@ -179,7 +176,6 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: 'record_voice_over',
         href: inProject('/objections'),
         projectScoped: true,
-        pending: true,
       },
       {
         key: 'grievances',
@@ -207,7 +203,6 @@ export const NAV_GROUPS: NavGroup[] = [
         description: 'Statutory clocks and consequences',
         icon: 'alarm',
         href: '/deadlines',
-        pending: true,
       },
       {
         key: 'analytics',
@@ -215,7 +210,6 @@ export const NAV_GROUPS: NavGroup[] = [
         description: 'Risk score (advisory) and bottlenecks',
         icon: 'insights',
         href: '/analytics',
-        pending: true,
       },
       {
         key: 'reports',
@@ -223,7 +217,6 @@ export const NAV_GROUPS: NavGroup[] = [
         description: 'CSV and PDF exports',
         icon: 'summarize',
         href: '/reports',
-        pending: true,
       },
       {
         key: 'rule-packs',
