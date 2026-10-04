@@ -29,8 +29,8 @@
   "Proof pending" and the landing page says the node is offline (G5). No manual "retry failed anchor" button: the
   job retries with back-off by itself.
 - **Real citizen accounts and grievance backend** — replaced by the mock above.
-- Sidebar items shown as "Soon": State/District dashboards, Proposals, Objections, Deadlines & alerts, Analytics,
-  Reports. They are disabled rows, not broken links.
+- (Fixed 4 Oct afternoon) the former "Soon" sidebar items — State/District dashboards, Proposals, Objections,
+  Deadlines & alerts, Analytics, Reports (MIS) — are now real pages on the existing APIs.
 
 ## Fixes made during the merge (4 Oct)
 - `pnpm-lock.yaml` synced (fresh `pnpm install --frozen-lockfile` used to fail); API typecheck fixed (TS4053).
@@ -53,8 +53,15 @@ build · browser smoke test of every sidebar page, landing, login, `/portal/*`, 
 `deploy/README.md` — laptop + Cloudflare tunnel, production mode, step by step. Chaitanya owns it.
 
 ## Demo logins (password `bhoomisetu-demo`, all `@bhoomisetu.local`)
-The landing page lists all 17 with "Sign in →" buttons. Main ones: `oversight` (national) · `collector.pune` ·
-`lao.satara` · `tehsildar.haveli` · `talathi.khedshivapur` (field) · `demo` (several posts) · `admin`.
+One account per screen, listed on the landing page and as chips on `/login` (single source:
+`apps/portal/lib/demo-accounts.ts`): `oversight` → National · `revenue.mh` → State · `collector.pune` → Collector desk ·
+`lao.satara` → District dashboard · `tehsildar.haveli` → Field office · `talathi.khedshivapur` → field app `/field` ·
+`pd.nhai` → Proposals · `demo` → role switcher. Other seeded accounts (admin, treasury, R&R, …) still work if typed.
+
+## Moving a stage (e.g. MH-PSX S07 → S08)
+The action panel lists why each button is blocked and who may act. As `lao.satara`: Escrow steps → raise demand and
+record deposit; Upload & attest the three documents. As `collector.pune`: Escrow steps → certify. As `lao.satara`:
+SUBMIT. As `collector.pune`: APPROVE. `pnpm db:reset` restores the demo state (S07, 34 days).
 Login is throttled to 10 per minute per IP and an account locks for 15 min after 5 wrong passwords (§29).
 
 ## Tamper demo

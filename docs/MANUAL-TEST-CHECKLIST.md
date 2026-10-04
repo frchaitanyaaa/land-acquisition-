@@ -5,7 +5,8 @@ Password for every account: `bhoomisetu-demo`. Tick each box; anything that fail
 
 ## 1. Landing and sign-in
 - [ ] `/` shows the navy hero, **"Chain node live"**, a non-zero **Records anchored** count and a block number
-- [ ] Six innovation cards and the "Evaluator logins" panel with 17 accounts are visible; layout fits a phone screen
+- [ ] Hero with 3 tiles, six innovation cards and the "One account per screen" panel with 8 accounts; fits a phone screen
+- [ ] Each "Sign in →" lands on a different screen: National · State (/state/27) · Collector desk · District (/district/…) · Field office · Proposals · role switcher; "Open field app" opens /field
 - [ ] "Sign in →" on **National dashboard** opens `/login` with email and password filled → Sign in → `/national`
 - [ ] Same for **Collector, Pune** → `/collector`, and **Field office** (talathi) → `/field-office`
 - [ ] `demo@` → asks you to choose a post → chosen post's screen opens
@@ -20,11 +21,21 @@ Password for every account: `bhoomisetu-demo`. Tick each box; anything that fail
 - [ ] **Trust center** (`/trust`): node live, contract address, KPI cards, ledger table; **Check** on a row → ✓ Verified with both hashes; QR shown
 - [ ] **Audit log** (`/trust/audit`) → Verify audit chain → "Chain intact"
 
+## 2b. Pages that used to say "Soon"
+- [ ] Sidebar has no faded "Soon" items; State/District dashboard, Proposals, Deadlines & alerts, Analytics, Reports (MIS) open
+- [ ] Reports: CSV and PDF download; Preview shows rows
+- [ ] Ask AI: "todays date" → statutory clock date; "hello" → list of what it can answer
+
+## 2c. Move MH-PSX from S07 to S08 (do it last, then `pnpm db:reset`)
+- [ ] `lao.satara` → project timeline: blocked reasons are listed; Escrow steps → demand ₹25,00,00,000 → deposit same; Upload & attest S19 declaration, Gazette copy, Newspaper clipping (any PDF)
+- [ ] `collector.pune` → Escrow steps → Certify sufficiency
+- [ ] `lao.satara` → SUBMIT; `collector.pune` → APPROVE (tick attestation) → stage becomes S08 Award
+
 ## 3. District and field (sign in as `collector.pune`, then `lao.satara`, then `tehsildar.haveli`)
 - [ ] Collector: deadline board with countdowns and consequences
 - [ ] Project → Families → open a family → money page shows ₹ amounts and chain badge on paid rows
 - [ ] Award page: entitlement checks listed (solatium, SC/ST ⅓)
-- [ ] LAO lands on the collector desk; Tehsildar lands on the field office queue
+- [ ] LAO lands on the Satara district dashboard; Tehsildar lands on the field office queue
 - [ ] Sidebar shows **Trust center**; **Audit log** is not listed for these posts
 
 ## 4. Phone (over the tunnel URL)

@@ -54,6 +54,16 @@ After fixes: all pages load with no page errors.
 Backend operations (workflow transitions, maker-checker, RETURN reason codes, hearings nullify/repeat, PPP consent
 tally, award OCR review → entitlements, annuity scan, GIS scope) are covered by the API e2e suite above.
 
+## 3b. Second round (afternoon, after Chaitanya's review)
+
+| Issue reported | Fix | Verified |
+|---|---|---|
+| Several login cards led to the same screen (two "State view") | One list of 8 accounts (`lib/demo-accounts.ts`), each role lands on its own screen | All 8 sign-ins land on 8 different paths |
+| Landing page overloaded | Hero with 3 tiles, six one-line innovations, login sheet, one footer line | Desktop + phone screenshots, no overflow |
+| 7 faded "Soon" sidebar items | State/District dashboards, Proposals, Objections, Deadlines & alerts, Analytics, Reports built on existing APIs | Crawl: 80 visits, 4 roles, 0 problems |
+| Ask AI answered "todays date" with the KPI overview | Date → statutory clock; unrelated → what it can answer; overview only when asked | 3 new e2e tests (API e2e now 30/30) |
+| Stage status could not be updated | Action panel shows blocked reasons + who acts; checklist rows: Upload & attest, escrow steps, Decide objections | Browser: MH-PSX S07 → S08 via LAO + Collector |
+
 ## 4. Known gaps (not fixed today)
 
 - Officer screens are English only. The हिं / मरा switch in the officer top bar sets the language for the public
