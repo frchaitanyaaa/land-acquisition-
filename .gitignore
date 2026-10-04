@@ -18,3 +18,4 @@ venv/
 .data/
 # built field PWA copied into the portal by `pnpm demo:tunnel` / build:portal
 apps/portal/public/field/
+dump.rdb
