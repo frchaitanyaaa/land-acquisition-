@@ -1,0 +1,10 @@
+# Optional Render Blueprint (Render → New → Blueprint). The simpler route is the dashboard: deploy/README.md §A.
+# The image is built by .github/workflows/deploy-cloud.yml; the package must be public on GitHub.
+services:
+  - type: web
+    name: bhoomisetu
+    runtime: image
+    image:
+      url: ghcr.io/frchaitanyaaa/bhoomisetu:latest
+    plan: free
+    healthCheckPath: /

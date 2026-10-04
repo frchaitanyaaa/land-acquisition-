@@ -50,8 +50,9 @@ build · browser smoke test of every sidebar page, landing, login, `/portal/*`, 
 - No `data/tiles` basemap file unless Atulit committed it; satellite basemap needs internet.
 
 ## Deploying
-`deploy/README.md`. **A: Hugging Face Space** (free, no card, always reachable; `deploy/hf/` + GitHub Action
-`deploy-hf.yml` redeploys on every push to `main` once `HF_TOKEN`/`HF_SPACE` are set). **B: laptop + Cloudflare
+`deploy/README.md`. **A: Render free web service** (no card, always reachable; image from `deploy/cloud/`, built and
+published to GHCR by `deploy-cloud.yml` on every push to `main`; redeploys once `RENDER_DEPLOY_HOOK` is set;
+sleeps after 15 min idle, ~3 min to wake — HF Docker Spaces now need PRO). **B: laptop + Cloudflare
 tunnel** for live presentations. The demo blockchain node keeps its state in memory; after any restart the API
 notices the empty chain and re-anchors every record within about a minute (proofs show "pending", never
 "mismatch", meanwhile).

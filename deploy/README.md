@@ -2,36 +2,43 @@
 
 Two ways, both free:
 
-- **A. Hugging Face Space (recommended)** — always reachable, no laptop needed, no credit card. Updates itself
-  every time `main` changes.
+- **A. Render (recommended)** — always reachable, no laptop needed, no credit card. Updates itself every time
+  `main` changes.
 - **B. Laptop + Cloudflare tunnel** — for a live presentation from your own machine.
 
-## A. Free cloud link on Hugging Face Spaces (no card)
+> Hugging Face Spaces was the first choice, but since autumn 2026 HF marks Docker Spaces as **Paid** (PRO). The same
+> image still runs there if you have PRO: use `deploy/cloud/hf-README.md` as the Space's README.
+
+## A. Free cloud link on Render (no card)
 
 The whole stack (Postgres/PostGIS, blockchain node, API, portal, field app) runs in one container
-(`deploy/hf/`). The link looks like `https://<your-hf-username>-bhoomisetu.hf.space`.
+(`deploy/cloud/`). GitHub Actions builds it (with the demo data already loaded) and publishes it as
+`ghcr.io/frchaitanyaaa/bhoomisetu:latest`; Render runs it. The link looks like `https://bhoomisetu.onrender.com`.
 
-**One-time setup (about 15 minutes, then 15–20 minutes of first build):**
-1. Sign up at https://huggingface.co/join (email only).
-2. Create the Space: https://huggingface.co/new-space → name `bhoomisetu` → SDK **Docker** → template
-   **Blank** → hardware **CPU basic (free)** → visibility **Public** → Create.
-3. Create a token: https://huggingface.co/settings/tokens → **Create new token** → type **Write** → copy it.
-4. On GitHub, open the repo → **Settings → Secrets and variables → Actions**:
-   - tab **Secrets** → **New repository secret** → name `HF_TOKEN`, value = the token.
-   - tab **Variables** → **New repository variable** → name `HF_SPACE`, value = `<your-hf-username>/bhoomisetu`.
-5. GitHub → **Actions** → **Deploy to Hugging Face Space** → **Run workflow** (branch `main`).
-6. Open the Space page; the **Logs** tab shows the build. When it says *Running*, open the direct link
-   `https://<your-hf-username>-bhoomisetu.hf.space` (use this link, not the framed huggingface.co page —
-   sign-in needs it). Submit that link.
-
-**After that:** every push to `main` redeploys automatically (GitHub Action → Space rebuild, ~10–15 min).
+**One-time setup (about 10 minutes, after the first image build of ~15 minutes):**
+1. GitHub → **Actions** → **Deploy (cloud image)** → wait for the green run (it starts on every push to `main`;
+   **Run workflow** starts it by hand).
+2. Make the image public: GitHub profile → **Packages** → `bhoomisetu` → **Package settings** → **Change
+   visibility** → **Public**.
+3. Sign up at https://dashboard.render.com with **GitHub** (no card asked for the free plan).
+4. **New → Web Service → Existing image** → Image URL `ghcr.io/frchaitanyaaa/bhoomisetu:latest` → Next → name
+   `bhoomisetu` → instance type **Free** → **Deploy**. (Leave the port alone: the image listens on Render's `PORT`.)
+5. When the log says `starting portal`, open `https://bhoomisetu.onrender.com` (Render shows the exact URL at the
+   top). Submit that link.
+6. Auto-update: Render → the service → **Settings → Deploy Hook** → copy the URL. GitHub → repo **Settings →
+   Secrets and variables → Actions → New repository secret** → name `RENDER_DEPLOY_HOOK`, value = that URL.
+   From then on every push to `main` builds a new image and Render redeploys it (~15–20 min in total).
 
 **What to expect**
-- The Space sleeps after about two days without visitors. The next visitor wakes it; the first page then takes
-  1–2 minutes while the database, blockchain node and demo data start.
-- Storage is not kept between restarts: each start loads the demo data fresh (MH-PSX at "34 days") and anchors
-  every record on a fresh chain. Anything an evaluator changes is reset at the next restart.
+- Free instances sleep after 15 minutes without visitors. The next visit wakes it: about 1 minute for Render plus
+  about 2 minutes for our services, during which Render shows a loading page. **Open the link a few minutes before
+  evaluators or judges use it.**
+- On wake-up the records are re-anchored on a fresh blockchain in the background (about 3 minutes); until then the
+  landing page shows fewer anchored records and Trust → Check may say *pending*.
+- Storage is not kept between restarts: each start begins from the seeded demo (MH-PSX at "34 days"). Anything an
+  evaluator changes is reset at the next restart.
 - Phones work (HTTPS): GPS, camera and fingerprint prompts appear.
+- Limits we measured on the image (512 MB / 0.1 CPU, Render free): peak memory about 380 MB; pages take 2–3 s.
 
 ## B. Laptop + Cloudflare tunnel (presentations)
 

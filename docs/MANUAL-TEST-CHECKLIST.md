@@ -1,6 +1,6 @@
 # Manual test checklist (run before you submit the link)
 
-Run on your laptop after `deploy/README.md` steps 1–3, then the phone part over the tunnel URL on **mobile data**.
+Run on the Render link (`deploy/README.md` §A — open it a few minutes early so it is awake) or on your laptop after §B steps 1–3; do the phone part on **mobile data**, at that public URL (Render link or tunnel URL).
 Password for every account: `bhoomisetu-demo`. Tick each box; anything that fails, note the page and what you saw.
 
 ## 1. Landing and sign-in
@@ -38,9 +38,9 @@ Password for every account: `bhoomisetu-demo`. Tick each box; anything that fail
 - [ ] LAO lands on the Satara district dashboard; Tehsildar lands on the field office queue
 - [ ] Sidebar shows **Trust center**; **Audit log** is not listed for these posts
 
-## 4. Phone (over the tunnel URL)
+## 4. Phone (over the Render link or tunnel URL)
 - [ ] Landing page readable, no sideways scrolling
-- [ ] On the laptop (open it at the **tunnel URL**, not localhost, so the QR points there), Trust center → Check a row → scan the QR with the phone → public proof page says **"Proof confirmed on the blockchain"** without login
+- [ ] On the laptop (open it at the **public URL**, not localhost, so the QR points there), Trust center → Check a row → scan the QR with the phone → public proof page says **"Proof confirmed on the blockchain"** without login
 - [ ] `/field` opens the field app; sign in as `talathi.khedshivapur`; location and camera prompts appear
 - [ ] (If time) payment acknowledgement: enrol link from a family's money page → fingerprint on the phone → acknowledge → row turns acknowledged on the laptop
 
