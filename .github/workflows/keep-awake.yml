@@ -29,7 +29,8 @@ jobs:
             [ "$code" = 200 ] && break
             echo "attempt $i: HTTP $code — waiting"; sleep 15
           done
-          echo "landing: HTTP $code"
-          echo "health:  $(curl -s -m 30 "$URL/api/v1/health" || echo unreachable)"
-          echo "ledger:  $(curl -s -m 30 "$URL/api/v1/public/chain-summary" | grep -o '"ledger":{[^}]*}' || echo unavailable)"
+          health=$(curl -s -m 30 "$URL/api/v1/health" | grep -o '"status":"[a-z]*","db":"[a-z]*"' || echo unreachable)
+          ledger=$(curl -s -m 30 "$URL/api/v1/public/chain-summary" | grep -o '"anchored":[0-9]*,"pending":[0-9]*' || echo unavailable)
+          # As an annotation, so the result is readable from the run page without opening the log.
+          echo "::notice title=Demo status::landing HTTP $code · api $health · ledger $ledger"
           [ "$code" = 200 ] || { echo "::error::$URL did not answer with 200"; exit 1; }
