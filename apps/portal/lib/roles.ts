@@ -38,28 +38,24 @@ export function jurisdictionText(post: Pick<Post, 'level' | 'stateCode' | 'distr
 }
 
 /** Roles whose first screen is the national (oversight) dashboard. */
-const NATIONAL_HOME = new Set([
-  'SUPER_ADMIN',
-  'CENTRAL_VIEWER',
-  'POLICY_MAKER',
-  'MONITORING_COMMITTEE',
-  'STATE_REVENUE',
-  'RNR_COMMISSIONER',
-]);
+const NATIONAL_HOME = new Set(['SUPER_ADMIN', 'CENTRAL_VIEWER', 'POLICY_MAKER', 'MONITORING_COMMITTEE']);
+/** State-level posts open on their own state's dashboard. */
+const STATE_HOME = new Set(['STATE_REVENUE', 'RNR_COMMISSIONER']);
+/** Field posts open on the field-office workspace (verification queue, surveys). */
+const FIELD_HOME = new Set(['TEHSILDAR', 'DILR', 'FIELD_OFFICER']);
 
 /**
- * Where a post lands after sign-in or a post switch. Only routes that already exist in the portal
- * are used. Teammates add their dashboards here.
- * This is navigation only — what each screen shows is decided by the API and RLS (G13).
+ * Where a post lands after sign-in or a post switch — one distinct screen per kind of post, so the evaluator
+ * accounts in lib/demo-accounts.ts never lead to the same page. Navigation only: what each screen shows is
+ * decided by the API and RLS (G13).
  */
-export function homeFor(post: Pick<Post, 'role' | 'level'>): string {
-  if (post.role === 'COLLECTOR' || post.role === 'LAO') return '/collector';
+export function homeFor(post: Pick<Post, 'role' | 'level' | 'stateCode' | 'districtCode'>): string {
+  if (post.role === 'COLLECTOR') return '/collector';
+  if (post.role === 'LAO' && post.districtCode) return `/district/${post.districtCode}`;
+  if (STATE_HOME.has(post.role) && post.stateCode) return `/state/${post.stateCode}`;
   if (NATIONAL_HOME.has(post.role) || post.level === 'NATIONAL') return '/national';
   if (FIELD_HOME.has(post.role)) return '/field-office';
-  // Every other post (treasury, R&R administrator, requiring body, case participants) starts on the
-  // map of the projects its scope can see; project pages open from there.
+  if (post.role === 'REQUIRING_BODY') return '/proposals';
+  // Treasury, R&R administrator and case participants start on the map of the projects their scope can see.
   return '/gis';
 }
-
-/** Roles whose first screen is the field-office workspace (verification queue, surveys). */
-const FIELD_HOME = new Set(['TEHSILDAR', 'DILR', 'FIELD_OFFICER']);

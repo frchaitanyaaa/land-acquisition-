@@ -9,7 +9,7 @@ import { homeFor } from '@/lib/roles';
 /** Only passed by the server page when DEMO_MODE=true (G18: these accounts are synthetic). */
 export interface DemoLogin {
   password: string;
-  accounts: string[];
+  accounts: Array<{ email: string; label: string }>;
 }
 
 /**
@@ -115,20 +115,23 @@ export function LoginForm({ demo = null }: { demo?: DemoLogin | null }) {
       </form>
 
       {demo && demo.accounts.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs text-slate-600">Fill in a synthetic demo account:</p>
+        <div className="space-y-2 rounded-md border border-amber-200 bg-amber-50 p-3">
+          <p className="text-xs text-amber-950">
+            Demo accounts (synthetic) — pick one to fill in. Password <code>{demo.password}</code>.
+          </p>
           <div className="flex flex-wrap gap-2">
             {demo.accounts.map((acct) => (
               <button
-                key={acct}
+                key={acct.email}
                 type="button"
+                title={acct.email}
                 onClick={() => {
-                  setEmail(acct);
+                  setEmail(acct.email);
                   setPassword(demo.password);
                 }}
-                className="rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-xs text-amber-950 hover:bg-amber-100"
+                className="rounded-md border border-amber-300 bg-white px-2 py-1 text-xs text-amber-950 hover:bg-amber-100"
               >
-                {acct.split('@')[0]}
+                {acct.label}
               </button>
             ))}
           </div>
