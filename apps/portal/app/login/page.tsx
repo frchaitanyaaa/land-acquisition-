@@ -6,10 +6,11 @@ import { LoginForm, type DemoLogin } from './login-form';
 const DEMO_LOGIN: DemoLogin = {
   password: 'bhoomisetu-demo',
   accounts: [
-    'demo@bhoomisetu.local',
+    'oversight@bhoomisetu.local',
     'collector.pune@bhoomisetu.local',
-    'collector.nagpur@bhoomisetu.local',
-    'lao.pune@bhoomisetu.local',
+    'lao.satara@bhoomisetu.local',
+    'talathi.khedshivapur@bhoomisetu.local',
+    'demo@bhoomisetu.local',
     'admin@bhoomisetu.local',
   ],
 };
@@ -26,9 +27,11 @@ export default function LoginPage() {
         <aside className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-950">
           <p className="font-semibold">Demo accounts (synthetic)</p>
           <p className="mt-1">
-            <code>demo@bhoomisetu.local</code> holds several posts for the role switcher. Officers:{' '}
-            <code>collector.pune@</code>, <code>collector.nagpur@</code>, <code>lao.pune@</code>, <code>admin@</code> …
-            <code>bhoomisetu.local</code>. Password: <code>bhoomisetu-demo</code>.
+            <code>demo@bhoomisetu.local</code> holds several posts for the role switcher. Password for every account:{' '}
+            <code>bhoomisetu-demo</code>.{' '}
+            <Link href="/#evaluator-logins" className="font-medium underline">
+              All demo accounts by dashboard
+            </Link>
           </p>
         </aside>
       )}

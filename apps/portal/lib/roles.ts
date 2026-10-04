@@ -49,11 +49,17 @@ const NATIONAL_HOME = new Set([
 
 /**
  * Where a post lands after sign-in or a post switch. Only routes that already exist in the portal
- * are used; every other role falls back to /session. Teammates add their dashboards here.
+ * are used. Teammates add their dashboards here.
  * This is navigation only — what each screen shows is decided by the API and RLS (G13).
  */
 export function homeFor(post: Pick<Post, 'role' | 'level'>): string {
-  if (post.role === 'COLLECTOR') return '/collector';
+  if (post.role === 'COLLECTOR' || post.role === 'LAO') return '/collector';
   if (NATIONAL_HOME.has(post.role) || post.level === 'NATIONAL') return '/national';
-  return '/session';
+  if (FIELD_HOME.has(post.role)) return '/field-office';
+  // Every other post (treasury, R&R administrator, requiring body, case participants) starts on the
+  // map of the projects its scope can see; project pages open from there.
+  return '/gis';
 }
+
+/** Roles whose first screen is the field-office workspace (verification queue, surveys). */
+const FIELD_HOME = new Set(['TEHSILDAR', 'DILR', 'FIELD_OFFICER']);

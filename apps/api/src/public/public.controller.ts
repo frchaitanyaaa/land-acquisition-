@@ -9,6 +9,7 @@ import { DbService } from '../common/db/db.service';
 import { rows } from '../common/db/raw';
 import { Public } from '../common/guards/decorators';
 import { ZodPipe } from '../common/validation/zod.pipe';
+import { ChainService } from '../chain/chain.service';
 import { PublicAckService } from '../disbursement/public-ack.service';
 
 const Token = z.string().regex(/^[A-Za-z0-9_-]{20,64}$/, 'token');
@@ -31,10 +32,18 @@ export class PublicController {
     private readonly db: DbService,
     private readonly ack: PublicAckService,
     private readonly clock: ClockService,
+    private readonly chain: ChainService,
   ) {}
 
   private meta() {
     return { provenance: PROVENANCE, asOf: this.clock.now() };
+  }
+
+  /** Landing page + public verify: anchoring ledger totals and node state. Hashes and counts only (G22). */
+  @Get('chain-summary')
+  async chainSummary() {
+    const [ledger] = await this.db.withScope(null, (tx) => rows(tx, sql`SELECT * FROM public_chain_summary`));
+    return { ...this.meta(), ledger: ledger ?? null, node: await this.chain.nodeInfo() };
   }
 
   @Get('villages')

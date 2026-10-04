@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { PostSwitcher } from '@/components/post-switcher';
 import { api, ApiProblem, type Me, type Post } from '@/lib/api';
 import { homeFor } from '@/lib/roles';
@@ -24,6 +24,14 @@ export function LoginForm({ demo = null }: { demo?: DemoLogin | null }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [me, setMe] = useState<Me | null>(null);
+
+  // Landing page "Sign in →" links pass ?email=; in demo mode the demo password is filled in too.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('email');
+    if (!q) return;
+    setEmail(q);
+    if (demo) setPassword(demo.password);
+  }, [demo]);
 
   function go(post: Post) {
     router.push(homeFor(post));

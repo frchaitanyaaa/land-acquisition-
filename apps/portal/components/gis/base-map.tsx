@@ -17,10 +17,20 @@ const FALLBACK_AFTER_ERRORS = 4;
 
 export type BasemapKind = 'satellite' | 'offline';
 
-function Basemap({ kind, onFailed }: { kind: BasemapKind; onFailed: () => void }) {
+/** Checked once per page: the PMTiles extract is optional (data/tiles is not always present). */
+let pmtilesCheck: Promise<boolean> | null = null;
+function pmtilesAvailable(): Promise<boolean> {
+  pmtilesCheck ??= fetch(TILES_URL, { method: 'HEAD' })
+    .then((r) => r.ok)
+    .catch(() => false);
+  return pmtilesCheck;
+}
+
+function Basemap({ kind, onFailed, onMissing }: { kind: BasemapKind; onFailed: () => void; onMissing: () => void }) {
   const map = useMap();
   useEffect(() => {
-    let layer: LeafletLayer;
+    let layer: LeafletLayer | null = null;
+    let cancelled = false;
     if (kind === 'satellite') {
       let errors = 0;
       const sat = tileLayer(ESRI_URL, { attribution: ESRI_ATTRIBUTION, maxZoom: 19, maxNativeZoom: 18 });
@@ -28,15 +38,21 @@ function Basemap({ kind, onFailed }: { kind: BasemapKind; onFailed: () => void }
         if (++errors === FALLBACK_AFTER_ERRORS) onFailed();
       });
       layer = sat;
+      map.addLayer(sat);
     } else {
-      // protomaps-leaflet's declarations don't line up with @types/leaflet's Layer; it is an L.GridLayer.
-      layer = leafletLayer({ url: TILES_URL, maxDataZoom: 15 }) as unknown as LeafletLayer;
+      void pmtilesAvailable().then((ok) => {
+        if (cancelled) return;
+        if (!ok) return onMissing();
+        // protomaps-leaflet's declarations don't line up with @types/leaflet's Layer; it is an L.GridLayer.
+        layer = leafletLayer({ url: TILES_URL, maxDataZoom: 15 }) as unknown as LeafletLayer;
+        map.addLayer(layer);
+      });
     }
-    map.addLayer(layer);
     return () => {
-      map.removeLayer(layer);
+      cancelled = true;
+      if (layer) map.removeLayer(layer);
     };
-  }, [map, kind, onFailed]);
+  }, [map, kind, onFailed, onMissing]);
   return null;
 }
 
@@ -117,6 +133,7 @@ export function BaseMap({
     typeof navigator !== 'undefined' && !navigator.onLine ? 'offline' : defaultBasemap,
   );
   const [fellBack, setFellBack] = useState(false);
+  const [offlineMissing, setOfflineMissing] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const box = useRef<HTMLDivElement>(null);
 
@@ -130,11 +147,12 @@ export function BaseMap({
     setFellBack(true);
     setKind('offline');
   }).current;
+  const onOfflineMissing = useRef(() => setOfflineMissing(true)).current;
 
   return (
     <div ref={box} className={`${fullscreen ? 'h-screen' : heightClassName} relative w-full overflow-hidden border border-slate-200 bg-slate-100`}>
       <MapContainer center={center} zoom={zoom} preferCanvas className="h-full w-full" scrollWheelZoom={scrollWheelZoom}>
-        <Basemap kind={kind} onFailed={onSatelliteFailed} />
+        <Basemap kind={kind} onFailed={onSatelliteFailed} onMissing={onOfflineMissing} />
         <FitBounds bounds={bounds} />
         <InvalidateOn token={fullscreen} />
         <ReportViewport onChange={onViewportChange} />
@@ -167,8 +185,13 @@ export function BaseMap({
           >
             {fullscreen ? '⤡ Exit' : '⤢ Full screen'}
           </button>
-          {fellBack && (
+          {fellBack && !offlineMissing && (
             <span className="rounded bg-amber-100 px-2 py-0.5 text-[11px] text-amber-900 shadow-sm">No internet — showing offline map</span>
+          )}
+          {kind === 'offline' && offlineMissing && (
+            <span className="rounded bg-amber-100 px-2 py-0.5 text-[11px] text-amber-900 shadow-sm">
+              Offline basemap not installed — map layers only
+            </span>
           )}
         </div>
       )}

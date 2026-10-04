@@ -49,6 +49,17 @@ export class ChainService {
     return this.provider;
   }
 
+  /** Read-only node probe for the trust screens: never throws, gives up after 1.5 s (G5: no blocking). */
+  async nodeInfo(): Promise<{ configured: boolean; contract: string | null; reachable: boolean; chainId: number | null; latestBlock: number | null }> {
+    const contract = env().CHAIN_ANCHOR_CONTRACT ?? null;
+    const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 1500));
+    const probe = Promise.all([this.rpc().getBlockNumber(), this.rpc().send('eth_chainId', [])])
+      .then(([block, id]: [number, string]) => ({ block, chainId: Number(id) }))
+      .catch(() => null);
+    const r = await Promise.race([probe, timeout]);
+    return { configured: !!contract, contract, reachable: !!r, chainId: r?.chainId ?? null, latestBlock: r?.block ?? null };
+  }
+
   contract(withSigner = false): Contract {
     const address = env().CHAIN_ANCHOR_CONTRACT;
     if (!address) throw new Error('CHAIN_ANCHOR_CONTRACT is not set — run pnpm chain:deploy');
