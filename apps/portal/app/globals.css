@@ -119,3 +119,21 @@ body {
 :root[data-theme='dark'] .ux4g-topbar {
   background: var(--ux4g-bg-primary);
 }
+
+/* Landing hero: slow zoom on the satellite backdrop (components/landing/hero-backdrop.tsx). */
+@keyframes hero-kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.12);
+  }
+}
+.hero-kenburns {
+  animation: hero-kenburns 9s ease-out forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-kenburns {
+    animation: none;
+  }
+}

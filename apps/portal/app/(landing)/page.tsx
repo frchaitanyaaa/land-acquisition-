@@ -1,12 +1,17 @@
 import Link from 'next/link';
 import { EvaluatorLogins } from '@/components/landing/evaluator-logins';
+import { HeroBackdrop } from '@/components/landing/hero-backdrop';
 import { serverEnv } from '@/lib/server-env';
-
-type Health = { status: string; db: string; demoMode: boolean; clock: { now: string; frozen: boolean } };
 
 type ChainSummary = {
   ledger: { anchored: number; pending: number; failed: number; latest_block: string | null } | null;
-  node: { configured: boolean; contract: string | null; reachable: boolean; chainId: number | null; latestBlock: number | null };
+  node: {
+    configured: boolean;
+    contract: string | null;
+    reachable: boolean;
+    chainId: number | null;
+    latestBlock: number | null;
+  };
 };
 
 async function get<T>(path: string): Promise<T | null> {
@@ -28,79 +33,90 @@ const INNOVATIONS = [
   ['AI assistant', 'Plain-language questions answered from your own data scope. Advisory only.'],
 ] as const;
 
-const dateIST = (iso: string) =>
-  new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata' }).format(new Date(iso));
-
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const [h, chain] = await Promise.all([get<Health>('/health'), get<ChainSummary>('/public/chain-summary')]);
+  const chain = await get<ChainSummary>('/public/chain-summary');
   const chainLive = !!chain?.node.reachable && chain.node.configured;
 
   return (
     <div className="space-y-10">
       <section
         aria-labelledby="hero-title"
-        className="overflow-hidden rounded-2xl bg-gradient-to-br from-[#0e1a43] via-[#13245a] to-[#1f3c8f] text-white"
+        className="relative isolate flex min-h-[560px] items-center overflow-hidden rounded-2xl bg-gradient-to-br from-[#0e1a43] via-[#13245a] to-[#1f3c8f] text-white"
       >
-        <div className="h-1.5 bg-gradient-to-r from-[#ff9933] via-white to-[#138808]" aria-hidden />
-        <div className="space-y-6 p-6 sm:p-10">
-          <div className="space-y-3">
-            <p className="text-sm font-semibold uppercase tracking-wider text-[#ffb866]">
-              Smart India Hackathon · Problem statement 26016
-            </p>
-            <h1 id="hero-title" className="max-w-3xl text-3xl font-extrabold leading-tight sm:text-4xl">
-              Land acquisition, from proposal to possession, enforced by the law&apos;s own deadlines.
-            </h1>
-            <p className="max-w-2xl text-lg text-[#d6e0f5]">
-              Every parcel on a map. Every approval anchored on a blockchain. Every payment confirmed by the family.
-            </p>
-          </div>
+        <HeroBackdrop />
+        <div
+          className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#ff9933] via-white to-[#138808]"
+          aria-hidden
+        />
+        <div className="relative mx-auto flex w-full max-w-4xl flex-col items-center px-6 py-16 text-center">
+          <p className="rounded-full border border-white/30 bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-[#ffb866] backdrop-blur-sm">
+            Smart India Hackathon · Problem statement 26016
+          </p>
+          <h1 id="hero-title" className="mt-5 text-4xl font-extrabold leading-tight drop-shadow-md sm:text-5xl">
+            From proposal to possession,
+            <span className="block text-[#ffb866]">enforced by the law&apos;s own deadlines.</span>
+          </h1>
+          <p className="mt-4 max-w-2xl text-lg text-white/90 drop-shadow">
+            Every parcel on a map. Every approval anchored on a blockchain. Every payment confirmed by the family.
+          </p>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-xl border-2 border-[#ff9933] bg-white/10 p-4">
-              <p className="flex items-center gap-2 text-sm font-semibold text-[#ffb866]">
-                Blockchain anchoring
-                {chainLive && (
-                  <span className="flex items-center gap-1 rounded bg-emerald-500/20 px-1.5 py-0.5 text-xs text-emerald-200">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" aria-hidden /> live
-                  </span>
-                )}
-              </p>
-              <p className="mt-1 text-2xl font-extrabold tabular-nums">
-                {chain?.ledger ? `${chain.ledger.anchored.toLocaleString('en-IN')} records` : 'Smart contract'}
-              </p>
-              <p className="text-sm text-[#d6e0f5]">
-                {chainLive && chain?.node.latestBlock != null
-                  ? `anchored · block #${chain.node.latestBlock} · permissioned EVM`
-                  : 'proofs queue and anchor when the chain node is up'}
-              </p>
-            </div>
-            <div className="rounded-xl border-2 border-white/30 bg-white/10 p-4">
-              <p className="text-sm font-semibold text-[#ffb866]">GIS map</p>
-              <p className="mt-1 text-2xl font-extrabold">Every parcel</p>
-              <p className="text-sm text-[#d6e0f5]">satellite view, colour by stage / payment / risk, legal flags</p>
-            </div>
-            <div className="rounded-xl border-2 border-white/30 bg-white/10 p-4">
-              <p className="text-sm font-semibold text-[#ffb866]">Statutory clocks</p>
-              <p className="mt-1 text-2xl font-extrabold">RFCTLARR 2013</p>
-              <p className="text-sm text-[#d6e0f5]">deadlines, consequences and interest cost, live</p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             {serverEnv.demoMode && (
-              <a href="#evaluator-logins" className="rounded-md bg-[#ff9933] px-5 py-2.5 text-sm font-bold text-slate-950 hover:bg-[#ffb866]">
+              <a
+                href="#evaluator-logins"
+                className="rounded-md bg-[#ff9933] px-6 py-3 text-sm font-bold text-slate-950 shadow-lg hover:bg-[#ffb866]"
+              >
                 Evaluator logins ↓
               </a>
             )}
-            <Link href="/login" className="rounded-md bg-white px-5 py-2.5 text-sm font-bold text-[#13245a] hover:bg-[#eef2fb]">
+            <Link
+              href="/login"
+              className="rounded-md bg-white px-6 py-3 text-sm font-bold text-[#13245a] shadow-lg hover:bg-[#eef2fb]"
+            >
               Officer sign in
             </Link>
-            <Link href="/portal" className="rounded-md border-2 border-white px-5 py-2.5 text-sm font-bold text-white hover:bg-white/10">
+            <Link
+              href="/portal"
+              className="rounded-md border-2 border-white/80 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur-sm hover:bg-white/20"
+            >
               Citizen portal
             </Link>
           </div>
+
+          <dl className="mt-10 grid w-full max-w-3xl grid-cols-1 overflow-hidden rounded-xl border border-white/20 bg-[#08102b]/55 text-left backdrop-blur-md sm:grid-cols-3 sm:divide-x sm:divide-white/15">
+            <div className="p-4">
+              <dt className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#ffb866]">
+                Blockchain proof
+                {chainLive && (
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" aria-label="chain node live" />
+                )}
+              </dt>
+              <dd className="mt-1 text-2xl font-extrabold tabular-nums">
+                {chain?.ledger ? (
+                  <>
+                    {chain.ledger.anchored.toLocaleString('en-IN')}
+                    <span className="ml-1 text-sm font-medium text-white/80">records anchored</span>
+                  </>
+                ) : (
+                  <span className="text-sm font-medium text-white/90">
+                    Every approved record hashed and anchored on chain
+                  </span>
+                )}
+              </dd>
+            </div>
+            <div className="p-4">
+              <dt className="text-xs font-semibold uppercase tracking-wide text-[#ffb866]">GIS map</dt>
+              <dd className="mt-1 text-sm text-white/90">
+                Every parcel on satellite view, coloured by stage, payment or risk
+              </dd>
+            </div>
+            <div className="p-4">
+              <dt className="text-xs font-semibold uppercase tracking-wide text-[#ffb866]">Statutory clocks</dt>
+              <dd className="mt-1 text-sm text-white/90">RFCTLARR 2013 deadlines with their legal consequence, live</dd>
+            </div>
+          </dl>
         </div>
       </section>
 
@@ -124,12 +140,6 @@ export default async function Home() {
       </section>
 
       {serverEnv.demoMode && <EvaluatorLogins />}
-
-      <p className="text-xs text-slate-500">
-        {h ? `Statutory clock ${dateIST(h.clock.now)} IST${h.clock.frozen ? ' (frozen for the demo)' : ''}. ` : 'API not reachable. '}
-        All personal data is synthetic. Payments, identity, land records, SMS and the language model are mock services,
-        labelled MOCK where they appear.
-      </p>
     </div>
   );
 }
