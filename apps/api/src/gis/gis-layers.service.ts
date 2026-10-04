@@ -11,13 +11,13 @@ export const MAP_LAYERS = ['villages', 'districts', 'states', 'constraints', 'pr
 export type MapLayer = (typeof MAP_LAYERS)[number];
 export type BBox = [number, number, number, number];
 
-interface Feature {
+export interface Feature {
   type: 'Feature';
   id?: string;
   properties: Record<string, unknown>;
   geometry: unknown;
 }
-interface FeatureCollection {
+export interface FeatureCollection {
   type: 'FeatureCollection';
   features: Feature[];
 }
