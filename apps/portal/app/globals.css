@@ -102,3 +102,22 @@ body {
   outline: 2px solid var(--ux4g-border-color-primary-default);
   outline-offset: 1px;
 }
+
+/*
+ * UX4G 3.0.0 bug: a top-level `.ux4g-icon-outlined { color: var(--ux4g-text-neutral-inverse) }`
+ * (grouped with the Accessibility Bar's icon rules) paints every outlined icon white, so icons
+ * vanish on light surfaces. Restore the documented behaviour — icons follow the colour utility
+ * (ux4g-icon-neutral, ux4g-text-primary, …) or inherit the text colour. More specific component
+ * rules (buttons, topbar) still win.
+ */
+.ux4g-icon-outlined {
+  color: var(--ux4g-icon-color, var(--ux4g-text-current, currentColor));
+}
+
+/*
+ * UX4G 3.0.0: the Accessibility Bar paints --ux4g-bg-primary-strong with fixed white text. In dark
+ * mode that token is a light navy (2.6:1 under white — fails AA). Use the dark brand surface there.
+ */
+:root[data-theme='dark'] .ux4g-topbar {
+  background: var(--ux4g-bg-primary);
+}

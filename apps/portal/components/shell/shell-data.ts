@@ -100,7 +100,7 @@ export function useNotifications(enabled: boolean, unread: number | null) {
   return useQuery({
     // The SSE unread count is part of the key, so the list refetches when the count moves.
     queryKey: ['notifications', unread],
-    queryFn: () => api<NotificationRow[]>('/notifications?limit=50'),
+    queryFn: () => api<{ unread: number; items: NotificationRow[] }>('/notifications?limit=50'),
     enabled,
     placeholderData: (prev) => prev,
   });
@@ -119,8 +119,7 @@ export function useSwitchPost() {
   const qc = useQueryClient();
   const router = useRouter();
   return useMutation({
-    mutationFn: (postId: string) =>
-      api<Me>('/auth/switch-post', { method: 'POST', body: JSON.stringify({ postId }) }),
+    mutationFn: (postId: string) => api<Me>('/auth/switch-post', { method: 'POST', body: JSON.stringify({ postId }) }),
     onSuccess: async () => {
       await qc.resetQueries();
       router.refresh();

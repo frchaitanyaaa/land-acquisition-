@@ -29,9 +29,7 @@ export function NavyHero({
     <section className="ux4g-bg-primary-strong ux4g-text-neutral-inverse ux4g-radius-l ux4g-p-l ux4g-d-flex ux4g-flex-column ux4g-gap-m">
       <div className="ux4g-d-flex ux4g-ai-start ux4g-jc-between ux4g-gap-m ux4g-flex-wrap">
         <div className="ux4g-d-flex ux4g-flex-column ux4g-gap-xs ux4g-min-w-0">
-          {eyebrow && (
-            <span className="ux4g-label-m-strong ux4g-text-uppercase ux4g-opacity-80">{eyebrow}</span>
-          )}
+          {eyebrow && <span className="ux4g-label-m-strong ux4g-text-uppercase ux4g-opacity-80">{eyebrow}</span>}
           <h1 className="ux4g-heading-l-strong">{title}</h1>
           {subtitle && <p className="ux4g-body-m-default ux4g-opacity-90">{subtitle}</p>}
           {scope && (

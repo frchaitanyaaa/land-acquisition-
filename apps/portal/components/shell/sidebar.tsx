@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import type { Post } from '@/lib/api';
+import { api, type Post } from '@/lib/api';
 import { collectorKey, nationalKey, type CollectorDashboard, type NationalDashboard } from '@/lib/dashboards-api';
 import { AskSlot } from './ask-slot';
 import { NAV_GROUPS, QUICK_ACTIONS, resolveHref, visibleItems, type NavContext, type NavItem } from './nav-config';
@@ -15,11 +15,20 @@ import { NAV_GROUPS, QUICK_ACTIONS, resolveHref, visibleItems, type NavContext, 
  * otherwise.
  */
 function useCachedCounts(): Record<string, number> {
-  const national = useQuery<NationalDashboard>({ queryKey: nationalKey, enabled: false });
-  const collector = useQuery<CollectorDashboard>({ queryKey: collectorKey, enabled: false });
+  const national = useQuery({
+    queryKey: nationalKey,
+    queryFn: () => api<NationalDashboard>('/dashboards/national'),
+    enabled: false,
+  });
+  const collector = useQuery({
+    queryKey: collectorKey,
+    queryFn: () => api<CollectorDashboard>('/dashboards/collector'),
+    enabled: false,
+  });
   const counts: Record<string, number> = {};
   if (national.data) counts.national = national.data.kpis.deadlines_breached;
-  if (collector.data) counts.collector = collector.data.deadlineBoard.filter((d) => d.live_status === 'BREACHED').length;
+  if (collector.data)
+    counts.collector = collector.data.deadlineBoard.filter((d) => d.live_status === 'BREACHED').length;
   return counts;
 }
 
@@ -35,7 +44,15 @@ function activeKey(pathname: string, ctx: NavContext, role: string): string | nu
   return best?.key ?? null;
 }
 
-export function SidebarNav({ post, projectId, onNavigate }: { post: Post; projectId: string | null; onNavigate?: () => void }) {
+export function SidebarNav({
+  post,
+  projectId,
+  onNavigate,
+}: {
+  post: Post;
+  projectId: string | null;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
   const counts = useCachedCounts();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
@@ -71,7 +88,13 @@ export function SidebarNav({ post, projectId, onNavigate }: { post: Post; projec
                 <ul id={listId} className="ux4g-d-flex ux4g-flex-column ux4g-gap-2xs ux4g-mt-2xs">
                   {items.map((item) => (
                     <li key={item.key}>
-                      <NavRow item={item} ctx={ctx} active={current === item.key} count={counts[item.key]} onNavigate={onNavigate} />
+                      <NavRow
+                        item={item}
+                        ctx={ctx}
+                        active={current === item.key}
+                        count={counts[item.key]}
+                        onNavigate={onNavigate}
+                      />
                     </li>
                   ))}
                 </ul>
@@ -82,7 +105,9 @@ export function SidebarNav({ post, projectId, onNavigate }: { post: Post; projec
       </nav>
 
       <div className="ux4g-dashboard-sidebar-footer ux4g-d-flex ux4g-flex-column ux4g-gap-xs">
-        <span className="ux4g-label-m-strong ux4g-text-neutral-secondary ux4g-text-uppercase ux4g-px-s">Quick actions</span>
+        <span className="ux4g-label-m-strong ux4g-text-neutral-secondary ux4g-text-uppercase ux4g-px-s">
+          Quick actions
+        </span>
         <Link
           href={QUICK_ACTIONS.newProject.href}
           onClick={onNavigate}
@@ -123,7 +148,9 @@ function NavRow({
         {item.icon}
       </span>
       <span className="ux4g-d-flex ux4g-flex-column ux4g-min-w-0 ux4g-flex-1">
-        <span className={`ux4g-label-l-strong ${active ? 'ux4g-text-primary' : 'ux4g-text-neutral-primary'}`}>{item.label}</span>
+        <span className={`ux4g-label-l-strong ${active ? 'ux4g-text-primary' : 'ux4g-text-neutral-primary'}`}>
+          {item.label}
+        </span>
         <span className="ux4g-body-xs-default ux4g-text-neutral-secondary">{description}</span>
       </span>
       {item.pending ? (

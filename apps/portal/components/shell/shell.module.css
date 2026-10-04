@@ -6,12 +6,7 @@
 /* National tricolour strip, 4 px, decorative. Fixed flag colours — not theme tokens on purpose. */
 .tricolour {
   height: 4px;
-  background: linear-gradient(
-    to right,
-    #ff9933 0 33.333%,
-    #ffffff 33.333% 66.666%,
-    #138808 66.666% 100%
-  );
+  background: linear-gradient(to right, #ff9933 0 33.333%, #ffffff 33.333% 66.666%, #138808 66.666% 100%);
 }
 
 /*
@@ -47,4 +42,31 @@
 /* The mobile drawer holds the full sidebar; UX4G's drawer has no width for nav use. */
 .drawerPanel {
   max-width: min(20rem, calc(100vw - 3.125rem));
+}
+
+/*
+ * On phones the always-visible skip link costs a whole row of the accessibility bar. Hide it
+ * visually until it receives keyboard focus (standard skip-link pattern, WCAG 2.4.1).
+ * ux4g-sr-only has no focus-revealing variant.
+ */
+@media (max-width: 767px) {
+  .skipLink:not(:focus) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+}
+
+/* Phones: pin the notifications panel to the viewport with 16 px gutters instead of the bell. */
+@media (max-width: 767px) {
+  .popoverPanel {
+    position: fixed;
+    left: 1rem;
+    right: 1rem;
+    top: 7.5rem;
+    width: auto;
+  }
 }

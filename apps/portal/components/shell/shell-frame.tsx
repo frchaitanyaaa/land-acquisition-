@@ -17,11 +17,23 @@ export type ShellVariant = 'full' | 'minimal';
  * main region and footer. Layout uses UX4G's dashboard pattern (ux4g-dashboard-layout-container,
  * -sidebar, -main-content).
  */
-export function ShellFrame({ variant, demoMode, children }: { variant: ShellVariant; demoMode: boolean; children: ReactNode }) {
+export function ShellFrame({
+  variant,
+  demoMode,
+  children,
+}: {
+  variant: ShellVariant;
+  demoMode: boolean;
+  children: ReactNode;
+}) {
   const body = (
     <div className="ux4g-d-flex ux4g-flex-column ux4g-min-h-screen">
       <AccessibilityBar />
-      {variant === 'full' ? <FullBody demoMode={demoMode}>{children}</FullBody> : <MinimalBody demoMode={demoMode}>{children}</MinimalBody>}
+      {variant === 'full' ? (
+        <FullBody demoMode={demoMode}>{children}</FullBody>
+      ) : (
+        <MinimalBody demoMode={demoMode}>{children}</MinimalBody>
+      )}
       <Footer />
     </div>
   );

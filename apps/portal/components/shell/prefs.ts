@@ -16,6 +16,18 @@ export const PREF_KEYS = {
 
 export const TEXT_SIZES: readonly TextSize[] = ['s', 'm', 'l', 'xl'];
 
+/**
+ * Routes whose screens are fully restyled with UX4G and pass AA in dark mode. Everything else is
+ * still Tailwind with hard-coded light colours, so it renders light whatever the viewer chose
+ * (UX4G's dark tokens only exist at :root, so a section cannot be scoped back to light).
+ * Whoever converts a screen adds its route prefix here in the same commit.
+ */
+export const DARK_READY_ROUTES: readonly string[] = ['/session'];
+
+export function isDarkReady(pathname: string): boolean {
+  return DARK_READY_ROUTES.some((r) => pathname === r || pathname.startsWith(`${r}/`));
+}
+
 export function readPref(key: string): string | null {
   try {
     return window.localStorage.getItem(key);
@@ -42,6 +54,7 @@ export function applyPref(attr: 'data-theme' | 'data-text-size' | 'data-contrast
 
 /** Inlined in <head> so the saved theme applies before first paint (no light flash in dark mode). */
 export const PREFS_BOOT_SCRIPT = `(function(){try{var s=window.localStorage,r=document.documentElement;
-var t=s.getItem('${PREF_KEYS.theme}');if(t==='dark'||t==='light')r.setAttribute('data-theme',t);
+var p=location.pathname,ok=${JSON.stringify(DARK_READY_ROUTES)}.some(function(x){return p===x||p.indexOf(x+'/')===0;});
+var t=s.getItem('${PREF_KEYS.theme}');if(t==='dark'&&ok)r.setAttribute('data-theme','dark');
 var z=s.getItem('${PREF_KEYS.textSize}');if(z==='s'||z==='l'||z==='xl')r.setAttribute('data-text-size',z);
 if(s.getItem('${PREF_KEYS.contrast}')==='high')r.setAttribute('data-contrast','high');}catch(e){}})();`;

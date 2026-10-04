@@ -21,8 +21,8 @@ export function Footer() {
         </nav>
       </div>
       <p className="ux4g-body-xs-default ux4g-pt-s ux4g-pb-xs">
-        Figures are recorded by the concerned authority; adapter values marked MOCK are not live
-        government integrations.
+        Figures are recorded by the concerned authority; adapter values marked MOCK are not live government
+        integrations.
       </p>
     </footer>
   );

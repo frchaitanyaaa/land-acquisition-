@@ -25,17 +25,26 @@ export function PageHeader({
     <div className="ux4g-d-flex ux4g-flex-column ux4g-gap-xs">
       {crumbs && crumbs.length > 0 && (
         <nav className="ux4g-breadcrumb ux4g-breadcrumb-divider" aria-label="Breadcrumb">
-          {crumbs.map((c, i) =>
-            c.href && i < crumbs.length - 1 ? (
-              <Link key={c.label} href={c.href}>
-                {c.label}
-              </Link>
-            ) : (
-              <span key={c.label} aria-current={i === crumbs.length - 1 ? 'page' : undefined}>
-                {c.label}
-              </span>
-            ),
-          )}
+          <ol className="ux4g-breadcrumb-list ux4g-d-flex ux4g-ai-center">
+            {crumbs.map((c, i) => {
+              const last = i === crumbs.length - 1;
+              return (
+                <li
+                  key={c.label}
+                  className={`ux4g-breadcrumb-item${last ? ' active' : ''}`}
+                  aria-current={last ? 'page' : undefined}
+                >
+                  {c.href && !last ? (
+                    <Link href={c.href} className="ux4g-breadcrumb-link">
+                      {c.label}
+                    </Link>
+                  ) : (
+                    c.label
+                  )}
+                </li>
+              );
+            })}
+          </ol>
         </nav>
       )}
       <div className="ux4g-d-flex ux4g-ai-start ux4g-jc-between ux4g-gap-m ux4g-flex-wrap">

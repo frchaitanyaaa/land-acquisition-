@@ -1,9 +1,19 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { LOCALE_COOKIE, LOCALES, type Locale } from '@/i18n/locales';
-import { applyPref, PREF_KEYS, readPref, writePref, type Contrast, type TextSize, type Theme } from './prefs';
+import {
+  applyPref,
+  isDarkReady,
+  PREF_KEYS,
+  readPref,
+  writePref,
+  type Contrast,
+  type TextSize,
+  type Theme,
+} from './prefs';
+import styles from './shell.module.css';
 
 const LANG_LABEL: Record<Locale, { short: string; name: string }> = {
   en: { short: 'EN', name: 'English' },
@@ -24,6 +34,8 @@ function readLocale(): Locale {
  */
 export function AccessibilityBar() {
   const router = useRouter();
+  const pathname = usePathname();
+  const darkReady = isDarkReady(pathname);
   const [theme, setTheme] = useState<Theme>('light');
   const [size, setSize] = useState<TextSize>('m');
   const [contrast, setContrast] = useState<Contrast>('normal');
@@ -32,11 +44,16 @@ export function AccessibilityBar() {
   // The boot script already applied the saved values to <html>; mirror them into state.
   useEffect(() => {
     const root = document.documentElement;
-    setTheme(root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
+    setTheme(readPref(PREF_KEYS.theme) === 'dark' ? 'dark' : 'light');
     setSize((root.getAttribute('data-text-size') as TextSize | null) ?? 'm');
     setContrast(root.getAttribute('data-contrast') === 'high' ? 'high' : 'normal');
     setLocale(readLocale());
   }, []);
+
+  // The viewer's choice applies only where the screen is dark-ready (prefs.ts DARK_READY_ROUTES).
+  useEffect(() => {
+    applyPref('data-theme', theme === 'dark' && darkReady ? 'dark' : 'light');
+  }, [theme, darkReady]);
 
   function changeSize(next: TextSize) {
     setSize(next);
@@ -57,7 +74,6 @@ export function AccessibilityBar() {
   function toggleTheme() {
     const next: Theme = theme === 'dark' ? 'light' : 'dark';
     setTheme(next);
-    applyPref('data-theme', next);
     writePref(PREF_KEYS.theme, next);
   }
   function changeLocale(next: Locale) {
@@ -70,17 +86,39 @@ export function AccessibilityBar() {
   return (
     <div className="ux4g-topbar">
       <div className="ux4g-topbar__wrap ux4g-d-flex ux4g-ai-center ux4g-jc-between ux4g-flex-wrap ux4g-px-m">
-        <a href="#main-content" className="ux4g-topbar__skip ux4g-label-m-default">
+        <a href="#main-content" className={`ux4g-topbar__skip ${styles.skipLink}`}>
           Skip to main content
         </a>
-        <div className="ux4g-topbar__group ux4g-d-flex ux4g-ai-center ux4g-flex-wrap" role="group" aria-label="Display settings">
-          <button type="button" className="ux4g-topbar__iconbtn" aria-label="Decrease text size" onClick={() => step(-1)} disabled={size === 's'}>
+        <div
+          className="ux4g-topbar__group ux4g-d-flex ux4g-ai-center ux4g-flex-wrap"
+          role="group"
+          aria-label="Display settings"
+        >
+          <button
+            type="button"
+            className="ux4g-topbar__iconbtn"
+            aria-label="Decrease text size"
+            onClick={() => step(-1)}
+            disabled={size === 's'}
+          >
             A−
           </button>
-          <button type="button" className="ux4g-topbar__iconbtn" aria-label="Default text size" aria-pressed={size === 'm'} onClick={() => changeSize('m')}>
+          <button
+            type="button"
+            className="ux4g-topbar__iconbtn"
+            aria-label="Default text size"
+            aria-pressed={size === 'm'}
+            onClick={() => changeSize('m')}
+          >
             A
           </button>
-          <button type="button" className="ux4g-topbar__iconbtn" aria-label="Increase text size" onClick={() => step(1)} disabled={size === 'xl'}>
+          <button
+            type="button"
+            className="ux4g-topbar__iconbtn"
+            aria-label="Increase text size"
+            onClick={() => step(1)}
+            disabled={size === 'xl'}
+          >
             A+
           </button>
           <button
@@ -99,7 +137,14 @@ export function AccessibilityBar() {
             type="button"
             className="ux4g-topbar__iconbtn"
             aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-            title={theme === 'dark' ? 'Light theme' : 'Dark theme'}
+            aria-pressed={theme === 'dark'}
+            title={
+              darkReady
+                ? theme === 'dark'
+                  ? 'Light theme'
+                  : 'Dark theme'
+                : 'Dark theme (this screen stays light until it is restyled)'
+            }
             onClick={toggleTheme}
           >
             <span className="ux4g-icon-outlined" aria-hidden="true">

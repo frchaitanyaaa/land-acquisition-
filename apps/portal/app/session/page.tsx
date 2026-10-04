@@ -1,83 +1,103 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useState } from 'react';
-import { api, ApiProblem, type Me } from '@/lib/api';
+import { useEffect } from 'react';
+import { PageHeader } from '@/components/shell/page-header';
+import { useLogout, useMe, useSwitchPost } from '@/components/shell/shell-data';
+import { jurisdictionOf } from '@/components/shell/top-bar';
+import { ApiProblem } from '@/lib/api';
 
 /**
  * Who am I, and through which post? Switching post changes what the API returns immediately:
  * RLS scope, redaction and role checks all follow the active post (G19, §34 beat 7).
+ * First screen restyled with UX4G end to end — it is listed in DARK_READY_ROUTES.
  */
 export default function SessionPage() {
   const router = useRouter();
-  const [me, setMe] = useState<Me | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    try {
-      setMe(await api<Me>('/auth/me'));
-    } catch (err) {
-      if (err instanceof ApiProblem && err.status === 401) router.replace('/login');
-      else setError('Could not load your session.');
-    }
-  }, [router]);
+  const me = useMe();
+  const switchPost = useSwitchPost();
+  const logout = useLogout();
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    if (me.error instanceof ApiProblem && me.error.status === 401) router.replace('/login');
+  }, [me.error, router]);
 
-  async function switchTo(postId: string) {
-    setMe(await api<Me>('/auth/switch-post', { method: 'POST', body: JSON.stringify({ postId }) }));
-  }
+  if (me.isError && !(me.error instanceof ApiProblem && me.error.status === 401))
+    return (
+      <div className="ux4g-alert ux4g-alert-error" role="alert">
+        <span>Could not load your session.</span>
+      </div>
+    );
+  if (!me.data)
+    return (
+      <p className="ux4g-body-m-default ux4g-text-neutral-secondary" role="status">
+        Loading…
+      </p>
+    );
 
-  async function signOut() {
-    await api('/auth/logout', { method: 'POST' });
-    router.replace('/login');
-  }
-
-  if (error) return <p className="text-red-700">{error}</p>;
-  if (!me) return <p className="text-slate-500">Loading…</p>;
+  const { user, posts, activePost } = me.data;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold">{me.user.fullName}</h1>
-          <p className="text-sm text-slate-600">{me.user.email}</p>
-        </div>
-        <button onClick={signOut} className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-100">
-          Sign out
-        </button>
-      </div>
+    <div className="ux4g-d-flex ux4g-flex-column ux4g-gap-l">
+      <PageHeader
+        title={user.fullName}
+        subtitle={user.email}
+        crumbs={[{ label: 'Home', href: '/' }, { label: 'Session and posts' }]}
+        actions={
+          <button
+            type="button"
+            className="ux4g-btn ux4g-btn-outline-neutral ux4g-btn-s"
+            onClick={() => logout.mutate()}
+          >
+            <span className="ux4g-icon-outlined" aria-hidden="true">
+              logout
+            </span>
+            Sign out
+          </button>
+        }
+      />
 
-      <section>
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">Acting as</h2>
-        <ul className="mt-2 divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white">
-          {me.posts.map((p) => {
-            const active = p.id === me.activePost.id;
-            return (
-              <li key={p.id} className="flex items-center gap-3 px-4 py-3">
-                <div className="flex-1">
-                  <p className="font-medium">{p.designation}</p>
-                  <p className="text-xs text-slate-500">
-                    {p.role} · {p.level}
-                    {p.districtCode ? ` · ${p.districtCode}` : p.stateCode ? ` · state ${p.stateCode}` : ''}
-                  </p>
-                </div>
-                {active ? (
-                  <span className="rounded bg-teal-100 px-2 py-0.5 text-xs font-semibold text-teal-900">Active</span>
-                ) : (
-                  <button
-                    onClick={() => void switchTo(p.id)}
-                    className="rounded-md bg-slate-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-900"
-                  >
-                    Switch
-                  </button>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+      <section className="ux4g-card ux4g-card-outline ux4g-card-vertical" aria-labelledby="posts-heading">
+        <div className="ux4g-card-header">
+          <h2 id="posts-heading" className="ux4g-title-s-strong">
+            Acting as
+          </h2>
+          <p className="ux4g-body-s-default ux4g-text-neutral-secondary">
+            Roles attach to posts, not people (G19). Every action records both you and the post you act through.
+          </p>
+        </div>
+        <div className="ux4g-card-body">
+          <ul className="ux4g-d-flex ux4g-flex-column ux4g-gap-xs">
+            {posts.map((p) => {
+              const active = p.id === activePost.id;
+              return (
+                <li
+                  key={p.id}
+                  className={`ux4g-d-flex ux4g-ai-center ux4g-jc-between ux4g-gap-m ux4g-flex-wrap ux4g-p-s ux4g-radius-m ${active ? 'ux4g-bg-primary-soft' : 'ux4g-bg-neutral-soft'}`}
+                >
+                  <div className="ux4g-d-flex ux4g-flex-column ux4g-gap-2xs ux4g-min-w-0">
+                    <span className="ux4g-label-l-strong">{p.designation}</span>
+                    <span className="ux4g-body-xs-default ux4g-text-neutral-secondary">
+                      {p.role} · {jurisdictionOf(p)}
+                    </span>
+                  </div>
+                  {active ? (
+                    <span className="ux4g-tag-filled-success ux4g-tag-s">Active</span>
+                  ) : (
+                    <button
+                      type="button"
+                      className="ux4g-btn ux4g-btn-primary ux4g-btn-s"
+                      disabled={switchPost.isPending}
+                      onClick={() => switchPost.mutate(p.id)}
+                    >
+                      Switch to this post
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       </section>
     </div>
   );

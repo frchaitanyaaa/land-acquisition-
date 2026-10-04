@@ -27,7 +27,15 @@ export function jurisdictionOf(post: Post): string {
   return 'National';
 }
 
-export function TopBar({ variant, demoMode, onOpenMenu }: { variant: 'full' | 'minimal'; demoMode: boolean; onOpenMenu?: () => void }) {
+export function TopBar({
+  variant,
+  demoMode,
+  onOpenMenu,
+}: {
+  variant: 'full' | 'minimal';
+  demoMode: boolean;
+  onOpenMenu?: () => void;
+}) {
   const full = variant === 'full';
   const me = useMe();
   const signedIn = full && !!me.data;
@@ -36,8 +44,8 @@ export function TopBar({ variant, demoMode, onOpenMenu }: { variant: 'full' | 'm
     <header>
       {/* Decorative national tricolour strip (00-shared-context.md identity). No State Emblem. */}
       <div className={styles.tricolour} aria-hidden="true" />
-      <nav className="ux4g-navbar" aria-label="Top">
-        <div className="ux4g-navbar-wrap ux4g-px-m ux4g-py-xs ux4g-flex-wrap">
+      <nav className="ux4g-navbar ux4g-px-m" aria-label="Top">
+        <div className="ux4g-navbar-wrap ux4g-flex-wrap">
           <div className="ux4g-d-flex ux4g-ai-center ux4g-gap-s ux4g-min-w-0">
             {full && onOpenMenu && (
               <button
@@ -51,7 +59,10 @@ export function TopBar({ variant, demoMode, onOpenMenu }: { variant: 'full' | 'm
                 </span>
               </button>
             )}
-            <Link href={signedIn ? '/national' : '/'} className="ux4g-d-flex ux4g-flex-column ux4g-min-w-0 ux4g-text-no-underline">
+            <Link
+              href={signedIn ? '/national' : '/'}
+              className="ux4g-d-flex ux4g-flex-column ux4g-min-w-0 ux4g-text-no-underline"
+            >
               <span className="ux4g-heading-s-strong ux4g-text-primary">BhoomiSetu</span>
               <span className="ux4g-body-xs-default ux4g-text-neutral-secondary ux4g-d-none ux4g-md-d-block">
                 Ministry of Rural Development · Prototype for SIH 26016
@@ -136,7 +147,9 @@ export function ProjectSwitcher({ block = false }: { block?: boolean }) {
             </button>
           </li>
         ))}
-        {projects?.length === 0 && <li className="ux4g-dropdown-option ux4g-body-s-default">No projects in your scope</li>}
+        {projects?.length === 0 && (
+          <li className="ux4g-dropdown-option ux4g-body-s-default">No projects in your scope</li>
+        )}
         {selected && (
           <li>
             <button
@@ -180,7 +193,9 @@ const FILTERS: Array<[NotifFilter, string]> = [
 ];
 const isDeadline = (n: NotificationRow) => n.trigger.startsWith('DEADLINE') || n.trigger === 'ESCALATED';
 const isDocument = (n: NotificationRow) =>
-  (n.entityType ?? '').toLowerCase().includes('document') || n.trigger.includes('DOCUMENT') || n.trigger.includes('ATTEST');
+  (n.entityType ?? '').toLowerCase().includes('document') ||
+  n.trigger.includes('DOCUMENT') ||
+  n.trigger.includes('ATTEST');
 const SEVERITY_TAG: Record<NotificationRow['severity'], string> = {
   info: 'ux4g-tag-tonal-info',
   warn: 'ux4g-tag-tonal-warning',
@@ -189,15 +204,16 @@ const SEVERITY_TAG: Record<NotificationRow['severity'], string> = {
 
 function Bell() {
   const live = useLiveStream();
-  const unread = live?.unread ?? null;
   const d = useDisclosure();
   const router = useRouter();
   const [filter, setFilter] = useState<NotifFilter>('all');
-  const list = useNotifications(d.open, unread);
+  const list = useNotifications(d.open, live?.unread ?? null);
+  // The SSE count arrives every few seconds; until then use the list's own count if loaded.
+  const unread = live?.unread ?? list.data?.unread ?? null;
   const markRead = useMarkRead();
 
   const rows = useMemo(() => {
-    const all = list.data ?? [];
+    const all = list.data?.items ?? [];
     if (filter === 'unread') return all.filter((n) => !n.readAt);
     if (filter === 'deadlines') return all.filter(isDeadline);
     if (filter === 'documents') return all.filter(isDocument);
@@ -233,87 +249,99 @@ function Bell() {
         )}
       </button>
 
-      <div
-        className={`ux4g-popover ux4g-popover-bottom-end ux4g-top-100 ux4g-end-0 ${styles.popoverPanel}${d.open ? ' show' : ''}`}
-        role="dialog"
-        aria-label="Notifications"
-        aria-hidden={!d.open}
-      >
-        <div className="ux4g-popover-header ux4g-w-100">
-          <div className="ux4g-d-flex ux4g-ai-center ux4g-jc-between ux4g-w-100">
-            <h2 className="ux4g-popover-title ux4g-title-s-strong">Notifications</h2>
-            <button
-              type="button"
-              className="ux4g-btn ux4g-btn-text-primary ux4g-btn-xs"
-              disabled={!list.data?.some((n) => !n.readAt) || markRead.isPending}
-              onClick={() => markRead.mutate('all')}
-            >
-              Mark all read
-            </button>
-          </div>
-          <div className="ux4g-filter-chip-group ux4g-d-flex ux4g-flex-wrap ux4g-gap-2xs" role="group" aria-label="Filter notifications">
-            {FILTERS.map(([key, label]) => (
+      {d.open && (
+        <div
+          className={`ux4g-popover ux4g-popover-bottom-end show ux4g-top-100 ux4g-end-0 ${styles.popoverPanel}`}
+          role="dialog"
+          aria-label="Notifications"
+        >
+          <div className="ux4g-popover-header ux4g-w-100">
+            <div className="ux4g-d-flex ux4g-ai-center ux4g-jc-between ux4g-w-100">
+              <h2 className="ux4g-popover-title ux4g-title-s-strong">Notifications</h2>
               <button
-                key={key}
                 type="button"
-                className={`ux4g-filter-chip-s${filter === key ? ' active' : ''}`}
-                aria-pressed={filter === key}
-                onClick={() => setFilter(key)}
+                className="ux4g-btn ux4g-btn-text-primary ux4g-btn-xs"
+                disabled={!list.data?.unread || markRead.isPending}
+                onClick={() => markRead.mutate('all')}
               >
-                {label}
+                Mark all read
               </button>
-            ))}
-          </div>
-        </div>
-        <div className="ux4g-popover-body ux4g-w-100 ux4g-max-h-384 ux4g-o-y-auto ux4g-p-none">
-          {list.isLoading ? (
-            <p className="ux4g-body-s-default ux4g-text-neutral-secondary ux4g-p-s">Loading…</p>
-          ) : rows.length === 0 ? (
-            <div className="ux4g-empty-state ux4g-w-100 ux4g-p-l">
-              <span className="ux4g-icon-outlined ux4g-empty-state-icon ux4g-icon-neutral" aria-hidden="true">
-                notifications_none
-              </span>
-              <p className="ux4g-title-s-strong">Nothing here</p>
-              <p className="ux4g-body-s-default ux4g-text-neutral-secondary">
-                {filter === 'all' ? 'No notifications for this post yet.' : 'No notifications match this filter.'}
-              </p>
             </div>
-          ) : (
-            <ul className="ux4g-w-100">
-              {rows.map((n) => (
-                <li key={n.id} className="ux4g-notification-item ux4g-px-s">
-                  <span className={`ux4g-badge-dot-${n.readAt ? 'neutral' : 'primary'} ux4g-mt-xs`} aria-hidden="true" />
-                  <div className="ux4g-notification-content ux4g-min-w-0">
-                    <div className="ux4g-notification-top-row ux4g-gap-xs">
-                      <button
-                        type="button"
-                        className="ux4g-text-link-m ux4g-text-start ux4g-label-l-strong"
-                        onClick={() => openRow(n)}
-                      >
-                        {n.title}
-                      </button>
-                      <span className={`${SEVERITY_TAG[n.severity]} ux4g-tag-s`}>{n.severity}</span>
-                    </div>
-                    {n.body && <p className="ux4g-body-xs-default ux4g-text-neutral-secondary ux4g-line-clamp-2">{n.body}</p>}
-                    <div className="ux4g-d-flex ux4g-ai-center ux4g-jc-between ux4g-gap-xs">
-                      <span className="ux4g-body-xs-default ux4g-text-neutral-secondary">{formatDateTime(n.createdAt)}</span>
-                      {!n.readAt && (
+            <div
+              className="ux4g-filter-chip-group ux4g-d-flex ux4g-flex-wrap ux4g-gap-2xs"
+              role="group"
+              aria-label="Filter notifications"
+            >
+              {FILTERS.map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`ux4g-filter-chip-s${filter === key ? ' active' : ''}`}
+                  aria-pressed={filter === key}
+                  onClick={() => setFilter(key)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="ux4g-popover-body ux4g-w-100 ux4g-max-h-384 ux4g-o-y-auto ux4g-p-none">
+            {list.isLoading ? (
+              <p className="ux4g-body-s-default ux4g-text-neutral-secondary ux4g-p-s">Loading…</p>
+            ) : rows.length === 0 ? (
+              <div className="ux4g-empty-state ux4g-w-100 ux4g-p-l">
+                <span className="ux4g-icon-outlined ux4g-empty-state-icon ux4g-icon-neutral" aria-hidden="true">
+                  notifications_none
+                </span>
+                <p className="ux4g-title-s-strong">Nothing here</p>
+                <p className="ux4g-body-s-default ux4g-text-neutral-secondary">
+                  {filter === 'all' ? 'No notifications for this post yet.' : 'No notifications match this filter.'}
+                </p>
+              </div>
+            ) : (
+              <ul className="ux4g-w-100">
+                {rows.map((n) => (
+                  <li key={n.id} className="ux4g-notification-item ux4g-px-s">
+                    <span
+                      className={`ux4g-badge-dot-${n.readAt ? 'neutral' : 'primary'} ux4g-mt-xs`}
+                      aria-hidden="true"
+                    />
+                    <div className="ux4g-notification-content ux4g-min-w-0">
+                      <div className="ux4g-notification-top-row ux4g-gap-xs">
                         <button
                           type="button"
-                          className="ux4g-btn ux4g-btn-text-neutral ux4g-btn-xs"
-                          onClick={() => markRead.mutate(n.id)}
+                          className="ux4g-text-link-m ux4g-text-start ux4g-label-l-strong"
+                          onClick={() => openRow(n)}
                         >
-                          Mark read
+                          {n.title}
                         </button>
+                        <span className={`${SEVERITY_TAG[n.severity]} ux4g-tag-s`}>{n.severity}</span>
+                      </div>
+                      {n.body && (
+                        <p className="ux4g-body-xs-default ux4g-text-neutral-secondary ux4g-line-clamp-2">{n.body}</p>
                       )}
+                      <div className="ux4g-d-flex ux4g-ai-center ux4g-jc-between ux4g-gap-xs">
+                        <span className="ux4g-body-xs-default ux4g-text-neutral-secondary">
+                          {formatDateTime(n.createdAt)}
+                        </span>
+                        {!n.readAt && (
+                          <button
+                            type="button"
+                            className="ux4g-btn ux4g-btn-text-neutral ux4g-btn-xs"
+                            onClick={() => markRead.mutate(n.id)}
+                          >
+                            Mark read
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -362,7 +390,9 @@ function UserMenu({ me }: { me: Me }) {
         {others.length > 0 && (
           <>
             <hr className="ux4g-divider-horizontal" />
-            <p className="ux4g-label-m-strong ux4g-text-neutral-secondary ux4g-text-uppercase ux4g-px-s ux4g-pt-xs">Switch post</p>
+            <p className="ux4g-label-m-strong ux4g-text-neutral-secondary ux4g-text-uppercase ux4g-px-s ux4g-pt-xs">
+              Switch post
+            </p>
             {others.map((p) => (
               <button
                 key={p.id}
@@ -384,7 +414,12 @@ function UserMenu({ me }: { me: Me }) {
           </>
         )}
         <hr className="ux4g-divider-horizontal" />
-        <Link href="/session" role="menuitem" className="ux4g-dropdown-option ux4g-d-flex ux4g-ai-center ux4g-gap-xs ux4g-body-s-default" onClick={() => d.close()}>
+        <Link
+          href="/session"
+          role="menuitem"
+          className="ux4g-dropdown-option ux4g-d-flex ux4g-ai-center ux4g-gap-xs ux4g-body-s-default"
+          onClick={() => d.close()}
+        >
           <span className="ux4g-icon-outlined ux4g-icon-neutral" aria-hidden="true">
             badge
           </span>
