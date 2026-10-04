@@ -61,6 +61,9 @@ Then restart **tab 1** (Ctrl+C, `node apps/api/dist/main.js`). The portal does n
 5. `/portal/grievance` → file → tracking number → `/portal/track` shows it.
 6. Sidebar **Ask AI** → ask "Which deadlines breach in the next 30 days?" → answer with MOCK badge.
 7. `/field` opens the field app (phone camera/GPS prompts appear).
+8. Landing page shows "Chain node live" and a non-zero "Records anchored"; `/trust` → Check any row → ✓ Verified;
+   its QR opens the public `/verify/...` page on the phone without login.
+9. Signed in as `oversight`: `/trust/audit` → Verify audit chain → "Chain intact".
 
 Submit that URL. **If the laptop restarts or tab 3 stops, the URL changes** — start tab 3 again, update the three
 `.env` lines, restart tab 1, and update the submitted link if the form allows.

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useChainVerify } from '@/lib/chain-api';
 
 const LABEL: Record<string, string> = {
@@ -27,14 +28,15 @@ export function ChainBadge({ entityType, entityId, version }: { entityType: stri
     return <span className="inline-flex items-center rounded px-2 py-0.5 text-xs text-slate-400">Checking…</span>;
   }
   return (
-    <span
-      title={data.txHash ? `tx ${data.txHash}` : undefined}
-      className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${CLASSES[data.result]}`}
+    <Link
+      href={`/trust?entity=${entityType}:${entityId}#verify`}
+      title={data.txHash ? `tx ${data.txHash} · open in Trust center` : 'Open in Trust center'}
+      className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-medium ring-1 ring-inset hover:underline ${CLASSES[data.result]}`}
     >
       {LABEL[data.result]}
       {data.result === 'VERIFIED' && data.blockNumber != null && (
         <span className="tabular-nums text-teal-600">· block #{data.blockNumber}</span>
       )}
-    </span>
+    </Link>
   );
 }

@@ -286,10 +286,43 @@ export class ChainService {
     });
   }
 
-  /** Ops panel: counts by status and the last failures. */
+  /** Trust center ledger page. Keyset cursor = `<createdAt ISO>|<id>` of the last row returned. */
+  events(user: AuthUser, q: { status?: string; eventType?: string; entityType?: string; cursor?: string; limit: number }) {
+    const [cAt, cId] = q.cursor?.split('|') ?? [];
+    const cursorAt = cAt && !Number.isNaN(Date.parse(cAt)) ? cAt : null;
+    return this.db.withScope(user, async (tx) => {
+      const data = (
+        (await tx.execute(sql`
+          SELECT id, entity_type, entity_id, entity_version, event_type, data_hash, status, tx_hash, block_number,
+                 anchored_at, attempts, last_error, created_at
+          FROM chain_events
+          WHERE (${q.status ?? null}::text IS NULL OR status::text = ${q.status ?? null})
+            AND (${q.eventType ?? null}::text IS NULL OR event_type = ${q.eventType ?? null})
+            AND (${q.entityType ?? null}::text IS NULL OR entity_type = ${q.entityType ?? null})
+            AND (${cursorAt}::timestamptz IS NULL
+                 OR (created_at, id) < (${cursorAt}::timestamptz, ${cId ?? '00000000-0000-0000-0000-000000000000'}::uuid))
+          ORDER BY created_at DESC, id DESC
+          LIMIT ${q.limit}`)) as unknown as { rows: { id: string; created_at: string | Date }[] }
+      ).rows;
+      const last = data.at(-1);
+      const nextCursor =
+        data.length === q.limit && last ? `${new Date(last.created_at).toISOString()}|${last.id}` : null;
+      return { data, nextCursor };
+    });
+  }
+
+  /** Ops panel: counts by status and event type, node state, and the last failures. */
   status(user: AuthUser) {
     return this.db.withScope(user, async (tx) => ({
       configured: this.configured(),
+      node: await this.nodeInfo(),
+      relayer: env().CHAIN_RELAYER_PRIVATE_KEY ? new Wallet(env().CHAIN_RELAYER_PRIVATE_KEY ?? '').address : null,
+      byEventType: (
+        (await tx.execute(
+          sql`SELECT event_type, count(*)::int AS n, count(*) FILTER (WHERE status = 'ANCHORED')::int AS anchored
+              FROM chain_events GROUP BY event_type ORDER BY n DESC`,
+        )) as unknown as { rows: unknown[] }
+      ).rows,
       counts: (
         (await tx.execute(sql`SELECT status, count(*)::int AS n FROM chain_events GROUP BY status`)) as unknown as {
           rows: unknown[];

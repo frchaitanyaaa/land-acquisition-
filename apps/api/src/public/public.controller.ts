@@ -46,6 +46,37 @@ export class PublicController {
     return { ...this.meta(), ledger: ledger ?? null, node: await this.chain.nodeInfo() };
   }
 
+  /**
+   * Public proof check (§27.4, G22). Reads only public_chain_anchor and the contract: does the hash in
+   * our ledger match the hash on the chain for each anchored version? Officers' /chain/verify goes
+   * further and rebuilds the hash from the live record.
+   */
+  @Get('verify/:entityType/:entityId')
+  async verify(@Param('entityType') entityType: string, @Param('entityId') entityId: string) {
+    if (!/^[a-z_]{1,40}$/.test(entityType) || !/^[0-9a-f-]{36}$/i.test(entityId))
+      return { ...this.meta(), found: false, versions: [] };
+    const anchors = await this.db.withScope(null, (tx) =>
+      rows<{ entity_version: number; event_type: string; data_hash: string; status: string; tx_hash: string | null; block_number: string | null; anchored_at: string | null }>(
+        tx,
+        sql`SELECT entity_version, event_type, data_hash, status, tx_hash, block_number, anchored_at
+            FROM public_chain_anchor WHERE entity_type = ${entityType} AND entity_id = ${entityId}::uuid
+            ORDER BY entity_version`,
+      ),
+    );
+    const versions = await Promise.all(
+      anchors.map(async (a) => {
+        if (a.status !== 'ANCHORED') return { ...a, onChainHash: null, result: 'PENDING' as const };
+        try {
+          const onChain = await this.chain.readAnchor(entityType, entityId, a.entity_version);
+          return { ...a, onChainHash: onChain.dataHash, result: onChain.dataHash === a.data_hash ? ('MATCH' as const) : ('MISMATCH' as const) };
+        } catch {
+          return { ...a, onChainHash: null, result: 'UNREACHABLE' as const };
+        }
+      }),
+    );
+    return { ...this.meta(), found: versions.length > 0, entityType, entityId, contract: (await this.chain.nodeInfo()).contract, versions };
+  }
+
   @Get('villages')
   async villages(@Query('q') q?: string) {
     const data = await this.db.withScope(null, (tx) =>

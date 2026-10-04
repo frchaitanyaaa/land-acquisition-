@@ -21,10 +21,13 @@
 | Ask AI assistant | Done (Madhav), sidebar quick action "Ask AI" | `app/(dashboards)/assistant` |
 | **Citizen sign-in + grievances** | **MOCK, browser-only** (localStorage), labelled MOCK on every screen | `lib/mock-citizen.ts`, `/portal/login`, `/portal/grievance`, `/portal/track`, officer `/grievances` |
 | Payment acknowledgement / enrol / passbook token pages | Done | `app/(public)/{ack,enrol,passbook}/[token]` |
+| **Landing page for evaluators**: bold blockchain + GIS + six-USP hero with live anchoring stats, evaluator logins panel (DEMO_MODE) | Done (4 Oct) | `app/(landing)/page.tsx`, `components/landing/evaluator-logins.tsx`, `GET /public/chain-summary` |
+| **Trust UI**: `/trust` Trust center (node, contract, ledger, verify any record + QR), `/trust/audit` (hash-chained audit log + verify), public `/verify/[type]/[id]` | Done (4 Oct) | `app/(dashboards)/trust/*`, `app/(public)/verify/*`, `GET /chain/events`, `GET /audit/log`, `GET /public/verify/:type/:id`, `packages/db/sql/07_public_trust.sql` |
 
 ## Dropped for this release
-- **Blockchain trust UI** (Trust center, public verify page) — Ishan's work dropped. The existing anchoring job,
-  `GET /chain/verify` and `ChainBadge` stay; without the chain node badges show "Proof pending" (G5).
+- Ishan's work was dropped; the Trust UI was built on 4 Oct instead (above). Without the chain node, badges show
+  "Proof pending" and the landing page says the node is offline (G5). No manual "retry failed anchor" button: the
+  job retries with back-off by itself.
 - **Real citizen accounts and grievance backend** — replaced by the mock above.
 - Sidebar items shown as "Soon": State/District dashboards, Proposals, Objections, Deadlines & alerts, Analytics,
   Reports. They are disabled rows, not broken links.
@@ -50,5 +53,10 @@ build · browser smoke test of every sidebar page, landing, login, `/portal/*`, 
 `deploy/README.md` — laptop + Cloudflare tunnel, production mode, step by step. Chaitanya owns it.
 
 ## Demo logins (password `bhoomisetu-demo`, all `@bhoomisetu.local`)
-`oversight` (national) · `collector.pune` · `lao.satara` · `tehsildar.haveli` · `talathi.khedshivapur` (field app) ·
-`demo` (several posts) · `admin`
+The landing page lists all 17 with "Sign in →" buttons. Main ones: `oversight` (national) · `collector.pune` ·
+`lao.satara` · `tehsildar.haveli` · `talathi.khedshivapur` (field) · `demo` (several posts) · `admin`.
+Login is throttled to 10 per minute per IP and an account locks for 15 min after 5 wrong passwords (§29).
+
+## Tamper demo
+`pnpm demo:tamper` edits an anchored parcel (if one was verified) or else an anchored payment (+₹1,000) with raw SQL.
+Trust center → Verify that record → MISMATCH. `pnpm db:reset` (or `demo:reset`) undoes it.

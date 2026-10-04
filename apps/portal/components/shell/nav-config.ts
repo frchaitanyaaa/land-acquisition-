@@ -45,6 +45,7 @@ const NATIONAL_STATE: readonly Role[] = [
   'RNR_COMMISSIONER',
 ];
 const DISTRICT_DESK: readonly Role[] = ['SUPER_ADMIN', 'COLLECTOR', 'LAO'];
+const AUDIT: readonly Role[] = ['SUPER_ADMIN', 'CENTRAL_VIEWER', 'MONITORING_COMMITTEE'];
 const FIELD: readonly Role[] = ['SUPER_ADMIN', 'TEHSILDAR', 'DILR', 'FIELD_OFFICER'];
 
 const inProject = (suffix: string) => (ctx: NavContext) =>
@@ -230,6 +231,27 @@ export const NAV_GROUPS: NavGroup[] = [
         description: 'Statute and state rules, versioned',
         icon: 'rule',
         href: '/rule-packs',
+      },
+    ],
+  },
+  {
+    key: 'trust',
+    label: 'Trust',
+    items: [
+      {
+        key: 'trust-center',
+        label: 'Trust center',
+        description: 'Blockchain anchors and record verification',
+        icon: 'verified_user',
+        href: '/trust',
+      },
+      {
+        key: 'audit-log',
+        label: 'Audit log',
+        description: 'Hash-chained record of every change',
+        icon: 'history',
+        href: '/trust/audit',
+        roles: AUDIT,
       },
     ],
   },

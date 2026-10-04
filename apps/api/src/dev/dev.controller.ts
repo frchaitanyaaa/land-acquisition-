@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, Post } from '@nestjs/common';
+import { Controller, Get, HttpCode, Post, Query } from '@nestjs/common';
 import { sql } from 'drizzle-orm';
 import type { AuthUser } from '../common/auth-user';
 import { DbService } from '../common/db/db.service';
@@ -22,6 +22,18 @@ export class DevController {
     return this.db.withScope(user, (tx) =>
       rows(tx, sql`SELECT to_masked, template, body, created_at FROM dev_outbox_sms ORDER BY created_at DESC LIMIT 50`),
     );
+  }
+
+  /** Trust center audit log page: field NAMES that changed, never values (audit_log_page, 07_public_trust.sql). */
+  @Get('audit/log')
+  @Roles('SUPER_ADMIN', 'CENTRAL_VIEWER', 'MONITORING_COMMITTEE')
+  auditLog(@CurrentUser() user: AuthUser, @Query('before') before?: string, @Query('limit') limit?: string) {
+    const beforeId = before && /^\d{1,18}$/.test(before) ? before : null;
+    const n = Math.min(Math.max(Number(limit) || 50, 1), 500);
+    return this.db.withScope(user, async (tx) => {
+      const data = await rows<{ id: string }>(tx, sql`SELECT * FROM audit_log_page(${beforeId}::bigint, ${n})`);
+      return { data, nextCursor: data.length === n ? (data.at(-1)?.id ?? null) : null };
+    });
   }
 
   /** Walks the audit hash chain and reports the first broken link. */
