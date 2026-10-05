@@ -30,13 +30,20 @@ The whole stack (Postgres/PostGIS, blockchain node, API, portal, field app) runs
    From then on every push to `main` builds a new image and Render redeploys it (~15–20 min in total).
 
 **What to expect**
-- Free instances sleep after 15 minutes without visitors; waking takes about 3 minutes. Because evaluators may open
-  the link at any time, keep it awake (one always-on service uses ~744 of the 750 free hours a month):
-  - **Primary:** a free uptime monitor, no card — https://uptimerobot.com (HTTP(s) monitor, interval 5 min) or
-    https://cron-job.org (every 10 min) on `https://bhoomisetu-latest.onrender.com/api/v1/health`.
-  - **Backup:** `.github/workflows/keep-awake.yml` pings every 10 minutes and logs health and the anchored count
-    (GitHub can delay scheduled runs, so it is not enough on its own). Set the repository variable `PUBLIC_URL` if
-    the Render URL changes.
+- Free instances sleep after 15 minutes without visitors; waking takes about 3 minutes. Render gives **750 free
+  instance hours a month**; awake 24×7 would use ~744, so close that a few redeploys could exhaust them and Render
+  would suspend the service until next month. So the demo is kept awake **08:00–24:00 IST** (~505 h/month); between
+  midnight and 08:00 the first visitor waits ~3 min while it wakes, then it runs normally.
+  - **Primary pinger:** https://cron-job.org (free, no card) → Create cronjob → URL
+    `https://bhoomisetu-latest.onrender.com/api/v1/health` → Schedule **Custom**: every 10 minutes, hours 8–23,
+    time zone **Asia/Kolkata**. **Pause or delete any UptimeRobot monitor** — it pings 24×7 and would undo the window.
+  - **Backup:** `.github/workflows/keep-awake.yml` pings every 10 minutes in the same window and logs health and the
+    anchored count (GitHub can delay scheduled runs, so it is not enough on its own). Set the repository variable
+    `PUBLIC_URL` if the Render URL changes.
+  - **Wake on demand** (e.g. before an evaluation at night): GitHub → Actions → *Keep demo awake* → Run workflow.
+- Spikes: the free instance (512 MB, 0.1 CPU) cannot scale out, so a burst of visitors makes pages slower. Node heap
+  caps in `start.sh` keep a burst from pushing the container past 512 MB (which would restart it and reset the demo),
+  and the API rate limits (60/min per IP on public endpoints) stop one client from flooding it.
 - On wake-up the records are re-anchored on a fresh blockchain in the background (about 3 minutes); until then the
   landing page shows fewer anchored records and Trust → Check may say *pending*.
 - Storage is not kept between restarts: each start begins from the seeded demo (MH-PSX at "34 days"). Anything an

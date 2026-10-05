@@ -74,8 +74,15 @@ set -a; . ./.env.local; set +a
 
 # --- API + portal ------------------------------------------------------------------------------------------
 # The portal binds the port straight away (the host's health check); the API comes up beside it.
+# Heap caps: under a burst each Node process collects garbage sooner instead of growing until the whole container
+# passes 512 MB and the host kills it (a restart is ~3 min down and resets the demo). Measured locally, 50 users
+# for 40 s: API + portal peaked ~100 MB lower than uncapped, with no errors other than the rate limiter's 429s.
+# Override with NODE_HEAP_MB.
+HEAP_MB=${NODE_HEAP_MB:-160}
+NODE_MEM="--max-old-space-size=$HEAP_MB --max-semi-space-size=4"
 log "starting API on :3001"
-nohup node apps/api/dist/main.js > "$RUN/api.log" 2>&1 &
+nohup node $NODE_MEM apps/api/dist/main.js > "$RUN/api.log" 2>&1 &
 log "starting portal on :$PORT (https://$HOST)"
 cd apps/portal
+export NODE_OPTIONS="$NODE_MEM"
 exec ./node_modules/.bin/next start --port "$PORT" --hostname 0.0.0.0

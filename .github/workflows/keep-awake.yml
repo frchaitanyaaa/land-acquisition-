@@ -1,5 +1,7 @@
-# Keeps the free Render demo awake (it sleeps after 15 min without visitors; waking takes ~3 min) and reports its
-# health. One always-on free service uses ~744 of Render's 750 free hours a month.
+# Keeps the free Render demo awake 08:00–24:00 IST (it sleeps after 15 min without visitors; waking takes ~3 min)
+# and reports its health. Awake 24×7 would use ~744 of Render's 750 free hours a month — too close to the limit,
+# after which Render suspends the service until next month. This window uses ~505 h. Overnight the first visitor
+# waits ~3 min; to wake it on demand: Actions → Keep demo awake → Run workflow.
 # GitHub may delay scheduled runs; an external pinger (UptimeRobot / cron-job.org, see deploy/README.md) is the
 # primary keep-awake, this is the backup and the health log.
 # URL: repository variable PUBLIC_URL, else the default below.
@@ -7,7 +9,10 @@ name: Keep demo awake
 
 on:
   schedule:
-    - cron: '*/10 * * * *'
+    # Cron is UTC; IST = UTC + 5:30. Together: every 10 min from 08:00 to 23:50 IST.
+    - cron: '30,40,50 2 * * *'
+    - cron: '*/10 3-17 * * *'
+    - cron: '0,10,20 18 * * *'
   workflow_dispatch:
 
 concurrency:
