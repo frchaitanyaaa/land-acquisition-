@@ -67,9 +67,10 @@ export const NAV_GROUPS: NavGroup[] = [
       {
         key: 'state',
         label: 'State dashboard',
-        description: 'Your state, district by district',
+        description: 'One state, district by district',
         icon: 'map',
-        href: (ctx) => (ctx.post.stateCode ? `/state/${ctx.post.stateCode}` : null),
+        href: (ctx) =>
+          ctx.post.stateCode ? `/state/${ctx.post.stateCode}` : ctx.post.level === 'NATIONAL' ? '/state' : null,
       },
       {
         key: 'district',

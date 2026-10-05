@@ -240,14 +240,12 @@ function PackColumn({ packKey, other, summaries }: { packKey: string; other: str
   );
 }
 
-/** §12.4: rendered first, in full, in a colour nobody can miss. */
+/** §12.4: the pack's verify[] notes, rendered first and in full (headline wording removed 5 Oct 2026 at the team's request). */
 function VerifyBanner({ own, inherited, parentKey }: { own: string[]; inherited: string[]; parentKey: string | null }) {
   if (!own.length && !inherited.length) return null;
   return (
-    <section role="alert" className="border-2 border-amber-400 bg-amber-50 px-4 py-3 text-amber-950">
-      <p className="text-sm font-bold uppercase tracking-wide">⚠ Verify before presenting as law</p>
-      <p className="text-xs text-amber-900">These values are unverified or placeholders. Do not present them as settled law.</p>
-      <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+    <section className="border-2 border-amber-400 bg-amber-50 px-4 py-3 text-amber-950">
+      <ul className="list-disc space-y-1 pl-5 text-sm">
         {own.map((v, i) => (
           <li key={i}>{v}</li>
         ))}

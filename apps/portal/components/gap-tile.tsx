@@ -19,18 +19,19 @@ export function GapTile({
   const unconfirmed = paise(unconfirmedPaise);
   const total = paid > 0n ? paid : 1n;
   const ackPct = Number((acknowledged * 1000n) / total) / 10;
-  const unconfPct = Math.max(0, 100 - ackPct);
+  // Nothing disbursed yet: an empty bar, not a full "unconfirmed" one.
+  const unconfPct = paid > 0n ? Math.max(0, 100 - ackPct) : 0;
 
   return (
-    <div className="col-span-full border border-slate-200 bg-white px-5 py-4 sm:col-span-2">
+    <div className="col-span-full border border-slate-200 bg-white px-5 py-4">
       <p className="text-xs font-medium text-slate-500">Disbursed vs. acknowledged</p>
       <div className="mt-2 flex flex-wrap items-baseline gap-x-6 gap-y-1">
         <span className="text-2xl font-semibold tabular-nums tracking-tight text-slate-900">{formatMoney(paid)}</span>
-        <span className="text-sm text-slate-500">disbursed</span>
+        <span className="text-sm text-slate-500">{paid > 0n ? 'disbursed' : 'disbursed — no payments yet'}</span>
       </div>
       <div className="mt-3 flex h-2 w-full overflow-hidden rounded-sm bg-slate-100">
         <div className="h-full bg-teal-700" style={{ width: `${ackPct}%` }} />
-        <div className="h-full w-0.5 bg-white" />
+        {paid > 0n && <div className="h-full w-0.5 bg-white" />}
         <div className="h-full bg-amber-500" style={{ width: `${unconfPct}%` }} />
       </div>
       <dl className="mt-3 grid grid-cols-2 gap-4 text-sm">

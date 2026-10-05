@@ -1,5 +1,6 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
 import { PostSwitcher } from '@/components/post-switcher';
@@ -19,6 +20,7 @@ export interface DemoLogin {
  */
 export function LoginForm({ demo = null }: { demo?: DemoLogin | null }) {
   const router = useRouter();
+  const qc = useQueryClient();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +36,9 @@ export function LoginForm({ demo = null }: { demo?: DemoLogin | null }) {
   }, [demo]);
 
   function go(post: Post) {
+    // A new sign-in changes user, post, RLS scope and sidebar: nothing cached from the previous session
+    // (e.g. /auth/me of another account) may survive, or the shell shows the old post until a reload.
+    qc.clear();
     router.push(homeFor(post));
   }
 

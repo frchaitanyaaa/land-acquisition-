@@ -22,10 +22,13 @@ const ProjectMap = dynamic(() => import('@/components/gis/project-map').then((m)
  */
 export function ScopeDashboard({
   title,
+  actions,
   data,
   breakdown,
 }: {
   title: ReactNode;
+  /** Shown to the right of the title (e.g. the state picker). */
+  actions?: ReactNode;
   data: NationalDashboard;
   /** Table under the map: by state (national), by district (state), or the projects themselves (district). */
   breakdown: 'state' | 'district' | 'projects';
@@ -34,34 +37,41 @@ export function ScopeDashboard({
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
-        <p className="text-sm text-slate-500">
-          {kpis.projects} projects · as of {formatDateTime(data.asOf)}
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
+          <p className="text-sm text-slate-500">
+            {kpis.projects} projects · as of {formatDateTime(data.asOf)}
+          </p>
+        </div>
+        {actions}
       </div>
       <section>
         <h2 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Key parameters</h2>
-        <div className="grid grid-cols-2 gap-px bg-slate-200 sm:grid-cols-4">
-          <StatTile label="Area notified" value={formatHectares(kpis.area_notified_sqm)} />
-          <StatTile label="Area acquired" value={formatHectares(kpis.area_acquired_sqm)} />
-          <StatTile label="Compensation assessed" value={formatMoney(kpis.compensation_assessed_paise)} />
-          <StatTile label="Compensation paid" value={formatMoney(kpis.compensation_paid_paise)} />
-          <StatTile label="Affected families" value={formatNum(kpis.affected_families)} />
-          <StatTile label="Displaced families" value={formatNum(kpis.displaced_families)} />
-          <StatTile label="R&R completion" value={formatPct(kpis.rnr_completion_pct)} />
-          <StatTile label="Possession" value={formatPct(kpis.possession_pct)} />
-          <StatTile label="Timeline adherence" value={formatPct(kpis.timeline_adherence_pct)} />
-          <StatTile
-            label="Deadlines breached"
-            value={formatNum(kpis.deadlines_breached)}
-            tone={kpis.deadlines_breached > 0 ? 'critical' : 'default'}
-          />
-          <StatTile
-            label="Estimated interest liability (s.80)"
-            value={formatMoney(data.estimatedInterestLiability.estimated_interest_paise)}
-            sub={`${data.estimatedInterestLiability.entitlements} entitlements accruing`}
-          />
+        <div className="space-y-px bg-slate-200">
+          <div className="grid grid-cols-2 gap-px lg:grid-cols-4">
+            <StatTile label="Area notified" value={formatHectares(kpis.area_notified_sqm)} />
+            <StatTile label="Area acquired" value={formatHectares(kpis.area_acquired_sqm)} />
+            <StatTile label="Compensation assessed" value={formatMoney(kpis.compensation_assessed_paise)} />
+            <StatTile label="Compensation paid" value={formatMoney(kpis.compensation_paid_paise)} />
+            <StatTile label="Affected families" value={formatNum(kpis.affected_families)} />
+            <StatTile label="Displaced families" value={formatNum(kpis.displaced_families)} />
+            <StatTile label="R&R completion" value={formatPct(kpis.rnr_completion_pct)} />
+            <StatTile label="Possession" value={formatPct(kpis.possession_pct)} />
+          </div>
+          <div className="grid grid-cols-1 gap-px sm:grid-cols-3">
+            <StatTile label="Timeline adherence" value={formatPct(kpis.timeline_adherence_pct)} />
+            <StatTile
+              label="Deadlines breached"
+              value={formatNum(kpis.deadlines_breached)}
+              tone={kpis.deadlines_breached > 0 ? 'critical' : 'default'}
+            />
+            <StatTile
+              label="Estimated interest liability (s.80)"
+              value={formatMoney(data.estimatedInterestLiability.estimated_interest_paise)}
+              sub={`${data.estimatedInterestLiability.entitlements} entitlements accruing`}
+            />
+          </div>
           <GapTile
             paidPaise={kpis.compensation_paid_paise}
             acknowledgedPaise={kpis.compensation_acknowledged_paise}
@@ -167,7 +177,7 @@ export function DashboardSkeleton() {
   return (
     <div className="space-y-8">
       <div className="h-14 animate-pulse bg-slate-100" />
-      <div className="grid grid-cols-2 gap-px bg-slate-200 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-px bg-slate-200 lg:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="h-20 animate-pulse bg-white" />
         ))}
