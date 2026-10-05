@@ -38,7 +38,13 @@ const EVENT_LABEL: Record<string, string> = {
 
 interface ChainStatus {
   configured: boolean;
-  node: { configured: boolean; contract: string | null; reachable: boolean; chainId: number | null; latestBlock: number | null };
+  node: {
+    configured: boolean;
+    contract: string | null;
+    reachable: boolean;
+    chainId: number | null;
+    latestBlock: number | null;
+  };
   relayer: string | null;
   byEventType: Array<{ event_type: string; n: number; anchored: number }>;
   counts: Array<{ status: string; n: number }>;
@@ -63,7 +69,9 @@ interface ChainEventRow {
 const short = (h: string | null | undefined, n = 10) => (h ? `${h.slice(0, n)}…${h.slice(-6)}` : '—');
 const when = (iso: string | null | undefined) =>
   iso
-    ? new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata' }).format(new Date(iso))
+    ? new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata' }).format(
+        new Date(iso),
+      )
     : '—';
 
 function Copy({ text }: { text: string }) {
@@ -93,7 +101,8 @@ function VerifyResult({ entityType, entityId }: { entityType: string; entityId: 
   const [origin, setOrigin] = useState('');
   useEffect(() => setOrigin(window.location.origin), []);
   if (isLoading) return <p className="ux4g-body-s-default">Rebuilding the record and reading the chain…</p>;
-  if (error || !data) return <p className="ux4g-body-s-default ux4g-text-error">{(error as Error)?.message ?? 'Could not verify.'}</p>;
+  if (error || !data)
+    return <p className="ux4g-body-s-default ux4g-text-error">{(error as Error)?.message ?? 'Could not verify.'}</p>;
   const tone =
     data.result === 'VERIFIED'
       ? 'border-emerald-300 bg-emerald-50 text-emerald-950'
@@ -150,7 +159,11 @@ function VerifyResult({ entityType, entityId }: { entityType: string; entityId: 
           <QrCode url={publicUrl} caption="Public proof page: anyone can scan and check this anchor" />
           <div className="space-y-2 text-sm">
             <p>The public page shows only hashes, block and time. No names or amounts.</p>
-            <Link href={`/verify/${entityType}/${entityId}`} className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-s" target="_blank">
+            <Link
+              href={`/verify/${entityType}/${entityId}`}
+              className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-s"
+              target="_blank"
+            >
               Open public proof page
             </Link>
           </div>
@@ -161,7 +174,11 @@ function VerifyResult({ entityType, entityId }: { entityType: string; entityId: 
 }
 
 export default function TrustCenterPage() {
-  const status = useQuery({ queryKey: ['chain', 'status'], queryFn: () => api<ChainStatus>('/chain/status'), refetchInterval: 15_000 });
+  const status = useQuery({
+    queryKey: ['chain', 'status'],
+    queryFn: () => api<ChainStatus>('/chain/status'),
+    refetchInterval: 15_000,
+  });
   const [statusFilter, setStatusFilter] = useState('');
   const [eventFilter, setEventFilter] = useState('');
   const [form, setForm] = useState({ entityType: 'disbursement', entityId: '' });
@@ -223,7 +240,9 @@ export default function TrustCenterPage() {
               {status.isLoading ? 'Checking chain node…' : 'Chain node not reachable: work continues, proofs queue'}
             </span>
           )}
-          <span className="text-sm text-[#adc0eb]">Permissioned EVM · Hardhat node (production direction: Hyperledger Besu)</span>
+          <span className="text-sm text-[#adc0eb]">
+            Permissioned EVM · Hardhat node (production direction: Hyperledger Besu)
+          </span>
         </div>
         <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
           <div>
@@ -247,7 +266,11 @@ export default function TrustCenterPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard icon="verified" label="Records anchored" value={count('ANCHORED').toLocaleString('en-IN')} />
-        <KpiCard icon="schedule" label="Queued / submitted" value={(count('QUEUED') + count('SUBMITTED')).toLocaleString('en-IN')} />
+        <KpiCard
+          icon="schedule"
+          label="Queued / submitted"
+          value={(count('QUEUED') + count('SUBMITTED')).toLocaleString('en-IN')}
+        />
         <KpiCard
           icon="error"
           label="Failed (retrying)"
@@ -302,7 +325,12 @@ export default function TrustCenterPage() {
         description="Newest first. Payloads contain no names, phones or bank details: only IDs, amounts in paise, hashes and posts."
         actions={
           <div className="flex flex-wrap gap-2">
-            <select className="input" aria-label="Status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <select
+              className="input"
+              aria-label="Status"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
               <option value="">All statuses</option>
               {['ANCHORED', 'QUEUED', 'SUBMITTED', 'FAILED'].map((s) => (
                 <option key={s} value={s}>
@@ -310,7 +338,12 @@ export default function TrustCenterPage() {
                 </option>
               ))}
             </select>
-            <select className="input" aria-label="Event" value={eventFilter} onChange={(e) => setEventFilter(e.target.value)}>
+            <select
+              className="input"
+              aria-label="Event"
+              value={eventFilter}
+              onChange={(e) => setEventFilter(e.target.value)}
+            >
               <option value="">All events</option>
               {(status.data?.byEventType ?? []).map((t) => (
                 <option key={t.event_type} value={t.event_type}>
@@ -325,9 +358,15 @@ export default function TrustCenterPage() {
           <p className="ux4g-body-s-default">Loading…</p>
         ) : rows.length === 0 ? (
           statusFilter || eventFilter ? (
-            <EmptyState title="No entries match these filters" description="Choose “All statuses” and “All events” to see the whole ledger." />
+            <EmptyState
+              title="No entries match these filters"
+              description="Choose “All statuses” and “All events” to see the whole ledger."
+            />
           ) : (
-            <EmptyState title="Nothing anchored yet" description="Approve a record (verify a parcel, sign an award) and it appears here." />
+            <EmptyState
+              title="Nothing anchored yet"
+              description="Approve a record (verify a parcel, sign an award) and it appears here."
+            />
           )
         ) : (
           <div className="overflow-x-auto">
@@ -362,7 +401,9 @@ export default function TrustCenterPage() {
                     </td>
                     <td className="py-2 pr-3">
                       <StatusTag kind="chain" status={r.status} />
-                      {r.last_error && <span className="mt-1 block max-w-48 text-xs text-red-700">{r.last_error.slice(0, 80)}</span>}
+                      {r.last_error && (
+                        <span className="mt-1 block max-w-48 text-xs text-red-700">{r.last_error.slice(0, 80)}</span>
+                      )}
                     </td>
                     <td className="py-2 pr-3 text-xs">{when(r.anchored_at)}</td>
                     <td className="py-2">
@@ -396,15 +437,18 @@ export default function TrustCenterPage() {
         )}
       </SectionCard>
 
-      <SectionCard title="How tampering is caught" description="What the demo shows, and why a correction is different.">
+      <SectionCard
+        title="How tampering is caught"
+        description="What the demo shows, and why a correction is different."
+      >
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-950">
             <p className="font-bold">Silent database edit → MISMATCH</p>
             <p className="mt-1">
               <code>pnpm demo:tamper</code> moves one verified parcel&apos;s boundary by about 5 m with raw SQL, as a
               privileged insider could (if no parcel is anchored yet, it adds ₹1,000 to an anchored payment instead).
-              The record&apos;s hash no longer matches the hash on the chain: Verify shows MISMATCH and the record&apos;s
-              badge turns red.
+              The record&apos;s hash no longer matches the hash on the chain: Verify shows MISMATCH and the
+              record&apos;s badge turns red.
             </p>
           </div>
           <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-950">

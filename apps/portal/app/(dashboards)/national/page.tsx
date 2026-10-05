@@ -19,5 +19,5 @@ export default function NationalDashboard() {
     return <p className="text-red-700">Could not load the national dashboard.</p>;
   }
   if (isLoading || !data) return <DashboardSkeleton />;
-  return <ScopeDashboard title="National dashboard" data={data} breakdown="state" />;
+  return <ScopeDashboard title="National dashboard" data={data} breakdown="state" pipeline={{}} />;
 }

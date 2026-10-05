@@ -19,7 +19,11 @@ const dateIST = (iso: string | null | undefined) =>
  */
 export default function OfficerPassbookPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { data: pb, isLoading, error } = useQuery({
+  const {
+    data: pb,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['family-passbook', id],
     queryFn: () => api<Passbook>(`/families/${id}/passbook`),
   });
@@ -58,35 +62,41 @@ export default function OfficerPassbookPage({ params }: { params: Promise<{ id: 
           </button>
         }
       />
-      {issueError && <div role="alert" className="ux4g-alert ux4g-alert-error">{issueError}</div>}
+      {issueError && (
+        <div role="alert" className="ux4g-alert ux4g-alert-error">
+          {issueError}
+        </div>
+      )}
       {link && <QrCode url={link.url} caption="Family scans to open their passbook (valid 90 days)" />}
 
       <div className="ux4g-table-responsive border border-slate-200 bg-white">
-      <table className="ux4g-table ux4g-table-s w-full">
-        <thead>
-          <tr>
-            <th className="px-3 py-2">Head</th>
-            <th className="px-3 py-2 text-right">Amount</th>
-            <th className="px-3 py-2">Status</th>
-            <th className="px-3 py-2">Acknowledged</th>
-            <th className="px-3 py-2">Due by</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {pb.entitlements.map((e) => (
-            <tr key={e.headCode}>
-              <td className="px-3 py-2">{e.headCode.replace(/_/g, ' ')}</td>
-              <td className="px-3 py-2 text-right tabular-nums">{formatMoney(e.amountPaise)}</td>
-              <td className="px-3 py-2">
-                <MoneyState state={e.status === 'PAYMENT_IN_PROCESS' ? 'SANCTIONED' : e.status} />
-                {e.status === 'PAYMENT_IN_PROCESS' && <span className="ml-1 text-xs text-slate-500">(family sees: payment in process)</span>}
-              </td>
-              <td className="px-3 py-2">{BigInt(e.paidPaise) > 0n ? (e.acknowledged ? '✓ yes' : 'not yet') : '—'}</td>
-              <td className="px-3 py-2">{dateIST(e.dueBy)}</td>
+        <table className="ux4g-table ux4g-table-s w-full">
+          <thead>
+            <tr>
+              <th className="px-3 py-2">Head</th>
+              <th className="px-3 py-2 text-right">Amount</th>
+              <th className="px-3 py-2">Status</th>
+              <th className="px-3 py-2">Acknowledged</th>
+              <th className="px-3 py-2">Due by</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {pb.entitlements.map((e) => (
+              <tr key={e.headCode}>
+                <td className="px-3 py-2">{e.headCode.replace(/_/g, ' ')}</td>
+                <td className="px-3 py-2 text-right tabular-nums">{formatMoney(e.amountPaise)}</td>
+                <td className="px-3 py-2">
+                  <MoneyState state={e.status === 'PAYMENT_IN_PROCESS' ? 'SANCTIONED' : e.status} />
+                  {e.status === 'PAYMENT_IN_PROCESS' && (
+                    <span className="ml-1 text-xs text-slate-500">(family sees: payment in process)</span>
+                  )}
+                </td>
+                <td className="px-3 py-2">{BigInt(e.paidPaise) > 0n ? (e.acknowledged ? '✓ yes' : 'not yet') : '—'}</td>
+                <td className="px-3 py-2">{dateIST(e.dueBy)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
       <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
         <div className="ux4g-card ux4g-card-outline ux4g-card-vertical ux4g-p-s">
@@ -99,7 +109,11 @@ export default function OfficerPassbookPage({ params }: { params: Promise<{ id: 
         </div>
         <div className="ux4g-card ux4g-card-outline ux4g-card-vertical ux4g-p-s">
           <dt className="text-xs text-slate-500">Resettlement site</dt>
-          <dd>{pb.site ? `${pb.site.name}${pb.site.readinessPct != null ? ` · ${pb.site.readinessPct}% ready` : ''}` : '—'}</dd>
+          <dd>
+            {pb.site
+              ? `${pb.site.name}${pb.site.readinessPct != null ? ` · ${pb.site.readinessPct}% ready` : ''}`
+              : '—'}
+          </dd>
         </div>
         <div className="ux4g-card ux4g-card-outline ux4g-card-vertical ux4g-p-s">
           <dt className="text-xs text-slate-500">Contact</dt>

@@ -8,7 +8,10 @@ import { usePossessionGate, useTakePossession } from '@/lib/money-api';
 
 /** Every condition the gate evaluates (packages/rules/src/engine/possession.ts, §12.6). */
 const CONDITIONS: Array<{ codes: string[]; label: string }> = [
-  { codes: ['LAND_HEAD_UNSETTLED'], label: 'Every land compensation head is acknowledged by the family or deposited with the Authority' },
+  {
+    codes: ['LAND_HEAD_UNSETTLED'],
+    label: 'Every land compensation head is acknowledged by the family or deposited with the Authority',
+  },
   { codes: ['RNR_HEAD_UNSETTLED'], label: 'Monetary R&R of every displaced family is acknowledged or deposited' },
   { codes: ['SITE_NOT_READY'], label: 'Resettlement site is 100% ready for every displaced family' },
   { codes: ['VACATION_CERTIFICATE_MISSING'], label: 'Vacation certificate is uploaded and attested' },
@@ -61,8 +64,12 @@ export default function PossessionPage({ params }: { params: Promise<{ id: strin
       });
       setResult({ ok: true, lines: ['Possession recorded. The parcel is now acquired and possessed.'] });
     } catch (e) {
-      const failures = e instanceof ApiProblem ? ((e.extra.failures as Array<{ message: string }> | undefined) ?? []) : [];
-      setResult({ ok: false, lines: failures.length ? failures.map((f) => f.message) : [e instanceof Error ? e.message : 'Refused.'] });
+      const failures =
+        e instanceof ApiProblem ? ((e.extra.failures as Array<{ message: string }> | undefined) ?? []) : [];
+      setResult({
+        ok: false,
+        lines: failures.length ? failures.map((f) => f.message) : [e instanceof Error ? e.message : 'Refused.'],
+      });
       void refetch();
     }
   }
@@ -78,7 +85,9 @@ export default function PossessionPage({ params }: { params: Promise<{ id: strin
       <section className="ux4g-card ux4g-card-outline ux4g-card-vertical">
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
           <h2 className="text-sm font-semibold">Possession gate (s.38)</h2>
-          <span className={`rounded px-2 py-0.5 text-xs font-semibold ${gate.allowed ? 'bg-teal-50 text-teal-800' : 'bg-red-50 text-red-800'}`}>
+          <span
+            className={`rounded px-2 py-0.5 text-xs font-semibold ${gate.allowed ? 'bg-teal-50 text-teal-800' : 'bg-red-50 text-red-800'}`}
+          >
             {gate.allowed ? 'Passes' : `${gate.failures.length} blocking`}
           </span>
         </div>
@@ -135,7 +144,11 @@ export default function PossessionPage({ params }: { params: Promise<{ id: strin
                 {docs[k] ? (
                   <span className="text-xs text-teal-800">✓ attested &amp; uploaded</span>
                 ) : (
-                  <button type="button" onClick={() => setUploading(k)} className="ux4g-btn-outline-primary ux4g-btn-xs">
+                  <button
+                    type="button"
+                    onClick={() => setUploading(k)}
+                    className="ux4g-btn-outline-primary ux4g-btn-xs"
+                  >
                     Upload
                   </button>
                 )}
@@ -146,7 +159,12 @@ export default function PossessionPage({ params }: { params: Promise<{ id: strin
             <span className="text-slate-700">
               Witnesses <span className="text-red-700">*</span> (one name per line)
             </span>
-            <textarea value={witnesses} onChange={(e) => setWitnesses(e.target.value)} rows={3} className="mt-1 block w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+            <textarea
+              value={witnesses}
+              onChange={(e) => setWitnesses(e.target.value)}
+              rows={3}
+              className="mt-1 block w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+            />
           </label>
           <button
             onClick={() => void submit()}
@@ -158,7 +176,10 @@ export default function PossessionPage({ params }: { params: Promise<{ id: strin
           </button>
           {!gate.allowed && <p className="text-xs text-slate-500">Disabled until every condition above passes.</p>}
           {result && (
-            <ul role="alert" className={`ux4g-alert space-y-1 ${result.ok ? 'ux4g-alert-success' : 'ux4g-alert-error'}`}>
+            <ul
+              role="alert"
+              className={`ux4g-alert space-y-1 ${result.ok ? 'ux4g-alert-success' : 'ux4g-alert-error'}`}
+            >
               {result.lines.map((l, i) => (
                 <li key={i}>{l}</li>
               ))}

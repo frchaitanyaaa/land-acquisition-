@@ -20,5 +20,11 @@ export default function DistrictDashboardPage() {
   }
   if (isLoading || !data) return <DashboardSkeleton />;
   const name = data.districts.find((d) => d.district_code === code)?.district_name;
-  return <ScopeDashboard title={name ? `District dashboard · ${name}` : 'District dashboard'} data={data} breakdown="projects" />;
+  return (
+    <ScopeDashboard
+      title={name ? `District dashboard · ${name}` : 'District dashboard'}
+      data={data}
+      breakdown="projects"
+    />
+  );
 }

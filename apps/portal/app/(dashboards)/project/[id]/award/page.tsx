@@ -58,7 +58,11 @@ export default function AwardPage({ params }: { params: Promise<{ id: string }> 
 
       <ValuationInputs projectId={projectId} />
 
-      {award ? <AwardReview projectId={projectId} award={award} /> : <p className="text-sm text-slate-500">No award drafted yet.</p>}
+      {award ? (
+        <AwardReview projectId={projectId} award={award} />
+      ) : (
+        <p className="text-sm text-slate-500">No award drafted yet.</p>
+      )}
     </div>
   );
 }
@@ -101,7 +105,11 @@ function NewAward({ projectId, onCreated }: { projectId: string; onCreated: (id:
     <div className="flex flex-wrap items-end gap-2 border border-slate-200 bg-white p-3">
       <label className="text-sm">
         <span className="block text-xs text-slate-500">Type</span>
-        <select value={awardType} onChange={(e) => setAwardType(e.target.value as 'LAND' | 'RNR')} className="ux4g-dropdown-control">
+        <select
+          value={awardType}
+          onChange={(e) => setAwardType(e.target.value as 'LAND' | 'RNR')}
+          className="ux4g-dropdown-control"
+        >
           <option value="LAND">Land (s.23)</option>
           <option value="RNR">R&amp;R (s.31)</option>
         </select>
@@ -190,18 +198,24 @@ function ValuationInputs({ projectId }: { projectId: string }) {
   });
   return (
     <section className="border border-slate-200 bg-slate-50">
-      <button onClick={() => setOpen((o) => !o)} className="flex w-full items-center justify-between px-4 py-2.5 text-left">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between px-4 py-2.5 text-left"
+      >
         <span className="text-sm font-semibold text-slate-800">Valuation inputs — reference only</span>
         <span className="text-xs text-slate-500">{open ? 'Hide' : 'Show'}</span>
       </button>
       {open && (
         <div className="space-y-3 border-t border-slate-200 px-4 py-3 text-sm">
           <p className="border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700">
-            This panel only <strong>shows</strong> benchmarks and department reports as they were entered. It does not pick a value, add
-            anything up, or apply a multiplication factor. The LAO decides and enters every figure in the award (G1).
+            This panel only <strong>shows</strong> benchmarks and department reports as they were entered. It does not
+            pick a value, add anything up, or apply a multiplication factor. The LAO decides and enters every figure in
+            the award (G1).
           </p>
           {isLoading && <p className="text-slate-500">Loading…</p>}
-          {data && data.length === 0 && <p className="text-slate-500">No benchmark documents or department reports uploaded for this project.</p>}
+          {data && data.length === 0 && (
+            <p className="text-slate-500">No benchmark documents or department reports uploaded for this project.</p>
+          )}
           {data && data.length > 0 && (
             <ul className="divide-y divide-slate-200 border border-slate-200 bg-white">
               {data.map((d) => (
@@ -211,7 +225,12 @@ function ValuationInputs({ projectId }: { projectId: string }) {
                   </span>
                   <span className="flex items-center gap-3 text-xs text-slate-500">
                     {d.uploaded_by_designation ?? '—'} · {new Date(d.uploaded_at).toLocaleDateString('en-IN')}
-                    <a href={`/api/v1/documents/${d.id}/download`} target="_blank" rel="noreferrer" className="text-teal-700 hover:underline">
+                    <a
+                      href={`/api/v1/documents/${d.id}/download`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-teal-700 hover:underline"
+                    >
                       Open
                     </a>
                   </span>
@@ -237,7 +256,13 @@ interface AwardDetail {
   status: string;
   version: number;
   documentId: string | null;
-  entitlements: Array<{ affected_family_id: string; head_code: string; amount_awarded_paise: string; source: string; head_name: string }>;
+  entitlements: Array<{
+    affected_family_id: string;
+    head_code: string;
+    amount_awarded_paise: string;
+    source: string;
+    head_name: string;
+  }>;
 }
 
 function AwardReview({ projectId, award }: { projectId: string; award: AwardListRow }) {
@@ -293,7 +318,9 @@ function AwardReview({ projectId, award }: { projectId: string; award: AwardList
       ) : !award.ocr_extraction_id ? (
         <p className="text-sm text-slate-500">No OCR extraction is linked to this award.</p>
       ) : extraction.data?.status === 'pending' || extraction.isLoading ? (
-        <p className="text-sm text-slate-500">Reading the award PDF… suggested fields appear here when the OCR job finishes.</p>
+        <p className="text-sm text-slate-500">
+          Reading the award PDF… suggested fields appear here when the OCR job finishes.
+        </p>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
           {/* LEFT: the PDF itself, at the page of the field under review */}
@@ -303,7 +330,12 @@ function AwardReview({ projectId, award }: { projectId: string; award: AwardList
                 Award PDF · page {page}
                 {focusKey && ' — the selected field is on this page'}
               </span>
-              <a href={`/api/v1/documents/${award.document_id}/download`} target="_blank" rel="noreferrer" className="text-teal-700 hover:underline">
+              <a
+                href={`/api/v1/documents/${award.document_id}/download`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-teal-700 hover:underline"
+              >
                 Open in new tab
               </a>
             </div>
@@ -318,10 +350,12 @@ function AwardReview({ projectId, award }: { projectId: string; award: AwardList
           {/* RIGHT: suggestions, greyed until a human accepts them one by one */}
           <div className="space-y-3">
             <p className="text-xs text-slate-500">
-              Suggested by OCR in grey. Accept each field yourself (edit first if the PDF says otherwise) — nothing is accepted in bulk,
-              and only accepted values become entitlements (G3).
+              Suggested by OCR in grey. Accept each field yourself (edit first if the PDF says otherwise) — nothing is
+              accepted in bulk, and only accepted values become entitlements (G3).
             </p>
-            {groups.length === 0 && <p className="text-sm text-slate-500">The OCR job found no award lines in this PDF.</p>}
+            {groups.length === 0 && (
+              <p className="text-sm text-slate-500">The OCR job found no award lines in this PDF.</p>
+            )}
             {groups.map(([familyId, fields]) => (
               <FamilyGroup
                 key={familyId}
@@ -398,7 +432,9 @@ function FamilyGroup({
   return (
     <section className="border border-slate-200 bg-white">
       <div className="border-b border-slate-200 px-3 py-2">
-        <p className="text-sm font-medium">{family ? family.head_name : <span className="text-red-700">Unknown family</span>}</p>
+        <p className="text-sm font-medium">
+          {family ? family.head_name : <span className="text-red-700">Unknown family</span>}
+        </p>
         <p className="text-xs text-slate-500">
           {family ? `${family.is_sc_st ? 'SC/ST · ' : ''}${family.is_displaced ? 'displaced' : 'affected'}` : familyId}
         </p>
@@ -464,7 +500,8 @@ function FieldRow({
   const head = field.key.slice(field.key.lastIndexOf(':') + 1);
   const isAccepted = !!accepted;
   const typed = value.trim();
-  const mismatch = existing && BigInt(existing.amount_awarded_paise) !== BigInt(rupeesToPaise(String(accepted?.value ?? field.value)));
+  const mismatch =
+    existing && BigInt(existing.amount_awarded_paise) !== BigInt(rupeesToPaise(String(accepted?.value ?? field.value)));
 
   async function doAccept() {
     setError(null);
@@ -484,7 +521,8 @@ function FieldRow({
         <span className="w-44 shrink-0 font-medium">{head.replace(/_/g, ' ')}</span>
         {isAccepted ? (
           <span className="font-semibold tabular-nums text-slate-900">
-            ₹ {Number(accepted.value).toLocaleString('en-IN', { maximumFractionDigits: 2 })} <span className="text-xs font-normal text-teal-700">✓ accepted</span>
+            ₹ {Number(accepted.value).toLocaleString('en-IN', { maximumFractionDigits: 2 })}{' '}
+            <span className="text-xs font-normal text-teal-700">✓ accepted</span>
           </span>
         ) : (
           <>
@@ -524,8 +562,8 @@ function FieldRow({
       </div>
       {mismatch && (
         <p className="border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-900">
-          Mismatch: {head} is already entered for this family at {formatMoney(existing.amount_awarded_paise)} ({existing.source}). Nothing is
-          overwritten automatically.
+          Mismatch: {head} is already entered for this family at {formatMoney(existing.amount_awarded_paise)} (
+          {existing.source}). Nothing is overwritten automatically.
         </p>
       )}
       {headResults
@@ -554,7 +592,9 @@ function FamiliesWithoutFields({
   if (!rest.length) return null;
   return (
     <section className="border border-red-200 bg-white">
-      <h3 className="border-b border-red-200 px-3 py-2 text-sm font-semibold text-red-800">Checks failing on manually entered heads</h3>
+      <h3 className="border-b border-red-200 px-3 py-2 text-sm font-semibold text-red-800">
+        Checks failing on manually entered heads
+      </h3>
       <ul className="divide-y divide-slate-100 text-sm">
         {rest.map((f) => (
           <li key={f.familyId} className="px-3 py-2">

@@ -12,7 +12,11 @@ import { api } from '@/lib/api';
 const GROUPS: Array<{ title: string; description: string; statuses: string[] }> = [
   { title: 'Drafts', description: 'Being prepared; not yet submitted to the Collector.', statuses: ['DRAFT'] },
   { title: 'Submitted', description: 'Awaiting scrutiny and acceptance (stage S01).', statuses: ['SUBMITTED'] },
-  { title: 'Accepted and in progress', description: 'Accepted proposals moving through the statutory stages.', statuses: ['ACTIVE', 'ON_HOLD'] },
+  {
+    title: 'Accepted and in progress',
+    description: 'Accepted proposals moving through the statutory stages.',
+    statuses: ['ACTIVE', 'ON_HOLD'],
+  },
   {
     title: 'Closed or stopped',
     description: 'Completed, terminated, denotified, abandoned or lapsed.',
@@ -20,7 +24,13 @@ const GROUPS: Array<{ title: string; description: string; statuses: string[] }> 
   },
 ];
 
-const stage = (s: string | null) => (s ? s.replace(/^S\d+_/, '').replace(/_/g, ' ').toLowerCase() : '—');
+const stage = (s: string | null) =>
+  s
+    ? s
+        .replace(/^S\d+_/, '')
+        .replace(/_/g, ' ')
+        .toLowerCase()
+    : '—';
 
 /** Proposals (§14): every project in the post's scope by status; a requiring body sees only its own (RLS). */
 export default function ProposalsPage() {
@@ -56,7 +66,10 @@ export default function ProposalsPage() {
                 <ul className="divide-y divide-slate-100">
                   {rows.map((p) => (
                     <li key={p.project_id} className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm">
-                      <Link href={`/project/${p.project_id}/timeline`} className="font-medium text-teal-800 hover:underline">
+                      <Link
+                        href={`/project/${p.project_id}/timeline`}
+                        className="font-medium text-teal-800 hover:underline"
+                      >
                         {p.code} · {p.name}
                       </Link>
                       <span className="flex items-center gap-2 text-slate-600">

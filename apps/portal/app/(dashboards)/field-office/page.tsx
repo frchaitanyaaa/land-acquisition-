@@ -21,9 +21,18 @@ import { useDecideCorrection, useParcel, useRequestCorrection, useVerifyParcel }
 import { useProject, useRulePack } from '@/lib/project-api';
 
 const mapLoading = () => <div className="h-[30rem] w-full animate-pulse border border-slate-200 bg-slate-100" />;
-const SurveyMap = dynamic(() => import('@/components/gis/survey-map').then((m) => m.SurveyMap), { ssr: false, loading: mapLoading });
-const CorrectionDiffMap = dynamic(() => import('@/components/gis/survey-map').then((m) => m.CorrectionDiffMap), { ssr: false, loading: mapLoading });
-const AssignmentsMap = dynamic(() => import('@/components/gis/survey-map').then((m) => m.AssignmentsMap), { ssr: false, loading: mapLoading });
+const SurveyMap = dynamic(() => import('@/components/gis/survey-map').then((m) => m.SurveyMap), {
+  ssr: false,
+  loading: mapLoading,
+});
+const CorrectionDiffMap = dynamic(() => import('@/components/gis/survey-map').then((m) => m.CorrectionDiffMap), {
+  ssr: false,
+  loading: mapLoading,
+});
+const AssignmentsMap = dynamic(() => import('@/components/gis/survey-map').then((m) => m.AssignmentsMap), {
+  ssr: false,
+  loading: mapLoading,
+});
 
 type Tab = SurveyQueueStatus | 'corrections' | 'assignments';
 const TABS: Array<{ key: Tab; label: string }> = [
@@ -46,10 +55,15 @@ const CHECKS: Record<string, string> = {
 
 const label = (s: string | null | undefined) => (s ?? '—').replace(/_/g, ' ').toLowerCase();
 const when = (iso: string | null | undefined) =>
-  iso ? new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata' }).format(new Date(iso)) : '—';
+  iso
+    ? new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata' }).format(
+        new Date(iso),
+      )
+    : '—';
 const area = (v: string | null | undefined) => (v == null ? '—' : formatArea(Number(v)));
 const doc = (id: string) => `/api/v1/documents/${id}/download`;
-const errText = (e: unknown) => (e instanceof ApiProblem ? e.message : e instanceof Error ? e.message : 'Something went wrong.');
+const errText = (e: unknown) =>
+  e instanceof ApiProblem ? e.message : e instanceof Error ? e.message : 'Something went wrong.';
 
 /**
  * Field office (A4) — for Tehsildar, DILR and field officers (LAO reads). Work queue on the left,
@@ -67,7 +81,9 @@ export default function FieldOfficePage() {
         <div>
           <h1 className="ux4g-heading-m-strong">Field office</h1>
           <p className="text-sm text-slate-600">
-            {me.data ? `${me.data.user.fullName} · ${me.data.activePost.designation}` : 'Verify synced field surveys and decide boundary corrections.'}
+            {me.data
+              ? `${me.data.user.fullName} · ${me.data.activePost.designation}`
+              : 'Verify synced field surveys and decide boundary corrections.'}
           </p>
         </div>
         <a href="/field/index.html" className="ux4g-btn-primary ux4g-btn-s">
@@ -102,12 +118,15 @@ function SurveyQueue({ status }: { status: SurveyQueueStatus }) {
         </p>
         {queue.isError && <p className="px-3 py-3 text-sm text-red-700">{errText(queue.error)}</p>}
         {!queue.isLoading && !queue.isError && rows.length === 0 && (
-          <p className="px-3 py-6 text-center text-sm text-slate-500">Nothing here.{status === 'submitted' && ' Surveys synced from the field app appear here.'}</p>
+          <p className="px-3 py-6 text-center text-sm text-slate-500">
+            Nothing here.{status === 'submitted' && ' Surveys synced from the field app appear here.'}
+          </p>
         )}
         <ul className="max-h-[40rem] divide-y divide-slate-100 overflow-y-auto">
           {rows.map((r) => (
             <li key={r.id}>
-              <button type="button"
+              <button
+                type="button"
                 onClick={() => setSelected(r.id)}
                 className={`w-full px-3 py-2.5 text-left text-sm hover:bg-slate-50 ${r.id === active ? 'bg-teal-50' : ''}`}
               >
@@ -176,8 +195,8 @@ function SurveyWorkspace({ survey }: { survey: SurveyDetail }) {
       <div className="min-w-0 flex-1 space-y-2">
         <SurveyMap survey={survey} warnM={warnM} overlay={legend} />
         <p className="text-xs text-slate-500">
-          {survey.project_code} — {survey.project_name} · walked by {survey.surveyor_name} ({survey.surveyor_designation}) · started{' '}
-          {when(survey.started_at)} · submitted {when(survey.submitted_at)}
+          {survey.project_code} — {survey.project_name} · walked by {survey.surveyor_name} (
+          {survey.surveyor_designation}) · started {when(survey.started_at)} · submitted {when(survey.submitted_at)}
         </p>
       </div>
 
@@ -229,27 +248,42 @@ function SurveyWorkspace({ survey }: { survey: SurveyDetail }) {
         </section>
 
         <section>
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Vertices ({survey.vertices.length})</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Vertices ({survey.vertices.length})
+          </h3>
           <ul className="mt-1 max-h-64 space-y-1 overflow-y-auto">
             {survey.vertices.map((v) => {
               const issues = perVertex.get(v.seq) ?? [];
               const acc = v.accuracy_m == null ? null : Number(v.accuracy_m);
               return (
-                <li key={v.seq} className={`flex items-center gap-2 border px-2 py-1 text-xs ${rejected.has(v.seq) ? 'border-red-200 bg-red-50' : 'border-slate-100'}`}>
+                <li
+                  key={v.seq}
+                  className={`flex items-center gap-2 border px-2 py-1 text-xs ${rejected.has(v.seq) ? 'border-red-200 bg-red-50' : 'border-slate-100'}`}
+                >
                   {v.photo_document_id ? (
                     <a href={doc(v.photo_document_id)} target="_blank" rel="noreferrer">
-                      <img src={doc(v.photo_document_id)} alt={`Vertex ${v.seq}`} className="h-10 w-10 rounded object-cover" loading="lazy" />
+                      <img
+                        src={doc(v.photo_document_id)}
+                        alt={`Vertex ${v.seq}`}
+                        className="h-10 w-10 rounded object-cover"
+                        loading="lazy"
+                      />
                     </a>
                   ) : (
-                    <span className="flex h-10 w-10 items-center justify-center rounded bg-slate-100 text-[10px] text-slate-400">no photo</span>
+                    <span className="flex h-10 w-10 items-center justify-center rounded bg-slate-100 text-[10px] text-slate-400">
+                      no photo
+                    </span>
                   )}
                   <span className="flex-1">
-                    <span className="font-semibold">#{v.seq}</span> ±{acc?.toFixed(1) ?? '—'} m{v.samples_averaged ? ` · ${v.samples_averaged} fixes` : ''}
+                    <span className="font-semibold">#{v.seq}</span> ±{acc?.toFixed(1) ?? '—'} m
+                    {v.samples_averaged ? ` · ${v.samples_averaged} fixes` : ''}
                     <span className="block text-slate-500">
                       captured {when(v.captured_at)} · synced {when(v.synced_at)}
                     </span>
                     {issues.length > 0 && <span className="block text-red-700">{issues.join(', ')}</span>}
-                    {rejected.has(v.seq) && <span className="block text-red-700">discarded by the server (accuracy)</span>}
+                    {rejected.has(v.seq) && (
+                      <span className="block text-red-700">discarded by the server (accuracy)</span>
+                    )}
                   </span>
                 </li>
               );
@@ -265,7 +299,12 @@ function SurveyWorkspace({ survey }: { survey: SurveyDetail }) {
               {survey.notice_document_id && (
                 <>
                   {' · '}
-                  <a href={doc(survey.notice_document_id)} target="_blank" rel="noreferrer" className="text-teal-700 hover:underline">
+                  <a
+                    href={doc(survey.notice_document_id)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-teal-700 hover:underline"
+                  >
                     notice photo
                   </a>
                 </>
@@ -277,14 +316,23 @@ function SurveyWorkspace({ survey }: { survey: SurveyDetail }) {
         </section>
 
         <section>
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Joint inspection ({survey.jirItems.length})</h3>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Joint inspection ({survey.jirItems.length})
+          </h3>
           {survey.jirItems.length === 0 ? (
             <p className="mt-1 text-xs text-slate-500">No items.</p>
           ) : (
             <ul className="mt-1 space-y-1 text-xs">
               {survey.jirItems.map((j) => (
                 <li key={j.id} className="flex items-center gap-2">
-                  {j.photo_document_id && <img src={doc(j.photo_document_id)} alt="" className="h-8 w-8 rounded object-cover" loading="lazy" />}
+                  {j.photo_document_id && (
+                    <img
+                      src={doc(j.photo_document_id)}
+                      alt=""
+                      className="h-8 w-8 rounded object-cover"
+                      loading="lazy"
+                    />
+                  )}
                   <span>
                     <span className="font-medium">{label(j.item_type)}</span>
                     {j.description && ` — ${j.description}`}
@@ -294,10 +342,14 @@ function SurveyWorkspace({ survey }: { survey: SurveyDetail }) {
               ))}
             </ul>
           )}
-          {survey.pillars.length > 0 && <p className="mt-1 text-xs text-slate-500">{survey.pillars.length} boundary pillar(s) recorded.</p>}
+          {survey.pillars.length > 0 && (
+            <p className="mt-1 text-xs text-slate-500">{survey.pillars.length} boundary pillar(s) recorded.</p>
+          )}
         </section>
 
-        {survey.status === 'submitted' && survey.parcel_id && <Decision survey={survey} flagged={Object.keys(flags).length > 0} />}
+        {survey.status === 'submitted' && survey.parcel_id && (
+          <Decision survey={survey} flagged={Object.keys(flags).length > 0} />
+        )}
         {survey.status === 'submitted' && !survey.parcel_id && (
           <p className="text-xs text-slate-500">This survey is not linked to a parcel, so it cannot be approved.</p>
         )}
@@ -317,7 +369,8 @@ function Decision({ survey, flagged }: { survey: SurveyDetail; flagged: boolean 
   const [reason, setReason] = useState('');
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   // Parcel-level spatial flags also need an override (the API checks both).
-  const allFlagged = flagged || (parcel.data?.projects.some((p) => p.project_id === survey.project_id && p.flags.length > 0) ?? false);
+  const allFlagged =
+    flagged || (parcel.data?.projects.some((p) => p.project_id === survey.project_id && p.flags.length > 0) ?? false);
 
   async function run(fn: () => Promise<unknown>, ok: string) {
     setMsg(null);
@@ -345,15 +398,22 @@ function Decision({ survey, flagged }: { survey: SurveyDetail; flagged: boolean 
       </label>
       {allFlagged && (
         <label className="ux4g-textarea-container ux4g-textarea-default block text-xs">
-          <span className="ux4g-label-s-strong text-amber-900">Override reason (required — this survey or parcel has flags)</span>
+          <span className="ux4g-label-s-strong text-amber-900">
+            Override reason (required — this survey or parcel has flags)
+          </span>
           <textarea value={override} onChange={(e) => setOverride(e.target.value)} rows={2} className={input} />
         </label>
       )}
-      <button type="button"
+      <button
+        type="button"
         disabled={verify.isPending || (allFlagged && !override.trim())}
         onClick={() =>
           void run(
-            () => verify.mutateAsync({ remarks: remarks.trim() || null, overrideReason: allFlagged ? override.trim() : null }),
+            () =>
+              verify.mutateAsync({
+                remarks: remarks.trim() || null,
+                overrideReason: allFlagged ? override.trim() : null,
+              }),
             'Approved — the parcel is VERIFIED and queued for anchoring.',
           )
         }
@@ -367,14 +427,18 @@ function Decision({ survey, flagged }: { survey: SurveyDetail; flagged: boolean 
         <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2} className={input} />
       </label>
       <div className="flex gap-2">
-        <button type="button"
+        <button
+          type="button"
           disabled={giveBack.isPending || reason.trim().length < 5}
-          onClick={() => void run(() => giveBack.mutateAsync({ id: survey.id, reason: reason.trim() }), 'Returned to the surveyor.')}
+          onClick={() =>
+            void run(() => giveBack.mutateAsync({ id: survey.id, reason: reason.trim() }), 'Returned to the surveyor.')
+          }
           className="ux4g-btn-outline-primary ux4g-btn-s flex-1"
         >
           Return to surveyor
         </button>
-        <button type="button"
+        <button
+          type="button"
           disabled={correct.isPending || reason.trim().length < 5 || !walked}
           title={walked ? 'Proposes the walked boundary as the corrected geometry' : 'Needs at least 3 usable vertices'}
           onClick={() =>
@@ -404,13 +468,21 @@ function Corrections({ myPostId }: { myPostId: string | null }) {
   return (
     <div className="flex flex-col gap-4 lg:flex-row">
       <aside className="w-full border border-slate-200 bg-white lg:w-72 lg:shrink-0">
-        <p className="border-b border-slate-200 px-3 py-2 text-xs text-slate-500">{q.isLoading ? 'Loading…' : `${rows.length} waiting`}</p>
+        <p className="border-b border-slate-200 px-3 py-2 text-xs text-slate-500">
+          {q.isLoading ? 'Loading…' : `${rows.length} waiting`}
+        </p>
         {q.isError && <p className="px-3 py-3 text-sm text-red-700">{errText(q.error)}</p>}
-        {!q.isLoading && rows.length === 0 && <p className="px-3 py-6 text-center text-sm text-slate-500">No corrections to decide.</p>}
+        {!q.isLoading && rows.length === 0 && (
+          <p className="px-3 py-6 text-center text-sm text-slate-500">No corrections to decide.</p>
+        )}
         <ul className="divide-y divide-slate-100">
           {rows.map((r) => (
             <li key={r.id}>
-              <button type="button" onClick={() => setSelected(r.id)} className={`w-full px-3 py-2.5 text-left text-sm hover:bg-slate-50 ${r.id === active?.id ? 'bg-teal-50' : ''}`}>
+              <button
+                type="button"
+                onClick={() => setSelected(r.id)}
+                className={`w-full px-3 py-2.5 text-left text-sm hover:bg-slate-50 ${r.id === active?.id ? 'bg-teal-50' : ''}`}
+              >
                 <span className="font-semibold">Survey {r.survey_no}</span> · {r.village_name}
                 <span className="block text-xs text-slate-500">
                   v{r.from_version} → v{r.from_version + 1} · by {r.requested_by_designation} · {when(r.created_at)}
@@ -420,7 +492,9 @@ function Corrections({ myPostId }: { myPostId: string | null }) {
           ))}
         </ul>
       </aside>
-      <div className="min-w-0 flex-1">{active && <CorrectionDecision c={active} mine={active.requested_by_post_id === myPostId} />}</div>
+      <div className="min-w-0 flex-1">
+        {active && <CorrectionDecision c={active} mine={active.requested_by_post_id === myPostId} />}
+      </div>
     </div>
   );
 }
@@ -434,7 +508,12 @@ function CorrectionDecision({ c, mine }: { c: CorrectionRow; mine: boolean }) {
     setMsg(null);
     try {
       await decide.mutateAsync({ correctionId: c.id, approve });
-      setMsg({ ok: true, text: approve ? `Approved — the parcel is now v${c.from_version + 1}.` : 'Rejected — the boundary is unchanged.' });
+      setMsg({
+        ok: true,
+        text: approve
+          ? `Approved — the parcel is now v${c.from_version + 1}.`
+          : 'Rejected — the boundary is unchanged.',
+      });
     } catch (e) {
       setMsg({ ok: false, text: errText(e) });
     }
@@ -445,8 +524,10 @@ function CorrectionDecision({ c, mine }: { c: CorrectionRow; mine: boolean }) {
       <CorrectionDiffMap from={c.from_geometry} to={c.proposed_geometry} />
       <div className="space-y-2 border border-slate-200 bg-white p-4 text-sm">
         <p className="text-xs text-slate-500">
-          <span className="inline-block w-4 border-t-2 border-dashed border-slate-500 align-middle" /> v{c.from_version} (current){'  '}
-          <span className="ml-3 inline-block w-4 border-t-2 border-amber-600 align-middle" /> proposed v{c.from_version + 1}
+          <span className="inline-block w-4 border-t-2 border-dashed border-slate-500 align-middle" /> v{c.from_version}{' '}
+          (current){'  '}
+          <span className="ml-3 inline-block w-4 border-t-2 border-amber-600 align-middle" /> proposed v
+          {c.from_version + 1}
         </p>
         <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
           <dt className="text-slate-500">Area now</dt>
@@ -461,15 +542,31 @@ function CorrectionDecision({ c, mine }: { c: CorrectionRow; mine: boolean }) {
         <p>
           <span className="text-slate-500">Reason:</span> {c.reason}
         </p>
-        {stale && <p className="text-xs text-amber-800">The parcel has changed since this was requested (now v{c.current_version}).</p>}
+        {stale && (
+          <p className="text-xs text-amber-800">
+            The parcel has changed since this was requested (now v{c.current_version}).
+          </p>
+        )}
         {mine ? (
-          <p className="text-xs text-slate-600">You requested this correction — a different post must decide it (G20).</p>
+          <p className="text-xs text-slate-600">
+            You requested this correction — a different post must decide it (G20).
+          </p>
         ) : (
           <div className="flex gap-2">
-            <button type="button" onClick={() => void go(true)} disabled={decide.isPending} className="ux4g-btn-primary ux4g-btn-s">
+            <button
+              type="button"
+              onClick={() => void go(true)}
+              disabled={decide.isPending}
+              className="ux4g-btn-primary ux4g-btn-s"
+            >
               Approve v{c.from_version + 1}
             </button>
-            <button type="button" onClick={() => void go(false)} disabled={decide.isPending} className="ux4g-btn-outline-danger ux4g-btn-s">
+            <button
+              type="button"
+              onClick={() => void go(false)}
+              disabled={decide.isPending}
+              className="ux4g-btn-outline-danger ux4g-btn-s"
+            >
               Reject
             </button>
           </div>
@@ -488,8 +585,9 @@ function Assignments() {
   return (
     <div className="space-y-3">
       <p className="text-sm text-slate-600">
-        Parcels in your scope that still need a field survey — <span className="text-red-700">red</span>: no surveyed boundary yet,{' '}
-        <span className="text-blue-700">blue</span>: awaiting verification. Field officers walk them in the field app.
+        Parcels in your scope that still need a field survey — <span className="text-red-700">red</span>: no surveyed
+        boundary yet, <span className="text-blue-700">blue</span>: awaiting verification. Field officers walk them in
+        the field app.
       </p>
       {q.isError && <p className="text-sm text-red-700">{errText(q.error)}</p>}
       <AssignmentsMap rows={rows} />
@@ -516,7 +614,9 @@ function Assignments() {
             ))}
           </tbody>
         </table>
-        {!q.isLoading && rows.length === 0 && <p className="px-3 py-4 text-sm text-slate-500">No parcels waiting for a survey.</p>}
+        {!q.isLoading && rows.length === 0 && (
+          <p className="px-3 py-4 text-sm text-slate-500">No parcels waiting for a survey.</p>
+        )}
       </div>
     </div>
   );

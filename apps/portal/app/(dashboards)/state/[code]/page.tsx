@@ -24,9 +24,10 @@ export default function StateDashboardPage() {
   return (
     <ScopeDashboard
       title={name ? `State dashboard · ${name}` : 'State dashboard'}
-      actions={<StatePicker current={code} />}
+      actions={<StatePicker current={code} dark />}
       data={data}
       breakdown="district"
+      pipeline={{ state: code }}
     />
   );
 }

@@ -24,11 +24,23 @@ interface RiskRow {
 }
 
 interface Bottlenecks {
-  byStage: Array<{ stage_code: string; instances: number; approved: number; returns: number; median_days_in_stage: string | null; open_now: number }>;
+  byStage: Array<{
+    stage_code: string;
+    instances: number;
+    approved: number;
+    returns: number;
+    median_days_in_stage: string | null;
+    open_now: number;
+  }>;
   topReasonCodes: Array<{ reason_code: string; stage_code: string; n: number }>;
 }
 
-const label = (s: string) => s.replace(/^S\d+_/, '').replace(/_/g, ' ').toLowerCase().replace(/^\w/, (c) => c.toUpperCase());
+const label = (s: string) =>
+  s
+    .replace(/^S\d+_/, '')
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/^\w/, (c) => c.toUpperCase());
 
 /**
  * Analytics (§24.4): delay risk score per open deadline — a transparent weighted formula, not a trained model —
@@ -36,7 +48,10 @@ const label = (s: string) => s.replace(/^S\d+_/, '').replace(/_/g, ' ').toLowerC
  */
 export default function AnalyticsPage() {
   const risk = useQuery({ queryKey: ['analytics', 'risk'], queryFn: () => api<RiskRow[]>('/analytics/risk') });
-  const bottle = useQuery({ queryKey: ['analytics', 'bottlenecks'], queryFn: () => api<Bottlenecks>('/analytics/bottlenecks') });
+  const bottle = useQuery({
+    queryKey: ['analytics', 'bottlenecks'],
+    queryFn: () => api<Bottlenecks>('/analytics/bottlenecks'),
+  });
 
   return (
     <div className="ux4g-d-flex ux4g-flex-column ux4g-gap-l">
@@ -72,7 +87,10 @@ export default function AnalyticsPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm">
-                      <Link href={`/project/${r.projectId}/timeline`} className="font-medium text-teal-800 hover:underline">
+                      <Link
+                        href={`/project/${r.projectId}/timeline`}
+                        className="font-medium text-teal-800 hover:underline"
+                      >
                         {r.projectCode}
                       </Link>{' '}
                       · {r.label ?? r.clockCode} · <StatusTag kind="deadline" status={r.liveStatus} />{' '}
@@ -91,7 +109,10 @@ export default function AnalyticsPage() {
         )}
       </SectionCard>
 
-      <SectionCard title="Bottlenecks by stage" description="Files open now, how often a stage is returned, and the median days it takes.">
+      <SectionCard
+        title="Bottlenecks by stage"
+        description="Files open now, how often a stage is returned, and the median days it takes."
+      >
         {bottle.isLoading || !bottle.data ? (
           <p className="text-sm text-slate-600">Loading…</p>
         ) : (
@@ -115,12 +136,20 @@ export default function AnalyticsPage() {
                         <td className="py-2 pr-3">{label(s.stage_code)}</td>
                         <td className="py-2 pr-3 text-right">
                           <span className="inline-flex items-center gap-2">
-                            <span className="h-2 rounded bg-[#1f3c8f]" style={{ width: `${(s.open_now / max) * 60}px` }} aria-hidden />
+                            <span
+                              className="h-2 rounded bg-[#1f3c8f]"
+                              style={{ width: `${(s.open_now / max) * 60}px` }}
+                              aria-hidden
+                            />
                             <span className="tabular-nums">{s.open_now}</span>
                           </span>
                         </td>
                         <td className="py-2 pr-3 text-right tabular-nums">{s.approved}</td>
-                        <td className={`py-2 pr-3 text-right tabular-nums ${s.returns ? 'font-semibold text-amber-700' : ''}`}>{s.returns}</td>
+                        <td
+                          className={`py-2 pr-3 text-right tabular-nums ${s.returns ? 'font-semibold text-amber-700' : ''}`}
+                        >
+                          {s.returns}
+                        </td>
                         <td className="py-2 text-right tabular-nums">{s.median_days_in_stage ?? '—'}</td>
                       </tr>
                     );
@@ -137,7 +166,8 @@ export default function AnalyticsPage() {
                   {bottle.data.topReasonCodes.slice(0, 8).map((r) => (
                     <li key={`${r.stage_code}-${r.reason_code}`} className="flex justify-between gap-2">
                       <span>
-                        {r.reason_code.replace(/_/g, ' ').toLowerCase()} <span className="text-xs text-slate-500">({label(r.stage_code)})</span>
+                        {r.reason_code.replace(/_/g, ' ').toLowerCase()}{' '}
+                        <span className="text-xs text-slate-500">({label(r.stage_code)})</span>
                       </span>
                       <span className="tabular-nums">{r.n}</span>
                     </li>

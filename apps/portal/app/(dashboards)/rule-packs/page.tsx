@@ -83,11 +83,25 @@ export default function RulePacksPage() {
   );
 }
 
-function PackSelect({ label, value, keys, onChange }: { label: string; value: string; keys: string[]; onChange: (k: string) => void }) {
+function PackSelect({
+  label,
+  value,
+  keys,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  keys: string[];
+  onChange: (k: string) => void;
+}) {
   return (
     <label>
       <span className="block text-xs text-slate-500">{label}</span>
-      <select value={value} onChange={(e) => onChange(e.target.value)} className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm"
+      >
         {keys.map((k) => (
           <option key={k} value={k}>
             {k}
@@ -98,13 +112,23 @@ function PackSelect({ label, value, keys, onChange }: { label: string; value: st
   );
 }
 
-function PackColumn({ packKey, other, summaries }: { packKey: string; other: string | null; summaries: PackSummary[] }) {
+function PackColumn({
+  packKey,
+  other,
+  summaries,
+}: {
+  packKey: string;
+  other: string | null;
+  summaries: PackSummary[];
+}) {
   const { code, version } = split(packKey);
   const pack = useRulePack(code, version);
   const o = other ? split(other) : null;
   const otherPack = useRulePack(o?.code, o?.version);
   const summary = summaries.find((s) => s.code === code && s.version === version);
-  const parent = summary?.extends ? summaries.find((s) => s.code === summary.extends!.code && s.version === summary.extends!.version) : undefined;
+  const parent = summary?.extends
+    ? summaries.find((s) => s.code === summary.extends!.code && s.version === summary.extends!.version)
+    : undefined;
 
   if (pack.error) return <p className="text-red-700">Could not load {packKey}.</p>;
   if (pack.isLoading || !pack.data) return <p className="text-slate-500">Loading {packKey}…</p>;
@@ -115,7 +139,11 @@ function PackColumn({ packKey, other, summaries }: { packKey: string; other: str
 
   return (
     <div className="space-y-4">
-      <VerifyBanner own={p.verify ?? []} inherited={inherited} parentKey={parent ? `${parent.code}@${parent.version}` : null} />
+      <VerifyBanner
+        own={p.verify ?? []}
+        inherited={inherited}
+        parentKey={parent ? `${parent.code}@${parent.version}` : null}
+      />
 
       <section className="border border-slate-200 bg-white px-4 py-3">
         <p className="text-base font-semibold">{p.title}</p>
@@ -176,13 +204,15 @@ function PackColumn({ packKey, other, summaries }: { packKey: string; other: str
               <li key={c.code} className={`px-3 py-2 ${other && !otherClocks.has(c.code) ? 'bg-sky-50/60' : ''}`}>
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <span>
-                    <span className="font-mono text-xs">{c.code}</span> <span className="text-slate-700">{c.label}</span>
+                    <span className="font-mono text-xs">{c.code}</span>{' '}
+                    <span className="text-slate-700">{c.label}</span>
                   </span>
                   <span className="text-xs text-slate-500">{c.section}</span>
                 </div>
                 <p className="text-xs text-slate-600">
                   <span className="font-mono">{duration(c)}</span> from {c.startsOn}
-                  {c.endsOn ? ` until ${c.endsOn}` : ''} → <span className="font-medium">{c.consequence}</span>: {c.consequenceText}
+                  {c.endsOn ? ` until ${c.endsOn}` : ''} → <span className="font-medium">{c.consequence}</span>:{' '}
+                  {c.consequenceText}
                 </p>
               </li>
             ))}
@@ -215,7 +245,9 @@ function PackColumn({ packKey, other, summaries }: { packKey: string; other: str
               </div>
               <p className="text-slate-700">{c.message}</p>
               {Object.values(c.params).some((v) => /placeholder/i.test(String(v))) && (
-                <p className="mt-1 text-xs font-semibold text-amber-800">⚠ Parameters are placeholders — see the verify notes above.</p>
+                <p className="mt-1 text-xs font-semibold text-amber-800">
+                  ⚠ Parameters are placeholders — see the verify notes above.
+                </p>
               )}
             </li>
           ))}
@@ -224,8 +256,8 @@ function PackColumn({ packKey, other, summaries }: { packKey: string; other: str
 
       <Block title="Interest (s.80) and entitlement heads">
         <p className="px-3 pt-2 text-sm text-slate-700">
-          {p.interest.section}: {p.interest.rateYear1Pct}% for the first year, {p.interest.rateAfterPct}% after ({p.interest.dayCount}) —
-          shown in the portal only as an estimated liability.
+          {p.interest.section}: {p.interest.rateYear1Pct}% for the first year, {p.interest.rateAfterPct}% after (
+          {p.interest.dayCount}) — shown in the portal only as an estimated liability.
         </p>
         <ul className="grid grid-cols-1 gap-x-4 px-3 py-2 text-xs text-slate-600 sm:grid-cols-2">
           {p.entitlementHeads.map((h) => (

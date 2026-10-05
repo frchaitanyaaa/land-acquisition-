@@ -43,7 +43,7 @@ export function StateTable({ states }: { states: StateRow[] }) {
   }
 
   return (
-    <div className="overflow-x-auto border border-slate-200 bg-white">
+    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-slate-200 bg-slate-50">
@@ -59,7 +59,7 @@ export function StateTable({ states }: { states: StateRow[] }) {
         </thead>
         <tbody className="divide-y divide-slate-100">
           {sorted.map((s) => (
-            <tr key={s.state_code}>
+            <tr key={s.state_code} className="even:bg-slate-50/60 hover:bg-slate-50">
               <td className="px-4 py-2 font-medium text-slate-900">{s.state_name}</td>
               <td className="px-4 py-2 text-right tabular-nums text-slate-700">{s.projects}</td>
               <td className="px-4 py-2 text-right tabular-nums text-slate-700">{formatHectares(s.area_acquired_sqm)}</td>

@@ -20,7 +20,9 @@ interface AuditRow {
 }
 
 const when = (iso: string) =>
-  new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'medium', timeZone: 'Asia/Kolkata' }).format(new Date(iso));
+  new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'medium', timeZone: 'Asia/Kolkata' }).format(
+    new Date(iso),
+  );
 const short = (h: string) => (h.length > 16 ? `${h.slice(0, 10)}…${h.slice(-6)}` : h);
 
 /**
@@ -33,7 +35,9 @@ export default function AuditLogPage() {
     queryKey: ['audit', 'log'],
     initialPageParam: '',
     queryFn: ({ pageParam }) =>
-      api<{ data: AuditRow[]; nextCursor: string | null }>(`/audit/log?limit=50${pageParam ? `&before=${pageParam}` : ''}`),
+      api<{ data: AuditRow[]; nextCursor: string | null }>(
+        `/audit/log?limit=50${pageParam ? `&before=${pageParam}` : ''}`,
+      ),
     getNextPageParam: (last) => last.nextCursor ?? undefined,
   });
   const verify = useMutation({
@@ -112,11 +116,15 @@ export default function AuditLogPage() {
                   <tr key={r.id} className="border-b border-slate-100 align-top">
                     <td className="py-2 pr-3 tabular-nums text-slate-500">{r.id}</td>
                     <td className="py-2 pr-3 text-xs">{when(r.at)}</td>
-                    <td className="py-2 pr-3">{r.actor_designation ?? <span className="text-slate-500">System / public</span>}</td>
+                    <td className="py-2 pr-3">
+                      {r.actor_designation ?? <span className="text-slate-500">System / public</span>}
+                    </td>
                     <td className="py-2 pr-3 font-mono text-xs">{r.action}</td>
                     <td className="py-2 pr-3 text-xs">
                       {r.entity_type}
-                      {r.entity_id && <span className="block font-mono text-slate-500">{r.entity_id.slice(0, 8)}…</span>}
+                      {r.entity_id && (
+                        <span className="block font-mono text-slate-500">{r.entity_id.slice(0, 8)}…</span>
+                      )}
                     </td>
                     <td className="py-2 pr-3 text-xs">
                       {r.changed_keys.length ? r.changed_keys.join(', ') : <span className="text-slate-400">—</span>}
@@ -143,7 +151,11 @@ export default function AuditLogPage() {
         )}
       </SectionCard>
       <p className="text-sm text-slate-600">
-        Records anchored on the blockchain are checked in the <Link href="/trust" className="underline">Trust center</Link>.
+        Records anchored on the blockchain are checked in the{' '}
+        <Link href="/trust" className="underline">
+          Trust center
+        </Link>
+        .
       </p>
     </div>
   );

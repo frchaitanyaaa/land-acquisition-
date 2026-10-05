@@ -239,6 +239,95 @@ export class WorkflowService {
     });
   }
 
+  /**
+   * Projects pipeline (§24.3): every project in the caller's scope with its applicable stages and where it stands,
+   * in one call. Read-only and for higher authorities only — national and state posts; RLS still limits the rows.
+   */
+  async pipeline(user: AuthUser, stateCode?: string) {
+    if (user.post.level !== 'NATIONAL' && user.post.level !== 'STATE')
+      throw new ProblemException(
+        403,
+        'PIPELINE_HIGHER_AUTHORITY_ONLY',
+        'The projects pipeline is for national and state posts. Open a project from your own dashboard instead.',
+      );
+    return this.db.withScope(user, async (tx) => {
+      const rows_ = await tx.select().from(projects).orderBy(asc(projects.code));
+      const scoped = rows_.filter((p) => p.rulePackCode && p.rulePackVersion && (!stateCode || p.stateCode === stateCode));
+      const ids = scoped.map((p) => p.id);
+      if (!ids.length) return { asOf: this.clock.now().toISOString(), projects: [] };
+      const instances = await tx
+        .select()
+        .from(stageInstances)
+        .where(inArray(stageInstances.projectId, ids))
+        .orderBy(asc(stageInstances.attempt));
+      const deadlineRows = (
+        await tx.execute<{
+          project_id: string;
+          label: string | null;
+          section: string;
+          due_at: string;
+          days_remaining: number;
+          live_status: 'SAFE' | 'DUE_SOON' | 'BREACHED';
+          consequence_text: string | null;
+        }>(
+          sql`SELECT project_id, label, section, due_at, days_remaining, live_status, consequence_text
+              FROM v_deadline_board WHERE project_id IN (${sql.join(ids.map((id) => sql`${id}`), sql`, `)})
+              ORDER BY (live_status = 'BREACHED') DESC, due_at`,
+        )
+      ).rows;
+      const statusOf = (s: string | undefined) =>
+        s === 'APPROVED'
+          ? 'done'
+          : s === 'IN_PROGRESS' || s === 'SUBMITTED'
+            ? 'active'
+            : s === 'RETURNED'
+              ? 'returned'
+              : s === 'SKIPPED'
+                ? 'skipped'
+                : s === 'TERMINATED' || s === 'NULLIFIED'
+                  ? 'stopped'
+                  : 'not_started';
+      const out = [];
+      for (const project of scoped) {
+        const pack = this.rules.get(project.rulePackCode!, project.rulePackVersion!); // filtered above
+        if (!pack) continue;
+        const facts = await this.facts(tx, project);
+        const stages = applicableStages(pack, facts).map((st) => {
+          const attempts = instances.filter((i) => i.projectId === project.id && i.stageCode === st.code);
+          const latest = attempts[attempts.length - 1];
+          return {
+            code: st.code,
+            name: st.name,
+            sections: st.sections,
+            status: statusOf(latest?.status),
+            attempts: attempts.length,
+            startedAt: latest?.startedAt ?? null,
+            completedAt: latest?.completedAt ?? null,
+          };
+        });
+        const deadlines = deadlineRows.filter((d) => d.project_id === project.id);
+        out.push({
+          id: project.id,
+          code: project.code,
+          name: project.name,
+          stateCode: project.stateCode,
+          status: project.status,
+          currentStage: project.currentStage,
+          rulePack: `${pack.code}@${pack.version}`,
+          stages,
+          done: stages.filter((s) => s.status === 'done' || s.status === 'skipped').length,
+          risk: deadlines.some((d) => d.live_status === 'BREACHED')
+            ? 'BREACHED'
+            : deadlines.some((d) => d.live_status === 'DUE_SOON')
+              ? 'DUE_SOON'
+              : 'SAFE',
+          nextDeadline: deadlines[0] ?? null,
+        });
+      }
+      return { asOf: this.clock.now().toISOString(), projects: out };
+    });
+  }
+
   async projectDeadlines(user: AuthUser, projectId: string) {
     return this.db.withScope(user, async (tx) => {
       const { pack } = await this.loadProject(tx, projectId);

@@ -122,8 +122,9 @@ export default function AssistantPage() {
           <p className="font-semibold">Advisory only</p>
           <p className="mt-1">
             The assistant reads figures through read-only tools and cannot change any record. It sees only what your
-            active post sees: {me.activePost.designation} ({roleLabel(me.activePost.role)}, {jurisdictionText(me.activePost)}).
-            Check figures on the dashboards before acting on them; decisions stay with the officer.
+            active post sees: {me.activePost.designation} ({roleLabel(me.activePost.role)},{' '}
+            {jurisdictionText(me.activePost)}). Check figures on the dashboards before acting on them; decisions stay
+            with the officer.
           </p>
         </div>
       </div>
@@ -207,7 +208,9 @@ function AnswerBody({ result }: { result: AssistantAnswer }) {
     <>
       <div className="flex flex-wrap items-center gap-2">
         {result.provider === 'MOCK' ? (
-          <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-900 ring-1 ring-amber-300">MOCK</span>
+          <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-900 ring-1 ring-amber-300">
+            MOCK
+          </span>
         ) : (
           <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">Language model</span>
         )}
@@ -230,9 +233,13 @@ function AnswerBody({ result }: { result: AssistantAnswer }) {
                   {i + 1}. <code>{c.tool}</code>
                 </p>
                 <p className="text-xs text-slate-500">Input</p>
-                <pre className="max-h-40 overflow-auto rounded bg-white p-2 text-xs text-slate-800">{pretty(c.input)}</pre>
+                <pre className="max-h-40 overflow-auto rounded bg-white p-2 text-xs text-slate-800">
+                  {pretty(c.input)}
+                </pre>
                 <p className="text-xs text-slate-500">Output</p>
-                <pre className="max-h-64 overflow-auto rounded bg-white p-2 text-xs text-slate-800">{pretty(c.output)}</pre>
+                <pre className="max-h-64 overflow-auto rounded bg-white p-2 text-xs text-slate-800">
+                  {pretty(c.output)}
+                </pre>
               </li>
             ))}
           </ol>

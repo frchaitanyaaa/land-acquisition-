@@ -65,6 +65,14 @@ export const NAV_GROUPS: NavGroup[] = [
         roles: NATIONAL_STATE,
       },
       {
+        key: 'pipeline',
+        label: 'Projects pipeline',
+        description: 'Every project, stage by stage',
+        icon: 'timeline',
+        href: '/pipeline',
+        roles: NATIONAL_STATE,
+      },
+      {
         key: 'state',
         label: 'State dashboard',
         description: 'One state, district by district',

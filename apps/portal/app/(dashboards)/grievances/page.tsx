@@ -35,7 +35,12 @@ const ACTION_LABEL: Partial<Record<GrievanceStatus, string>> = {
 };
 
 const fmt = (iso: string) =>
-  new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date(iso));
+  new Intl.DateTimeFormat('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'Asia/Kolkata',
+  }).format(new Date(iso));
 
 /**
  * Officer grievance inbox — MOCK (lib/mock-citizen.ts): reads and updates the same browser-only
@@ -55,7 +60,8 @@ export default function GrievancesPage() {
   }, []);
   useEffect(() => void reload(), [reload]);
 
-  const daysLeft = (g: MockGrievance) => (now === null ? 0 : Math.ceil((new Date(g.slaDueAt).getTime() - now) / DAY_MS));
+  const daysLeft = (g: MockGrievance) =>
+    now === null ? 0 : Math.ceil((new Date(g.slaDueAt).getTime() - now) / DAY_MS);
   const rows = useMemo(() => {
     const isOpen = (g: MockGrievance) => g.status !== 'CLOSED';
     return all.filter((g) => {
@@ -73,7 +79,8 @@ export default function GrievancesPage() {
     return all.filter((g) =>
       t === 'closed'
         ? g.status === 'CLOSED'
-        : g.status !== 'CLOSED' && (t === 'open' || (t === 'dueSoon' ? daysLeft(g) >= 0 && daysLeft(g) <= 5 : daysLeft(g) < 0)),
+        : g.status !== 'CLOSED' &&
+          (t === 'open' || (t === 'dueSoon' ? daysLeft(g) >= 0 && daysLeft(g) <= 5 : daysLeft(g) < 0)),
     ).length;
   };
 
@@ -149,7 +156,11 @@ export default function GrievancesPage() {
                   const d = daysLeft(g);
                   const tone = g.status === 'CLOSED' ? 'neutral' : d < 0 ? 'error' : d <= 5 ? 'warning' : 'success';
                   return [
-                    <tr key={g.trackingNo} className="ux4g-cursor-pointer" onClick={() => setOpen(open === g.trackingNo ? null : g.trackingNo)}>
+                    <tr
+                      key={g.trackingNo}
+                      className="ux4g-cursor-pointer"
+                      onClick={() => setOpen(open === g.trackingNo ? null : g.trackingNo)}
+                    >
                       <td className="ux4g-font-mono">{g.trackingNo}</td>
                       <td>{CATEGORY_LABEL[g.category]}</td>
                       <td>{g.subject}</td>
@@ -158,7 +169,9 @@ export default function GrievancesPage() {
                       </td>
                       <td>{fmt(g.filedAt)}</td>
                       <td>
-                        <span className={`ux4g-tag-tonal-${tone === 'success' ? 'success' : tone === 'warning' ? 'warning' : tone === 'error' ? 'error' : 'neutral'} ux4g-tag-s`}>
+                        <span
+                          className={`ux4g-tag-tonal-${tone === 'success' ? 'success' : tone === 'warning' ? 'warning' : tone === 'error' ? 'error' : 'neutral'} ux4g-tag-s`}
+                        >
                           {g.status === 'CLOSED' ? 'Closed' : d < 0 ? `${-d} days past` : `${d} days left`}
                         </span>
                       </td>

@@ -18,7 +18,12 @@ const FILTERS = [
 type Filter = (typeof FILTERS)[number]['key'];
 
 const fmt = (iso: string) =>
-  new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date(iso));
+  new Intl.DateTimeFormat('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'Asia/Kolkata',
+  }).format(new Date(iso));
 
 /** Deadlines & alerts (§24.2, §28): every statutory clock in the post's scope, worst first (GET /deadlines/board). */
 export default function DeadlinesPage() {
@@ -28,10 +33,20 @@ export default function DeadlinesPage() {
     queryFn: () => api<DeadlineRow[]>('/deadlines/board'),
   });
   const rows = (data ?? []).filter((d) =>
-    filter === 'breached' ? d.live_status === 'BREACHED' : filter === 'soon' ? d.live_status !== 'BREACHED' && d.days_remaining <= 30 : true,
+    filter === 'breached'
+      ? d.live_status === 'BREACHED'
+      : filter === 'soon'
+        ? d.live_status !== 'BREACHED' && d.days_remaining <= 30
+        : true,
   );
   const count = (f: Filter) =>
-    (data ?? []).filter((d) => (f === 'breached' ? d.live_status === 'BREACHED' : f === 'soon' ? d.live_status !== 'BREACHED' && d.days_remaining <= 30 : true)).length;
+    (data ?? []).filter((d) =>
+      f === 'breached'
+        ? d.live_status === 'BREACHED'
+        : f === 'soon'
+          ? d.live_status !== 'BREACHED' && d.days_remaining <= 30
+          : true,
+    ).length;
 
   return (
     <div className="ux4g-d-flex ux4g-flex-column ux4g-gap-l">
@@ -79,7 +94,10 @@ export default function DeadlinesPage() {
                 {rows.map((d) => (
                   <tr key={d.id} className="border-b border-slate-100 align-top">
                     <td className="py-2 pr-3">
-                      <Link href={`/project/${d.project_id}/timeline`} className="font-medium text-teal-800 hover:underline">
+                      <Link
+                        href={`/project/${d.project_id}/timeline`}
+                        className="font-medium text-teal-800 hover:underline"
+                      >
                         {d.project_code}
                       </Link>
                       <span className="block text-xs text-slate-500">{d.project_name}</span>
@@ -87,7 +105,9 @@ export default function DeadlinesPage() {
                     <td className="py-2 pr-3">{d.label ?? d.clock_code}</td>
                     <td className="py-2 pr-3">{d.section ? `s.${d.section}` : '—'}</td>
                     <td className="py-2 pr-3 whitespace-nowrap">{fmt(d.due_at)}</td>
-                    <td className={`py-2 pr-3 text-right tabular-nums ${d.days_remaining < 0 ? 'font-semibold text-red-700' : ''}`}>
+                    <td
+                      className={`py-2 pr-3 text-right tabular-nums ${d.days_remaining < 0 ? 'font-semibold text-red-700' : ''}`}
+                    >
                       {d.days_remaining < 0 ? `${-d.days_remaining} overdue` : d.days_remaining}
                     </td>
                     <td className="py-2 pr-3">

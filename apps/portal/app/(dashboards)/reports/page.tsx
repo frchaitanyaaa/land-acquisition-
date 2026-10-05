@@ -7,11 +7,31 @@ import { SectionCard } from '@/components/ui/section-card';
 import { api } from '@/lib/api';
 
 const REPORTS = [
-  { type: 'project-progress', title: 'Project progress', body: 'Stage, status, parcels, area notified and acquired, possession and timeline adherence per project.' },
-  { type: 'compensation-register', title: 'Compensation register', body: 'Every entitlement head per family as entered by the Collector, with status and due date.' },
-  { type: 'rnr-status', title: 'R&R status', body: 'Per affected family: assessed, disbursed, acknowledged, unconfirmed and deposited amounts.' },
-  { type: 'deadline-compliance', title: 'Deadline compliance', body: 'All statutory clocks with section, due date, days remaining and status.' },
-  { type: 'district-comparison', title: 'District comparison', body: 'Key parameters side by side for every district in your scope.' },
+  {
+    type: 'project-progress',
+    title: 'Project progress',
+    body: 'Stage, status, parcels, area notified and acquired, possession and timeline adherence per project.',
+  },
+  {
+    type: 'compensation-register',
+    title: 'Compensation register',
+    body: 'Every entitlement head per family as entered by the Collector, with status and due date.',
+  },
+  {
+    type: 'rnr-status',
+    title: 'R&R status',
+    body: 'Per affected family: assessed, disbursed, acknowledged, unconfirmed and deposited amounts.',
+  },
+  {
+    type: 'deadline-compliance',
+    title: 'Deadline compliance',
+    body: 'All statutory clocks with section, due date, days remaining and status.',
+  },
+  {
+    type: 'district-comparison',
+    title: 'District comparison',
+    body: 'Key parameters side by side for every district in your scope.',
+  },
 ] as const;
 
 const PREVIEW_ROWS = 8;
@@ -39,10 +59,18 @@ export default function ReportsPage() {
             <h2 className="font-semibold text-slate-950">{r.title}</h2>
             <p className="mt-1 flex-1 text-sm text-slate-700">{r.body}</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <a href={`/api/v1/reports/${r.type}?format=csv`} className="ux4g-btn ux4g-btn-primary ux4g-btn-s" download>
+              <a
+                href={`/api/v1/reports/${r.type}?format=csv`}
+                className="ux4g-btn ux4g-btn-primary ux4g-btn-s"
+                download
+              >
                 CSV
               </a>
-              <a href={`/api/v1/reports/${r.type}?format=pdf`} className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-s" download>
+              <a
+                href={`/api/v1/reports/${r.type}?format=pdf`}
+                className="ux4g-btn ux4g-btn-outline-primary ux4g-btn-s"
+                download
+              >
                 PDF
               </a>
               <button
@@ -60,7 +88,11 @@ export default function ReportsPage() {
       {open && (
         <SectionCard
           title={`Preview · ${REPORTS.find((r) => r.type === open)?.title}`}
-          description={preview.data ? `${preview.data.length} rows; first ${Math.min(PREVIEW_ROWS, preview.data.length)} shown. Money columns are in paise.` : undefined}
+          description={
+            preview.data
+              ? `${preview.data.length} rows; first ${Math.min(PREVIEW_ROWS, preview.data.length)} shown. Money columns are in paise.`
+              : undefined
+          }
         >
           {preview.isLoading ? (
             <p className="text-sm text-slate-600">Loading…</p>

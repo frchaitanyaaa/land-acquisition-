@@ -22,9 +22,20 @@ interface Objection {
   decidedAt: string | null;
 }
 
-const words = (s: string | null) => (s ? s.replace(/^[A-C]_/, '').replace(/_/g, ' ').toLowerCase() : null);
+const words = (s: string | null) =>
+  s
+    ? s
+        .replace(/^[A-C]_/, '')
+        .replace(/_/g, ' ')
+        .toLowerCase()
+    : null;
 const fmt = (iso: string) =>
-  new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' }).format(new Date(iso));
+  new Intl.DateTimeFormat('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'Asia/Kolkata',
+  }).format(new Date(iso));
 const OPEN = new Set(['FILED', 'SCHEDULED', 'HEARD']);
 
 /**
@@ -55,7 +66,11 @@ export default function ObjectionsPage({ params }: { params: Promise<{ id: strin
       ) : (
         <ul className="space-y-3">
           {rows.map((o) => (
-            <ObjectionCard key={o.id} o={o} onDone={() => void qc.invalidateQueries({ queryKey: ['objections', id] })} />
+            <ObjectionCard
+              key={o.id}
+              o={o}
+              onDone={() => void qc.invalidateQueries({ queryKey: ['objections', id] })}
+            />
           ))}
         </ul>
       )}

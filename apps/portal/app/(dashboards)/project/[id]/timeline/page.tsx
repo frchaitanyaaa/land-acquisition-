@@ -81,7 +81,9 @@ export default function ProjectTimeline({ params }: { params: Promise<{ id: stri
 
         {currentStageCode && (
           <section>
-            <h2 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Act on the current stage</h2>
+            <h2 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+              Act on the current stage
+            </h2>
             <ActionPanel projectId={id} stageCode={currentStageCode} stages={data.stages} />
           </section>
         )}
@@ -101,7 +103,9 @@ export default function ProjectTimeline({ params }: { params: Promise<{ id: stri
                     <span className="text-xs text-slate-500">{formatDate(t.at)}</span>
                   </div>
                   {(t.reasonCode || t.remarks) && (
-                    <p className="mt-0.5 text-xs text-slate-500">{[t.reasonCode, t.remarks].filter(Boolean).join(' — ')}</p>
+                    <p className="mt-0.5 text-xs text-slate-500">
+                      {[t.reasonCode, t.remarks].filter(Boolean).join(' — ')}
+                    </p>
                   )}
                 </li>
               ))}

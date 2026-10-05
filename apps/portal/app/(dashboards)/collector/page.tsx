@@ -75,7 +75,9 @@ export default function CollectorDashboard() {
       <section>
         <h2 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Consent meters</h2>
         {data.consentMeters.length === 0 ? (
-          <p className="border border-slate-200 bg-white px-4 py-6 text-sm text-slate-500">No consent registers in progress.</p>
+          <p className="border border-slate-200 bg-white px-4 py-6 text-sm text-slate-500">
+            No consent registers in progress.
+          </p>
         ) : (
           <ul className="divide-y divide-slate-200 border border-slate-200 bg-white">
             {data.consentMeters.map((c) => {
@@ -97,7 +99,10 @@ export default function CollectorDashboard() {
                       style={{ width: `${Math.min(100, pct)}%` }}
                     />
                     {threshold !== null && (
-                      <div className="relative -mt-1.5 h-1.5 w-px bg-slate-400" style={{ marginLeft: `${Math.min(100, threshold)}%` }} />
+                      <div
+                        className="relative -mt-1.5 h-1.5 w-px bg-slate-400"
+                        style={{ marginLeft: `${Math.min(100, threshold)}%` }}
+                      />
                     )}
                   </div>
                 </li>
@@ -119,7 +124,10 @@ export default function CollectorDashboard() {
                 <Link href={`/project/${f.project_id}`} className="font-medium text-slate-900 hover:underline">
                   {f.project_code}
                 </Link>
-                <span className="text-slate-500"> — {f.stage_code} (attempt {f.attempt})</span>
+                <span className="text-slate-500">
+                  {' '}
+                  — {f.stage_code} (attempt {f.attempt})
+                </span>
                 {f.reason_code && <p className="mt-0.5 text-xs text-slate-500">{f.reason_code}</p>}
               </li>
             ))}
@@ -131,7 +139,9 @@ export default function CollectorDashboard() {
             Unacknowledged disbursements ({data.unacknowledged.length})
           </h2>
           <ul className="divide-y divide-slate-200 border border-slate-200 bg-white text-sm">
-            {data.unacknowledged.length === 0 && <li className="px-4 py-6 text-slate-500">All disbursements acknowledged.</li>}
+            {data.unacknowledged.length === 0 && (
+              <li className="px-4 py-6 text-slate-500">All disbursements acknowledged.</li>
+            )}
             {data.unacknowledged.slice(0, 10).map((u) => (
               <li key={u.affected_family_id} className="flex items-center justify-between px-4 py-2.5">
                 <div>

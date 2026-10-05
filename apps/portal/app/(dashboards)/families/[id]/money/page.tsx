@@ -22,7 +22,9 @@ import { useLiveUpdates } from '@/lib/use-live-updates';
 const dateIST = (iso: string | null | undefined) =>
   iso ? new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeZone: 'Asia/Kolkata' }).format(new Date(iso)) : '—';
 const dateTimeIST = (iso: string) =>
-  new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata' }).format(new Date(iso));
+  new Intl.DateTimeFormat('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata' }).format(
+    new Date(iso),
+  );
 
 /**
  * Family money + acknowledgement loop (§21, demo beats 6–7). Per head: assessed → sanctioned →
@@ -49,7 +51,11 @@ export default function FamilyMoneyPage({ params }: { params: Promise<{ id: stri
 
   if (q.error) {
     const e = q.error;
-    return <p className="text-red-700">{e instanceof ApiProblem && e.status === 401 ? 'Sign in to continue.' : 'Could not load this family.'}</p>;
+    return (
+      <p className="text-red-700">
+        {e instanceof ApiProblem && e.status === 401 ? 'Sign in to continue.' : 'Could not load this family.'}
+      </p>
+    );
   }
   if (q.isLoading || !q.data) return <p className="text-slate-500">Loading…</p>;
   const { family, money, entitlements, estimatedInterestLiability, label } = q.data;
@@ -87,7 +93,8 @@ export default function FamilyMoneyPage({ params }: { params: Promise<{ id: stri
           <>
             {family.is_displaced ? 'Displaced family' : 'Affected family'}
             {family.is_sc_st ? ' · SC/ST' : ''}
-            {family.phone_masked ? ` · ${family.phone_masked}` : ''} · {family.has_passkey ? 'passkey enrolled' : 'no passkey enrolled'}
+            {family.phone_masked ? ` · ${family.phone_masked}` : ''} ·{' '}
+            {family.has_passkey ? 'passkey enrolled' : 'no passkey enrolled'}
           </>
         }
         actions={
@@ -98,19 +105,32 @@ export default function FamilyMoneyPage({ params }: { params: Promise<{ id: stri
             <button type="button" onClick={() => void viewAsPublic()} className="ux4g-btn-tonal-primary ux4g-btn-s">
               View as the public sees it ↗
             </button>
-            <button type="button" onClick={() => void showEnrol()} disabled={enrol.isPending} className="ux4g-btn-tonal-primary ux4g-btn-s">
+            <button
+              type="button"
+              onClick={() => void showEnrol()}
+              disabled={enrol.isPending}
+              className="ux4g-btn-tonal-primary ux4g-btn-s"
+            >
               {family.has_passkey ? 'Enrol another phone' : 'Create enrolment link'}
             </button>
           </>
         }
       />
-      {linkError && <div role="alert" className="ux4g-alert ux4g-alert-error">{linkError}</div>}
+      {linkError && (
+        <div role="alert" className="ux4g-alert ux4g-alert-error">
+          {linkError}
+        </div>
+      )}
       {enrolLink && (
         <div className="flex flex-wrap items-start gap-4 border border-slate-200 bg-white p-4">
-          <QrCode url={enrolLink.url} caption="Family scans with their own phone to register fingerprint / face" expiresInMinutes={enrolLink.expiresInMinutes} />
+          <QrCode
+            url={enrolLink.url}
+            caption="Family scans with their own phone to register fingerprint / face"
+            expiresInMinutes={enrolLink.expiresInMinutes}
+          />
           <p className="max-w-sm text-sm text-slate-600">
-            The beneficiary opens this on their own phone and uses its fingerprint or face unlock. Nothing biometric is stored — only the
-            credential id and public key (G6).{' '}
+            The beneficiary opens this on their own phone and uses its fingerprint or face unlock. Nothing biometric is
+            stored — only the credential id and public key (G6).{' '}
             <button type="button" className="ux4g-btn-text-primary ux4g-btn-xs" onClick={() => setEnrolLink(null)}>
               Close
             </button>
@@ -122,16 +142,29 @@ export default function FamilyMoneyPage({ params }: { params: Promise<{ id: stri
         <KpiCard label="Assessed" value={formatMoney(money.assessed_paise)} />
         <KpiCard label="Sanctioned" value={formatMoney(money.sanctioned_paise)} tone="info" />
         <KpiCard label="Disbursed" value={formatMoney(money.disbursed_paise)} tone="info" />
-        <KpiCard label="Acknowledged" value={formatMoney(money.acknowledged_paise)} tone="success" sub="confirmed by the family" />
+        <KpiCard
+          label="Acknowledged"
+          value={formatMoney(money.acknowledged_paise)}
+          tone="success"
+          sub="confirmed by the family"
+        />
         <KpiCard
           label="Disbursed, not acknowledged"
           value={formatMoney(money.unconfirmed_paise)}
           tone={BigInt(money.unconfirmed_paise) > 0n ? 'warning' : 'neutral'}
           sub="the office says paid; the family has not confirmed"
         />
-        <KpiCard label="On hold" value={formatMoney(money.held_paise)} tone={BigInt(money.held_paise) > 0n ? 'error' : 'neutral'} />
+        <KpiCard
+          label="On hold"
+          value={formatMoney(money.held_paise)}
+          tone={BigInt(money.held_paise) > 0n ? 'error' : 'neutral'}
+        />
         <KpiCard label="Deposited with Authority" value={formatMoney(money.deposited_paise)} />
-        <KpiCard label={label} value={formatMoney(estimatedInterestLiability?.estimated_interest_paise ?? '0')} tone="warning" />
+        <KpiCard
+          label={label}
+          value={formatMoney(estimatedInterestLiability?.estimated_interest_paise ?? '0')}
+          tone="warning"
+        />
       </div>
 
       <div className="space-y-4">
@@ -193,7 +226,10 @@ function DisbursementRow({ d, onLinkShown }: { d: Disbursement; onLinkShown: () 
           {d.adapterProvider && (
             <>
               {' · via '}
-              {d.adapterProvider} {isMockProvider(d.adapterProvider) && <MockBadge title="Payment adapter is a mock — not a live bank or treasury system" />}
+              {d.adapterProvider}{' '}
+              {isMockProvider(d.adapterProvider) && (
+                <MockBadge title="Payment adapter is a mock — not a live bank or treasury system" />
+              )}
             </>
           )}
           {d.paidOn ? ` · paid ${dateIST(d.paidOn)}` : ''}
@@ -203,7 +239,12 @@ function DisbursementRow({ d, onLinkShown }: { d: Disbursement; onLinkShown: () 
           {d.acknowledgement ? (
             <span className="ux4g-tag-tonal-success ux4g-tag-s">
               ✓ Acknowledged by family · {d.acknowledgement.method} · {dateTimeIST(d.acknowledgement.confirmedAt)}
-              {d.acknowledgement.method === 'OTP' && <> <MockBadge title="OTP sent through the mock SMS adapter" /></>}
+              {d.acknowledgement.method === 'OTP' && (
+                <>
+                  {' '}
+                  <MockBadge title="OTP sent through the mock SMS adapter" />
+                </>
+              )}
             </span>
           ) : d.paymentStatus === 'SUCCESS' && d.instrument === 'DBT' ? (
             <span className="ux4g-tag-tonal-warning ux4g-tag-s">Disbursed, not acknowledged</span>
@@ -222,12 +263,17 @@ function DisbursementRow({ d, onLinkShown }: { d: Disbursement; onLinkShown: () 
           <div className="flex flex-wrap items-start gap-4">
             <QrCode url={link.url} caption="Family scans with their own phone to confirm receipt" />
             <p className="max-w-sm text-xs text-slate-600">
-              The confirmation happens on the family’s phone — fingerprint/face, or an SMS code. This screen updates by itself when they
-              confirm.
+              The confirmation happens on the family’s phone — fingerprint/face, or an SMS code. This screen updates by
+              itself when they confirm.
             </p>
           </div>
         ) : (
-          <button type="button" onClick={() => void showQr()} disabled={ack.isPending} className="ux4g-btn-outline-primary ux4g-btn-xs">
+          <button
+            type="button"
+            onClick={() => void showQr()}
+            disabled={ack.isPending}
+            className="ux4g-btn-outline-primary ux4g-btn-xs"
+          >
             Show acknowledgement QR
           </button>
         ))}

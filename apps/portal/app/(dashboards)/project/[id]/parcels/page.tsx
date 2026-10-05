@@ -10,7 +10,9 @@ export default function ProjectParcels({ params }: { params: Promise<{ id: strin
     <div className="space-y-6">
       <GisWorkspace projectId={id} />
       <section>
-        <h2 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">Spatial flags (s.10 / s.41 / overlap)</h2>
+        <h2 className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+          Spatial flags (s.10 / s.41 / overlap)
+        </h2>
         <FlagsPanel projectId={id} />
       </section>
     </div>

@@ -36,7 +36,9 @@ export function ProjectHeader({ projectId, children }: { projectId: string; chil
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-semibold tracking-tight text-slate-900">{project.name}</h1>
-              <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{project.code}</span>
+              <span className="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                {project.code}
+              </span>
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">
               <span>{project.status}</span>

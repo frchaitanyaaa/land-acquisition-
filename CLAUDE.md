@@ -1831,6 +1831,8 @@ On a phone over the tunnel: enrol a demo beneficiary, disburse, acknowledge with
 
 Requiring Body (where is my project stuck, cost of delay) · Field Officer (task list) · District staff (desk inbox) · R&R (families not yet made whole) · Oversight (districts failing and why).
 
+**Built 5 Oct 2026 — Projects pipeline** (`/pipeline`, `GET /api/v1/pipeline?state=`): every project in scope as a stage stepper with its next deadline; a row expands to the stage history (dates, returns with reasons, open deadlines). National and state posts only (403 `PIPELINE_HIGHER_AUTHORITY_ONLY` otherwise; RLS still narrows rows). Read-only — action stays in the project workspace (G12). National/state dashboards link to it from a "Projects by stage" funnel.
+
 ### 24.4 Analytics
 
 - **Delay risk score (0–100)** per open deadline — transparent weighted formula, no training:

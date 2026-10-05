@@ -187,7 +187,15 @@ function DetailsStep({ onCreated }: { onCreated: (id: string, isLinear: boolean)
           </select>
         </Field>
         <Field label="State">
-          <select value={stateCode} onChange={(e) => { setStateCode(e.target.value); setSelectedDistricts([]); }} required className="input">
+          <select
+            value={stateCode}
+            onChange={(e) => {
+              setStateCode(e.target.value);
+              setSelectedDistricts([]);
+            }}
+            required
+            className="input"
+          >
             <option value="">Select…</option>
             {(states ?? []).map((s) => (
               <option key={s.code} value={s.code}>
@@ -322,7 +330,10 @@ function DocumentsStep({ projectId, onNext }: { projectId: string; onNext: () =>
           onUploaded={() => setUploaded((s) => new Set(s).add(d.docType))}
         />
       ))}
-      <button onClick={onNext} className="mt-4 rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800">
+      <button
+        onClick={onNext}
+        className="mt-4 rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
+      >
         Continue
       </button>
     </StepCard>
@@ -354,7 +365,9 @@ function PrescrutinyStep({ projectId, onNext }: { projectId: string; onNext: () 
           {result.items.map((item) => (
             <li key={item.code} className="px-3 py-2 text-sm">
               <div className="flex items-center gap-2">
-                <span className={`rounded px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset ${ITEM_CLASSES[item.status]}`}>
+                <span
+                  className={`rounded px-1.5 py-0.5 text-xs font-medium ring-1 ring-inset ${ITEM_CLASSES[item.status]}`}
+                >
                   {item.status}
                 </span>
                 <span className="font-medium text-slate-900">{item.code}</span>
@@ -373,7 +386,11 @@ function PrescrutinyStep({ projectId, onNext }: { projectId: string; onNext: () 
           ))}
         </ul>
       )}
-      <button onClick={onNext} disabled={!result} className="mt-4 rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800 disabled:opacity-50">
+      <button
+        onClick={onNext}
+        disabled={!result}
+        className="mt-4 rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800 disabled:opacity-50"
+      >
         Continue
       </button>
     </StepCard>
@@ -400,13 +417,18 @@ function SubmitStep({ projectId }: { projectId: string }) {
       {done ? (
         <div>
           <p className="text-sm text-teal-700">Submitted. The rule pack is pinned and the districts are routed.</p>
-          <Link href={`/project/${projectId}/timeline`} className="mt-2 inline-block text-sm font-medium text-teal-700 hover:underline">
+          <Link
+            href={`/project/${projectId}/timeline`}
+            className="mt-2 inline-block text-sm font-medium text-teal-700 hover:underline"
+          >
             Open the project timeline →
           </Link>
         </div>
       ) : (
         <>
-          <p className="text-sm text-slate-600">Submitting pins the eligible rule pack and routes the districts derived from the footprint.</p>
+          <p className="text-sm text-slate-600">
+            Submitting pins the eligible rule pack and routes the districts derived from the footprint.
+          </p>
           {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
           <button
             onClick={() => void onSubmit()}
