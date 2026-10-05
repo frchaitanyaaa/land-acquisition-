@@ -20,6 +20,7 @@ import {
   type ExtractedField,
   type FamilyRow,
 } from '@/lib/award-api';
+import { useDemoMode } from '@/lib/demo-mode';
 import { formatMoney } from '@/lib/format';
 
 const rupeesToPaise = (v: string) => {
@@ -70,6 +71,7 @@ function NewAward({ projectId, onCreated }: { projectId: string; onCreated: (id:
   const [awardNo, setAwardNo] = useState('');
   const [upload, setUpload] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const demoMode = useDemoMode();
 
   if (!open)
     return (
@@ -101,6 +103,15 @@ function NewAward({ projectId, onCreated }: { projectId: string; onCreated: (id:
       <button type="button" onClick={() => setOpen(false)} className="ux4g-btn-text-neutral ux4g-btn-s">
         Cancel
       </button>
+      {demoMode && (
+        <p className="w-full text-xs text-slate-600">
+          Demo:{' '}
+          <a href="/demo/sample-award-MH-SIN.pdf" download className="underline">
+            sample award PDF
+          </a>{' '}
+          (synthetic, for MH-SIN-2025-004 — award number MH-SIN-2025-004/LAND/2).
+        </p>
+      )}
       {error && <p className="w-full text-sm text-red-700">{error}</p>}
       <AttestationModal
         projectId={projectId}
