@@ -1,3 +1,4 @@
+import { InnovationFaq } from '@/components/landing/innovation-faq';
 import { PortalCards } from '@/components/landing/portal-cards';
 import { HeroBackdrop } from '@/components/landing/hero-backdrop';
 import { serverEnv } from '@/lib/server-env';
@@ -22,15 +23,6 @@ async function get<T>(path: string): Promise<T | null> {
   }
 }
 
-/** The six innovations (CLAUDE.md §2), in build-priority order — one line each. */
-const INNOVATIONS = [
-  ['Payment acknowledgement', 'The family confirms each payment on their own phone. Disbursed vs received, live.'],
-  ['Statutory clocks', 'Every stage counts down a legal deadline and shows what happens if it lapses.'],
-  ['Blockchain proof', 'Approved records are anchored on chain; a silent database edit shows as a mismatch.'],
-  ['GIS field verification', 'Walk the boundary with GPS and a photo at every corner, even offline.'],
-  ['Rule packs', 'The Act and state rules are versioned data. The law changes, the code does not.'],
-  ['AI assistant', 'Plain-language questions answered from your own data scope. Advisory only.'],
-] as const;
 
 export const dynamic = 'force-dynamic';
 
@@ -105,28 +97,7 @@ export default async function Home() {
 
       <PortalCards demoMode={serverEnv.demoMode} />
 
-      <section aria-labelledby="usp-title">
-        <h2 id="usp-title" className="text-center text-xs font-semibold uppercase tracking-widest text-slate-500">
-          Six innovations
-        </h2>
-        <ol className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {INNOVATIONS.map(([title, body], i) => (
-            <li
-              key={title}
-              title={body}
-              className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-3"
-            >
-              <span className="text-2xl font-black leading-none text-[#ff9933]" aria-hidden>
-                {i + 1}
-              </span>
-              <h3 className="text-sm font-semibold leading-snug text-slate-950">
-                {title}
-                <span className="sr-only">: {body}</span>
-              </h3>
-            </li>
-          ))}
-        </ol>
-      </section>
+      <InnovationFaq />
     </div>
   );
 }
