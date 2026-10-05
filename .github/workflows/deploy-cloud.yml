@@ -40,6 +40,8 @@ jobs:
           tags: |
             ${{ steps.img.outputs.name }}:latest
             ${{ steps.img.outputs.name }}:${{ github.sha }}
+          build-args: |
+            GIT_SHA=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
       - name: Tell Render to redeploy
@@ -49,5 +51,8 @@ jobs:
           if [ -z "$HOOK" ]; then
             echo "::notice::RENDER_DEPLOY_HOOK not set — image published, Render not notified (see deploy/README.md)."
           else
-            curl -fsS -X POST "$HOOK" > /dev/null && echo "::notice::Render redeploy requested."
+            # Deploy this exact build (the commit-SHA tag), so Render cannot keep a cached ':latest'.
+            IMG="${{ steps.img.outputs.name }}:${{ github.sha }}"
+            curl -fsS -X POST "$HOOK&imgURL=$(printf %s "$IMG" | jq -sRr @uri)" > /dev/null \
+              && echo "::notice::Render redeploy requested for $IMG."
           fi

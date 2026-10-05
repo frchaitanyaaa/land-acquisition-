@@ -32,6 +32,9 @@ RUN cp .env.example .env \
  && pnpm build
 # Seed the demo into Postgres now, so a cold start only boots services (Render free: 0.1 CPU).
 RUN sh deploy/cloud/start.sh prepare
+# The commit this image was built from, reported by GET /api/v1/health (to see what a host is running).
+ARG GIT_SHA=unknown
+ENV BUILD_SHA=$GIT_SHA
 
 EXPOSE 7860
 CMD ["sh", "deploy/cloud/start.sh"]

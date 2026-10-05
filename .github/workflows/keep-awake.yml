@@ -30,7 +30,8 @@ jobs:
             echo "attempt $i: HTTP $code — waiting"; sleep 15
           done
           health=$(curl -s -m 30 "$URL/api/v1/health" | grep -o '"status":"[a-z]*","db":"[a-z]*"' || echo unreachable)
+          build=$(curl -s -m 30 "$URL/api/v1/health" | grep -o '"build":"[0-9a-f]\{7\}' | cut -d'"' -f4 || true)
           ledger=$(curl -s -m 30 "$URL/api/v1/public/chain-summary" | grep -o '"anchored":[0-9]*,"pending":[0-9]*' || echo unavailable)
           # As an annotation, so the result is readable from the run page without opening the log.
-          echo "::notice title=Demo status::landing HTTP $code · api $health · ledger $ledger"
+          echo "::notice title=Demo status::landing HTTP $code · api $health · ledger $ledger · build ${build:-unknown}"
           [ "$code" = 200 ] || { echo "::error::$URL did not answer with 200"; exit 1; }

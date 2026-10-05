@@ -23,6 +23,8 @@ export class HealthController {
       status: db === 'ok' ? 'ok' : 'degraded',
       db,
       demoMode: env().DEMO_MODE,
+      // Commit of the running image (deploy/cloud/Dockerfile); null outside that image.
+      build: process.env.BUILD_SHA ?? null,
       clock: { now: this.clock.now().toISOString(), frozen: this.clock.frozen },
     };
   }
