@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { PostSwitcher } from '@/components/post-switcher';
 import { api, ApiProblem, type Me, type Post } from '@/lib/api';
 import { homeFor } from '@/lib/roles';
@@ -27,12 +27,21 @@ export function LoginForm({ demo = null }: { demo?: DemoLogin | null }) {
   const [busy, setBusy] = useState(false);
   const [me, setMe] = useState<Me | null>(null);
 
-  // Landing page "Sign in →" links pass ?email=; in demo mode the demo password is filled in too.
+  // Landing page links pass ?email=; in demo mode the demo password is filled in too, and with &go=1 (the
+  // one-click evaluator cards) the form signs in by itself — once.
+  const autoSubmitted = useRef(false);
   useEffect(() => {
-    const q = new URLSearchParams(window.location.search).get('email');
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('email');
     if (!q) return;
     setEmail(q);
-    if (demo) setPassword(demo.password);
+    if (!demo) return;
+    setPassword(demo.password);
+    if (params.get('go') === '1' && !autoSubmitted.current) {
+      autoSubmitted.current = true;
+      void signIn(q, demo.password);
+    }
+    // Runs once on mount (signIn is a plain function of this render).
   }, [demo]);
 
   function go(post: Post) {
@@ -44,6 +53,10 @@ export function LoginForm({ demo = null }: { demo?: DemoLogin | null }) {
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    await signIn(email, password);
+  }
+
+  async function signIn(email: string, password: string) {
     setBusy(true);
     setError(null);
     try {

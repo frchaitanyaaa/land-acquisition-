@@ -68,7 +68,7 @@ export default async function Home() {
                 href="#evaluator-logins"
                 className="rounded-md bg-[#ff9933] px-6 py-3 text-sm font-bold text-slate-950 shadow-lg hover:bg-[#ffb866]"
               >
-                Evaluator logins ↓
+                Try the demo ↓
               </a>
             )}
             <Link
@@ -120,26 +120,30 @@ export default async function Home() {
         </div>
       </section>
 
-      <section aria-labelledby="usp-title" className="space-y-4">
-        <h2 id="usp-title" className="text-2xl font-bold text-slate-950">
+      {serverEnv.demoMode && <EvaluatorLogins />}
+
+      <section aria-labelledby="usp-title">
+        <h2 id="usp-title" className="text-center text-xs font-semibold uppercase tracking-widest text-slate-500">
           Six innovations
         </h2>
-        <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ol className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {INNOVATIONS.map(([title, body], i) => (
-            <li key={title} className="flex gap-3 rounded-lg border border-slate-200 bg-white p-4">
-              <span className="text-3xl font-black leading-none text-[#ff9933]" aria-hidden>
+            <li
+              key={title}
+              title={body}
+              className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white px-3 py-3"
+            >
+              <span className="text-2xl font-black leading-none text-[#ff9933]" aria-hidden>
                 {i + 1}
               </span>
-              <div>
-                <h3 className="font-bold text-slate-950">{title}</h3>
-                <p className="mt-0.5 text-sm text-slate-700">{body}</p>
-              </div>
+              <h3 className="text-sm font-semibold leading-snug text-slate-950">
+                {title}
+                <span className="sr-only">: {body}</span>
+              </h3>
             </li>
           ))}
         </ol>
       </section>
-
-      {serverEnv.demoMode && <EvaluatorLogins />}
     </div>
   );
 }
