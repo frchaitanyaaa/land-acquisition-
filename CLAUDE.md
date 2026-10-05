@@ -1553,7 +1553,8 @@ Bulk downloading `tile.openstreetmap.org` violates the OSM tile usage policy. In
 - Render with `protomaps-leaflet`
 - Workbox caches the PMTiles file (range requests) for offline use
 - Satellite imagery: portal only, online only, with the provider's attribution, per its terms. Never cache it offline.
-- **Decided 1 Oct 2026:** the officer portal opens on Esri World Imagery (online, attribution visible) with a toggle to the offline PMTiles map; the field PWA uses PMTiles only.
+- **Decided 1 Oct 2026:** the officer portal opens on Esri World Imagery (online, attribution visible) with a toggle to the offline PMTiles map.
+- **Decided 5 Oct 2026:** the field PWA also shows Esri World Imagery while online (never cached by the service worker), drawn over the PMTiles map, which is what shows offline. Reason: the PMTiles extract is not committed, so the field map was blank. Walk & Mark opens on the parcel; following the GPS is a button.
 
 ### Done when
 

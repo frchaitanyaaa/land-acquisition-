@@ -1,6 +1,9 @@
 import { BASEMAP_CACHE } from './basemap-shared';
 
-/** The regional vector basemap (§16.5). Never OSM raster tiles, never satellite imagery. */
+/**
+ * The regional vector basemap (§16.5), cached with the offline pack. Online, FieldMap draws Esri satellite imagery on
+ * top of it; that imagery is never cached (and OSM raster tiles are never used).
+ */
 export const TILES_URL = import.meta.env.TILES_PMTILES_URL || '/tiles/demo-region.pmtiles';
 
 /**

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { CircleMarker, Polygon, Polyline, Tooltip } from 'react-leaflet';
 import { AccuracyBadge } from '../components/AccuracyBadge';
 import { Camera, type Capture } from '../components/Camera';
-import { FieldMap } from '../components/FieldMap';
+import { FieldMap, packBounds } from '../components/FieldMap';
 import { Button, ErrorText } from '../components/ui';
 import { db } from '../lib/db';
 import { distanceM, estimateAreaSqm, formatArea, HOLD_MS, selfIntersects, weightedAverage } from '../lib/geo';
@@ -23,7 +23,9 @@ export function WalkMark({ survey, pack }: SurveyProps) {
   const t = pack.thresholds;
   const { fix, error: gpsError } = usePosition();
   const vertices = useLive(() => surveyVertices(survey.clientId), [survey.clientId]) ?? [];
-  const [follow, setFollow] = useState(true);
+  // Start on the parcel; following the GPS is opt-in (an officer far from the parcel would see an empty map).
+  const [follow, setFollow] = useState(false);
+  const [fitToken, setFitToken] = useState(0);
   const [hold, setHold] = useState<{ progress: number; samples: number } | null>(null);
   const [pending, setPending] = useState<Averaged | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -79,11 +81,14 @@ export function WalkMark({ survey, pack }: SurveyProps) {
   function finishHold() {
     const s = stopHold();
     if (!s) return;
-    if (!s.fixes.length) return setError('No GPS fix arrived while holding — wait for the badge to show an accuracy and try again.');
+    if (!s.fixes.length)
+      return setError('No GPS fix arrived while holding — wait for the badge to show an accuracy and try again.');
     const avg = { ...weightedAverage(s.fixes), capturedAt: new Date().toISOString() };
     if (
       avg.accuracyM > t.gpsAccuracyRejectM &&
-      !confirm(`Accuracy ±${avg.accuracyM.toFixed(1)} m is worse than ${t.gpsAccuracyRejectM} m — the server will discard this point. Keep it anyway?`)
+      !confirm(
+        `Accuracy ±${avg.accuracyM.toFixed(1)} m is worse than ${t.gpsAccuracyRejectM} m — the server will discard this point. Keep it anyway?`,
+      )
     )
       return;
     setPending(avg); // → camera
@@ -114,38 +119,74 @@ export function WalkMark({ survey, pack }: SurveyProps) {
   const kinked = selfIntersects(vertices);
   const latlngs = vertices.map((v) => [v.lat, v.lng] as [number, number]);
   const trackLatLngs = survey.track.map(([lng, lat]) => [lat, lng] as [number, number]);
+  const bounds = packBounds(pack);
+  const centre = bounds?.getCenter() ?? null;
+  const awayM = fix && centre ? distanceM({ lat: fix.lat, lng: fix.lng }, { lat: centre.lat, lng: centre.lng }) : null;
 
   return (
     <div className="flex flex-col">
       <div className="relative">
-        <FieldMap pack={pack} fix={fix} follow={follow}>
-          {trackLatLngs.length > 1 && <Polyline positions={trackLatLngs} pathOptions={{ color: '#7c3aed', weight: 2, opacity: 0.6 }} />}
+        <FieldMap pack={pack} fix={fix} follow={follow} fitToken={fitToken}>
+          {trackLatLngs.length > 1 && (
+            <Polyline positions={trackLatLngs} pathOptions={{ color: '#7c3aed', weight: 2, opacity: 0.6 }} />
+          )}
           {survey.closed && latlngs.length >= 3 ? (
-            <Polygon positions={latlngs} pathOptions={{ color: kinked ? '#dc2626' : '#1d4ed8', weight: 3, fillOpacity: 0.2 }} />
+            <Polygon
+              positions={latlngs}
+              pathOptions={{ color: kinked ? '#dc2626' : '#1d4ed8', weight: 3, fillOpacity: 0.2 }}
+            />
           ) : (
             latlngs.length > 1 && (
               <Polyline positions={latlngs} pathOptions={{ color: kinked ? '#dc2626' : '#1d4ed8', weight: 3 }} />
             )
           )}
           {vertices.map((v) => (
-            <CircleMarker key={v.seq} center={[v.lat, v.lng]} radius={6} pathOptions={{ color: '#1e3a8a', fillColor: '#fff', fillOpacity: 1, weight: 2 }}>
+            <CircleMarker
+              key={v.seq}
+              center={[v.lat, v.lng]}
+              radius={6}
+              pathOptions={{ color: '#1e3a8a', fillColor: '#fff', fillOpacity: 1, weight: 2 }}
+            >
               <Tooltip permanent direction="top" offset={[0, -6]}>
                 {v.seq}
               </Tooltip>
             </CircleMarker>
           ))}
         </FieldMap>
-        <div className="pointer-events-none absolute left-2 top-2 z-[1000] flex flex-col items-start gap-1">
-          <AccuracyBadge accuracy={fix?.accuracy ?? null} thresholds={t} />
-          {gpsError && !fix && <span className="rounded bg-white/90 px-2 py-0.5 text-[11px] text-red-700">{gpsError}</span>}
+        <div className="pointer-events-none absolute inset-x-2 top-2 z-[1000] flex items-start justify-between gap-2">
+          <div className="flex flex-col items-start gap-1">
+            <AccuracyBadge accuracy={fix?.accuracy ?? null} thresholds={t} />
+            {gpsError && !fix && (
+              <span className="rounded bg-white/90 px-2 py-0.5 text-[11px] text-red-700">{gpsError}</span>
+            )}
+          </div>
+          <div className="pointer-events-auto flex overflow-hidden rounded-full bg-white text-xs font-semibold shadow-md">
+            <button
+              type="button"
+              onClick={() => {
+                setFollow(false);
+                setFitToken((n) => n + 1);
+              }}
+              className={`px-3 py-2 ${!follow ? 'bg-[#13245a] text-white' : 'text-[#13245a]'}`}
+            >
+              Parcel
+            </button>
+            <button
+              type="button"
+              disabled={!fix}
+              onClick={() => setFollow(true)}
+              className={`px-3 py-2 disabled:opacity-50 ${follow ? 'bg-[#13245a] text-white' : 'text-[#13245a]'}`}
+            >
+              Follow me
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          onClick={() => setFollow((f) => !f)}
-          className={`absolute right-2 top-2 z-[1000] rounded-full px-3 py-1 text-xs font-medium shadow ${follow ? 'bg-blue-600 text-white' : 'bg-white text-slate-800'}`}
-        >
-          {follow ? 'Following' : 'Follow me'}
-        </button>
+        {awayM != null && awayM > 2000 && (
+          <p className="absolute inset-x-2 bottom-6 z-[1000] rounded-md bg-[#13245a]/90 px-3 py-1.5 text-center text-xs text-white">
+            You are {awayM >= 10_000 ? Math.round(awayM / 1000) : (awayM / 1000).toFixed(1)} km from this parcel — walk
+            to it before marking points.
+          </p>
+        )}
       </div>
 
       <div className="space-y-3 p-4">
@@ -156,7 +197,8 @@ export function WalkMark({ survey, pack }: SurveyProps) {
         </div>
         {kinked && (
           <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
-            The boundary crosses itself. Undo the last point(s) and re-walk — the server will refuse a self-intersecting polygon.
+            The boundary crosses itself. Undo the last point(s) and re-walk — the server will refuse a self-intersecting
+            polygon.
           </p>
         )}
         <ErrorText>{error}</ErrorText>
@@ -189,7 +231,12 @@ export function WalkMark({ survey, pack }: SurveyProps) {
               </span>
             </button>
             <div className="flex gap-2">
-              <Button variant="secondary" className="flex-1" disabled={!vertices.length || !!hold} onClick={() => undoLastVertex(survey.clientId)}>
+              <Button
+                variant="secondary"
+                className="flex-1"
+                disabled={!vertices.length || !!hold}
+                onClick={() => undoLastVertex(survey.clientId)}
+              >
                 Undo last point
               </Button>
               {survey.closed ? (
@@ -197,7 +244,11 @@ export function WalkMark({ survey, pack }: SurveyProps) {
                   Reopen polygon
                 </Button>
               ) : (
-                <Button className="flex-1" disabled={vertices.length < 3 || !!hold} onClick={() => setClosed(survey.clientId, true)}>
+                <Button
+                  className="flex-1"
+                  disabled={vertices.length < 3 || !!hold}
+                  onClick={() => setClosed(survey.clientId, true)}
+                >
                   Close polygon
                 </Button>
               )}
@@ -214,7 +265,13 @@ export function WalkMark({ survey, pack }: SurveyProps) {
         </p>
       </div>
 
-      {pending && <Camera title={`Photo for point ${vertices.length + 1}`} onCapture={onPhoto} onCancel={() => setPending(null)} />}
+      {pending && (
+        <Camera
+          title={`Photo for point ${vertices.length + 1}`}
+          onCapture={onPhoto}
+          onCancel={() => setPending(null)}
+        />
+      )}
     </div>
   );
 }

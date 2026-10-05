@@ -69,46 +69,55 @@ export function Review({ survey, pack }: SurveyProps) {
             ))}
           </ul>
         )}
-        <table className="w-full text-xs">
-          <thead className="text-left text-slate-500">
-            <tr>
-              <th className="py-1">#</th>
-              <th>Accuracy</th>
-              <th>Samples</th>
-              <th>Issues</th>
-            </tr>
-          </thead>
-          <tbody>
-            {vertices.map((v) => (
-              <tr key={v.seq} className="border-t border-slate-100">
-                <td className="py-1">{v.seq}</td>
-                <td className="tabular-nums">±{v.accuracyM.toFixed(1)} m</td>
-                <td>{v.samplesAveraged}</td>
-                <td className={local.perVertex.get(v.seq)?.length ? 'text-red-700' : 'text-slate-400'}>
-                  {local.perVertex.get(v.seq)?.join(', ') || 'ok'}
-                </td>
+        {vertices.length > 0 && (
+          <table className="w-full text-xs">
+            <thead className="text-left text-slate-500">
+              <tr>
+                <th className="py-1">#</th>
+                <th>Accuracy</th>
+                <th>Samples</th>
+                <th>Issues</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {vertices.map((v) => (
+                <tr key={v.seq} className="border-t border-slate-100">
+                  <td className="py-1">{v.seq}</td>
+                  <td className="tabular-nums">±{v.accuracyM.toFixed(1)} m</td>
+                  <td>{v.samplesAveraged}</td>
+                  <td className={local.perVertex.get(v.seq)?.length ? 'text-red-700' : 'text-slate-400'}>
+                    {local.perVertex.get(v.seq)?.join(', ') || 'ok'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
         <p className="text-xs text-slate-500">
-          The server re-runs these checks on sync and is authoritative; accuracy thresholds come from the project's rule pack
-          (warn &gt; {pack.thresholds.gpsAccuracyWarnM} m, discard &gt; {pack.thresholds.gpsAccuracyRejectM} m).
+          The server re-runs these checks on sync and is authoritative; accuracy thresholds come from the project's rule
+          pack (warn &gt; {pack.thresholds.gpsAccuracyWarnM} m, discard &gt; {pack.thresholds.gpsAccuracyRejectM} m).
         </p>
       </Card>
 
       {draft && (
         <>
-          {blocking.map((b) => (
-            <p key={b} className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-800">
-              {b}
-            </p>
-          ))}
+          {blocking.length > 0 && (
+            <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+              <p className="font-semibold">Before you can submit</p>
+              <ul className="mt-1 list-disc space-y-0.5 pl-5">
+                {blocking.map((b) => (
+                  <li key={b}>{b}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           <ErrorText>{error}</ErrorText>
           <Button className="w-full py-3" disabled={busy || blocking.length > 0} onClick={submit}>
             {busy ? 'Queueing…' : 'Submit survey'}
           </Button>
-          <p className="text-center text-xs text-slate-500">Submitting locks the survey and queues it; it uploads when you sync.</p>
+          <p className="text-center text-xs text-slate-500">
+            Submitting locks the survey and queues it; it uploads when you sync.
+          </p>
         </>
       )}
     </div>

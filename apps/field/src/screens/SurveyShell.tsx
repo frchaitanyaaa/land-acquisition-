@@ -25,11 +25,12 @@ export function SurveyShell({ clientId, tab, demoMode }: { clientId: string; tab
   const data = useLive(async () => {
     const survey = await db.surveys.get(clientId);
     const pack = survey ? await db.offlinePacks.get(survey.projectParcelId) : undefined;
-    return { survey, pack: pack?.pack };
+    const assignment = survey ? await db.assignments.get(survey.projectParcelId) : undefined;
+    return { survey, pack: pack?.pack, assignment };
   }, [clientId]);
 
   if (!data) return null;
-  const { survey, pack } = data;
+  const { survey, pack, assignment } = data;
   if (!survey || !pack)
     return (
       <div className="min-h-full bg-slate-50">
@@ -41,14 +42,20 @@ export function SurveyShell({ clientId, tab, demoMode }: { clientId: string; tab
   const locked = survey.status !== 'draft';
   return (
     <div className="flex min-h-full flex-col bg-slate-50">
-      <Header title={`${pack.assignment.projectCode} · parcel`} back="assignments" demoMode={demoMode} />
-      <nav className="sticky top-[calc(env(safe-area-inset-top)+2.75rem)] z-[1400] flex border-b border-slate-200 bg-white text-sm">
+      <Header
+        title={
+          assignment ? `Survey no. ${assignment.survey_no} · ${assignment.village_name}` : pack.assignment.projectCode
+        }
+        back="assignments"
+        demoMode={demoMode}
+      />
+      <nav className="sticky top-[calc(env(safe-area-inset-top)+3.5rem)] z-[1400] flex border-b border-slate-200 bg-white text-[13px]">
         {TABS.map(([key, label]) => (
           <button
             key={key}
             type="button"
             onClick={() => go(`survey/${clientId}/${key}`)}
-            className={`flex-1 px-1 py-2.5 ${tab === key ? 'border-b-2 border-[#1f3c8f] font-semibold text-[#13245a]' : 'text-slate-600'}`}
+            className={`min-w-0 flex-1 whitespace-nowrap px-1 py-3 ${tab === key ? 'border-b-2 border-[#1f3c8f] font-semibold text-[#13245a]' : 'text-slate-600'}`}
           >
             {label}
           </button>
@@ -56,7 +63,11 @@ export function SurveyShell({ clientId, tab, demoMode }: { clientId: string; tab
       </nav>
       {locked && (
         <p className="bg-amber-50 px-4 py-2 text-xs text-amber-900">
-          Submitted — this survey is read-only. See <button type="button" className="underline" onClick={() => go('sync')}>Sync status</button>.
+          Submitted — this survey is read-only. See{' '}
+          <button type="button" className="underline" onClick={() => go('sync')}>
+            Sync status
+          </button>
+          .
         </p>
       )}
       <div className="flex-1">
