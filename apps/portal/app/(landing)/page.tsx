@@ -1,5 +1,4 @@
-import Link from 'next/link';
-import { EvaluatorLogins } from '@/components/landing/evaluator-logins';
+import { PortalCards } from '@/components/landing/portal-cards';
 import { HeroBackdrop } from '@/components/landing/hero-backdrop';
 import { serverEnv } from '@/lib/server-env';
 
@@ -62,28 +61,12 @@ export default async function Home() {
             Every parcel on a map. Every approval anchored on a blockchain. Every payment confirmed by the family.
           </p>
 
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            {serverEnv.demoMode && (
-              <a
-                href="#evaluator-logins"
-                className="rounded-md bg-[#ff9933] px-6 py-3 text-sm font-bold text-slate-950 shadow-lg hover:bg-[#ffb866]"
-              >
-                Try the demo ↓
-              </a>
-            )}
-            <Link
-              href="/login"
-              className="rounded-md bg-white px-6 py-3 text-sm font-bold text-[#13245a] shadow-lg hover:bg-[#eef2fb]"
-            >
-              Officer sign in
-            </Link>
-            <Link
-              href="/portal"
-              className="rounded-md border-2 border-white/80 bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur-sm hover:bg-white/20"
-            >
-              Citizen portal
-            </Link>
-          </div>
+          <a
+            href="#portals"
+            className="mt-8 rounded-md bg-[#ff9933] px-7 py-3 text-sm font-bold text-slate-950 shadow-lg hover:bg-[#ffb866]"
+          >
+            Get started ↓
+          </a>
 
           <dl className="mt-10 grid w-full max-w-3xl grid-cols-1 overflow-hidden rounded-xl border border-white/20 bg-[#08102b]/55 text-left backdrop-blur-md sm:grid-cols-3 sm:divide-x sm:divide-white/15">
             <div className="p-4">
@@ -120,7 +103,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {serverEnv.demoMode && <EvaluatorLogins />}
+      <PortalCards demoMode={serverEnv.demoMode} />
 
       <section aria-labelledby="usp-title">
         <h2 id="usp-title" className="text-center text-xs font-semibold uppercase tracking-widest text-slate-500">

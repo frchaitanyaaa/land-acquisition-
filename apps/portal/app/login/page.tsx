@@ -1,26 +1,28 @@
 import Link from 'next/link';
-import { DEMO_ACCOUNTS, DEMO_PASSWORD, demoEmail } from '@/lib/demo-accounts';
 import { serverEnv } from '@/lib/server-env';
-import { LoginForm, type DemoLogin } from './login-form';
-
-/** The same synthetic accounts as the landing page sheet (lib/demo-accounts.ts); the field app signs in at /field. */
-const DEMO_LOGIN: DemoLogin = {
-  password: DEMO_PASSWORD,
-  accounts: DEMO_ACCOUNTS.filter((a) => !a.fieldApp).map((a) => ({ email: demoEmail(a), label: a.screen })),
-};
+import { LoginForm } from './login-form';
 
 export default function LoginPage() {
   return (
-    <div className="mx-auto max-w-sm space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-xl font-semibold">Officer sign in</h1>
-        <p className="text-sm text-slate-600">For officers and staff working on land acquisition cases.</p>
+    <div className="mx-auto w-full max-w-md py-6">
+      <div className="text-center">
+        <span className="ux4g-icon-outlined text-5xl" style={{ color: '#1f3c8f' }} aria-hidden>
+          admin_panel_settings
+        </span>
+        <h1 className="mt-2 text-2xl font-bold text-slate-950">Officer login</h1>
+        <p className="mt-1 text-sm text-slate-600">
+          For government officers working on land acquisition — Revenue, LAO / CALA, Collectorate and requiring bodies.
+        </p>
       </div>
-      <LoginForm demo={serverEnv.demoMode ? DEMO_LOGIN : null} />
-      <p className="border-t border-slate-200 pt-4 text-sm text-slate-600">
-        Not an officer? Citizens do not need an account.{' '}
-        <Link href="/portal" className="font-medium text-teal-800 underline">
-          Go to the public portal
+
+      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <LoginForm demo={serverEnv.demoMode} />
+      </div>
+
+      <p className="mt-6 text-center text-sm text-slate-600">
+        Citizen or landowner? No account needed —{' '}
+        <Link href="/portal" className="font-semibold text-[#138808] hover:underline">
+          Public Land Information Portal →
         </Link>
       </p>
     </div>

@@ -5,11 +5,10 @@ Password for every account: `bhoomisetu-demo`. Tick each box; anything that fail
 
 ## 1. Landing and sign-in
 - [ ] `/` shows the navy hero, **"Chain node live"**, a non-zero **Records anchored** count and a block number
-- [ ] Hero with 3 tiles, six innovation cards and the "One account per screen" panel with 8 accounts; fits a phone screen
-- [ ] Each "Sign in →" lands on a different screen: National · State (/state/27) · Collector desk · District (/district/…) · Field office · Proposals · role switcher; "Open field app" opens /field
-- [ ] "Sign in →" on **National dashboard** opens `/login` with email and password filled → Sign in → `/national`
-- [ ] Same for **Collector, Pune** → `/collector`, and **Field office** (talathi) → `/field-office`
-- [ ] `demo@` → asks you to choose a post → chosen post's screen opens
+- [ ] Below the hero: two cards, **Officer Portal** (restricted) and **Public Land Information Portal** (open access); fits a phone screen
+- [ ] Officer login: choose a role in **Login as** → email and password fill in (demo) → Login → National (/national) · State (/state/27) · Collector (/collector) · LAO (/district/…) · Tehsildar (/field-office) · Requiring body (/proposals)
+- [ ] "Field officer (Talathi)" shows a link to the field app (/field) instead of a password form
+- [ ] Choosing **Land Acquisition Officer** and typing collector.pune@… → "This account does not hold a Land Acquisition Officer post"
 - [ ] Wrong password once → clear error message (don't try 5 times: the account locks for 15 min)
 
 ## 2. Officer screens (sign in as `oversight`)

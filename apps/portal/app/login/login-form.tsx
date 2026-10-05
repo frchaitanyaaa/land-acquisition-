@@ -2,159 +2,163 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { PostSwitcher } from '@/components/post-switcher';
-import { api, ApiProblem, type Me, type Post } from '@/lib/api';
+import { useEffect, useState, type FormEvent } from 'react';
+import { api, ApiProblem, type Me } from '@/lib/api';
+import { DEMO_PASSWORD, demoEmail, LOGIN_ROLES } from '@/lib/demo-accounts';
 import { homeFor } from '@/lib/roles';
 
-/** Only passed by the server page when DEMO_MODE=true (G18: these accounts are synthetic). */
-export interface DemoLogin {
-  password: string;
-  accounts: Array<{ email: string; label: string }>;
-}
+const input =
+  'mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-[#1f3c8f] focus:outline-none focus:ring-2 focus:ring-[#1f3c8f]/20';
 
 /**
- * Step 1: email + password → POST /auth/login (signs in to the first post held).
- * Step 2: if the user holds more than one post, they choose one; a different choice goes through
- * POST /auth/switch-post. Then the user lands on that post's home screen (lib/roles.ts).
+ * Officer sign-in, role first (CLAUDE.md §25): "Login as" lists roles, never a person's posts; the server signs
+ * into the user's post with that role (POST /auth/login {role}) and refuses if they hold none. In demo mode,
+ * choosing a role fills in that role's synthetic account.
  */
-export function LoginForm({ demo = null }: { demo?: DemoLogin | null }) {
+export function LoginForm({ demo = false }: { demo?: boolean }) {
   const router = useRouter();
   const qc = useQueryClient();
+  const [role, setRole] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [show, setShow] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [me, setMe] = useState<Me | null>(null);
+  const chosen = LOGIN_ROLES.find((r) => r.role === role);
 
-  // Landing page links pass ?email=; in demo mode the demo password is filled in too, and with &go=1 (the
-  // one-click evaluator cards) the form signs in by itself — once.
-  const autoSubmitted = useRef(false);
+  // ?role=COLLECTOR preselects a role (and, in demo mode, its account).
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const q = params.get('email');
-    if (!q) return;
-    setEmail(q);
-    if (!demo) return;
-    setPassword(demo.password);
-    if (params.get('go') === '1' && !autoSubmitted.current) {
-      autoSubmitted.current = true;
-      void signIn(q, demo.password);
-    }
-    // Runs once on mount (signIn is a plain function of this render).
+    const q = new URLSearchParams(window.location.search).get('role');
+    if (q && LOGIN_ROLES.some((r) => r.role === q)) pick(q);
+    // Runs once on mount.
   }, [demo]);
 
-  function go(post: Post) {
-    // A new sign-in changes user, post, RLS scope and sidebar: nothing cached from the previous session
-    // (e.g. /auth/me of another account) may survive, or the shell shows the old post until a reload.
-    qc.clear();
-    router.push(homeFor(post));
+  function pick(next: string) {
+    setRole(next);
+    setError(null);
+    const r = LOGIN_ROLES.find((x) => x.role === next);
+    if (demo && r && !r.fieldApp) {
+      setEmail(demoEmail(r.demo));
+      setPassword(DEMO_PASSWORD);
+    }
   }
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    await signIn(email, password);
-  }
-
-  async function signIn(email: string, password: string) {
+    if (!chosen || chosen.fieldApp) return;
     setBusy(true);
     setError(null);
     try {
       const session = await api<Me>('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, role }),
       });
-      if (session.posts.length > 1) setMe(session);
-      else go(session.activePost);
+      // A new sign-in changes user, post, RLS scope and sidebar: nothing cached from a previous session may
+      // survive, or the shell shows the old post until a reload.
+      qc.clear();
+      router.push(homeFor(session.activePost));
     } catch (err) {
-      setError(err instanceof ApiProblem ? err.message : 'Could not reach the server.');
+      setError(
+        err instanceof ApiProblem
+          ? err.code === 'ROLE_NOT_HELD'
+            ? `This account does not hold a ${chosen.label} post. Choose the role you were assigned.`
+            : err.message
+          : 'Could not reach the server.',
+      );
     } finally {
       setBusy(false);
     }
   }
 
-  if (me) {
-    return (
-      <div className="space-y-4">
-        <div>
-          <p className="font-medium text-slate-900">Signed in as {me.user.fullName}</p>
-          <p className="text-sm text-slate-600">
-            You hold {me.posts.length} posts. Choose the post you are acting in now. What you can see and do follows
-            this post, and you can switch later from Session.
-          </p>
-        </div>
-        <PostSwitcher posts={me.posts} activePostId={me.activePost.id} variant="choose" onChosen={(post) => go(post)} />
-      </div>
-    );
-  }
-
-  const inputClass =
-    'mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600';
-
   return (
-    <div className="space-y-4">
-      <form onSubmit={submit} className="space-y-3">
-        <label className="block text-sm">
-          <span className="text-slate-700">Email</span>
-          <input
-            name="email"
-            type="email"
-            required
-            autoComplete="username"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={inputClass}
-          />
-        </label>
-        <label className="block text-sm">
-          <span className="text-slate-700">Password</span>
-          <input
-            name="password"
-            type="password"
-            required
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={inputClass}
-          />
-        </label>
-        {error && (
-          <p role="alert" className="text-sm text-red-700">
-            {error}
-          </p>
-        )}
-        <button
-          type="submit"
-          disabled={busy}
-          className="w-full rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800 disabled:opacity-60"
-        >
-          {busy ? 'Signing in…' : 'Sign in'}
-        </button>
-      </form>
+    <form onSubmit={submit} className="space-y-4">
+      <label className="block text-sm font-medium text-slate-800">
+        Login as
+        <select required value={role} onChange={(e) => pick(e.target.value)} className={input}>
+          <option value="" disabled>
+            Select your role…
+          </option>
+          {LOGIN_ROLES.map((r) => (
+            <option key={r.role} value={r.role}>
+              {r.label}
+            </option>
+          ))}
+        </select>
+        {chosen && <span className="mt-1 block text-xs font-normal text-slate-500">{chosen.hint}</span>}
+      </label>
 
-      {demo && demo.accounts.length > 0 && (
-        <div className="space-y-2 rounded-md border border-amber-200 bg-amber-50 p-3">
-          <p className="text-xs text-amber-950">
-            Demo accounts (synthetic) — pick one to fill in. Password <code>{demo.password}</code>.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {demo.accounts.map((acct) => (
-              <button
-                key={acct.email}
-                type="button"
-                title={acct.email}
-                onClick={() => {
-                  setEmail(acct.email);
-                  setPassword(demo.password);
-                }}
-                className="rounded-md border border-amber-300 bg-white px-2 py-1 text-xs text-amber-950 hover:bg-amber-100"
-              >
-                {acct.label}
-              </button>
-            ))}
-          </div>
+      {chosen?.fieldApp ? (
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+          Field officers work on the mobile field app, which also works offline.
+          <a
+            href="/field"
+            className="mt-3 flex w-full items-center justify-center rounded-lg bg-[#1f3c8f] px-4 py-2.5 font-semibold text-white hover:bg-[#182f72]"
+          >
+            Open the field app →
+          </a>
+          {demo && (
+            <p className="mt-2 text-xs text-slate-500">
+              Demo: <code>{demoEmail(chosen.demo)}</code> · password <code>{DEMO_PASSWORD}</code>
+            </p>
+          )}
         </div>
+      ) : (
+        <>
+          <label className="block text-sm font-medium text-slate-800">
+            Email
+            <input
+              name="email"
+              type="email"
+              required
+              autoComplete="username"
+              placeholder="name@department.gov.in"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={input}
+            />
+          </label>
+          <label className="block text-sm font-medium text-slate-800">
+            Password
+            <span className="relative block">
+              <input
+                name="password"
+                type={show ? 'text' : 'password'}
+                required
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`${input} pr-16`}
+              />
+              <button
+                type="button"
+                onClick={() => setShow((s) => !s)}
+                className="absolute inset-y-0 right-2 my-auto h-7 rounded px-2 text-xs font-medium text-[#1f3c8f] hover:bg-slate-100"
+                aria-label={show ? 'Hide password' : 'Show password'}
+              >
+                {show ? 'Hide' : 'Show'}
+              </button>
+            </span>
+          </label>
+          {error && (
+            <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
+              {error}
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={busy || !role}
+            className="flex w-full items-center justify-center rounded-lg bg-[#1f3c8f] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#182f72] disabled:opacity-50"
+          >
+            {busy ? 'Signing in…' : 'Login as officer →'}
+          </button>
+          {demo && (
+            <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-950">
+              <span className="font-semibold">Demo:</span> choose any role and its synthetic account is filled in —
+              just press Login.
+            </p>
+          )}
+        </>
       )}
-    </div>
+    </form>
   );
 }

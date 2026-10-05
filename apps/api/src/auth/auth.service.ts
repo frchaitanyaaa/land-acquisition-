@@ -1,4 +1,5 @@
 import { users } from '@bhoomisetu/db';
+import type { Role } from '@bhoomisetu/shared';
 import { Injectable, type OnModuleInit } from '@nestjs/common';
 import argon2 from 'argon2';
 import { eq, sql } from 'drizzle-orm';
@@ -34,7 +35,7 @@ export class AuthService implements OnModuleInit {
     this.dummyHash = await argon2.hash('not-a-real-password', { type: argon2.argon2id });
   }
 
-  async login(email: string, password: string, postId?: string): Promise<SessionView> {
+  async login(email: string, password: string, postId?: string, role?: Role): Promise<SessionView> {
     const result = await this.db.withScope(null, (tx) =>
       tx.execute<{ user_id: string; password_hash: string; is_active: boolean }>(sql`SELECT * FROM auth_credentials(${email})`),
     );
@@ -46,8 +47,15 @@ export class AuthService implements OnModuleInit {
 
     const now = this.clock.now();
     const posts = await this.org.postsHeld(cred.user_id, now);
-    const activePost = postId ? posts.find((p) => p.id === postId) : posts[0];
+    // "Login as" (§25): the role picks the post; the dropdown never lists a person's posts.
+    const activePost = postId
+      ? posts.find((p) => p.id === postId)
+      : role
+        ? posts.find((p) => p.role === role)
+        : posts[0];
     if (!activePost) {
+      if (role && !postId)
+        throw new ProblemException(403, 'ROLE_NOT_HELD', 'This account does not hold a post with the selected role.');
       throw new ProblemException(403, 'NO_ACTIVE_POST', postId ? 'You do not hold that post.' : 'You hold no active post.');
     }
 

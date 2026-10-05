@@ -1,6 +1,7 @@
 import { Throttle } from '@nestjs/throttler';
 import { Body, Controller, Get, HttpCode, Post, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
+import { ROLES } from '@bhoomisetu/shared';
 import { z } from 'zod';
 import { AuditEntity } from '../common/audit/audit.interceptor';
 import type { AuthUser } from '../common/auth-user';
@@ -16,6 +17,8 @@ const LoginBody = z.object({
   password: z.string().min(1),
   /** Optional: sign straight into a specific post. */
   postId: z.uuid().optional(),
+  /** Optional "Login as" role (§25): signs into the user's post with this role, refused if they hold none. */
+  role: z.enum(ROLES).optional(),
 });
 
 const SwitchPostBody = z.object({ postId: z.uuid() });
@@ -50,7 +53,7 @@ export class AuthController {
     @Body(new ZodPipe(LoginBody)) body: z.infer<typeof LoginBody>,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return respond(res, await this.auth.login(body.email, body.password, body.postId));
+    return respond(res, await this.auth.login(body.email, body.password, body.postId, body.role));
   }
 
   @Public()

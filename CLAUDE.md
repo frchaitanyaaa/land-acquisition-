@@ -1883,6 +1883,9 @@ POST /assistant/query               GET /stream    (SSE: kpi.updated, notificati
 - **Landing page** `/` with two entry cards (Officer portal — restricted; Public portal — open) and **one login page** with
   tabs Officer / Citizen. Officers choose **"Login as" role** first; the server picks their active post with that role
   and rejects the login if they hold none (the dropdown lists roles, never a person's posts).
+- **Built 5 Oct 2026:** the landing page has the two entry cards; `/login` is role-first (`POST /auth/login {role}`,
+  error `ROLE_NOT_HELD`). Citizens use `/portal` (no officer tab on the login page). In DEMO_MODE, choosing a role
+  fills in that role's synthetic account (`apps/portal/lib/demo-accounts.ts`); "Field officer" points to `/field`.
 - **Release status (4 Oct 2026):** the public portal is **`/portal`** (route group `app/(portal)`); `/public` redirects
   to it. Citizen sign-in and grievances below are **not built as a backend** in this release — a browser-only MOCK
   (`apps/portal/lib/mock-citizen.ts`, labelled MOCK on every screen) shows the intended flow at `/portal/login`,
