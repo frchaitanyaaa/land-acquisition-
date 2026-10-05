@@ -20,6 +20,7 @@ import {
   type ExtractedField,
   type FamilyRow,
 } from '@/lib/award-api';
+import { useMe } from '@/components/shell/shell-data';
 import { useDemoMode } from '@/lib/demo-mode';
 import { formatMoney } from '@/lib/format';
 
@@ -72,12 +73,28 @@ function NewAward({ projectId, onCreated }: { projectId: string; onCreated: (id:
   const [upload, setUpload] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const demoMode = useDemoMode();
+  const role = useMe().data?.activePost.role;
+  // Mirrors DRAFT_ROLES in apps/api/src/award/award.service.ts: the LAO drafts, the Collector signs (G20).
+  const canDraft = role === 'LAO' || role === 'SUPER_ADMIN';
 
   if (!open)
     return (
-      <button type="button" onClick={() => setOpen(true)} className="ux4g-btn-primary ux4g-btn-s">
-        Upload signed award PDF
-      </button>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          disabled={!canDraft}
+          onClick={() => setOpen(true)}
+          className="ux4g-btn-primary ux4g-btn-s disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Upload signed award PDF
+        </button>
+        {role && !canDraft && (
+          <p className="text-sm text-slate-600">
+            Only the Land Acquisition Officer drafts an award; the Collector then signs it.
+            {demoMode && ' In the demo, sign in as lao.satara (Satara projects).'}
+          </p>
+        )}
+      </div>
     );
 
   return (

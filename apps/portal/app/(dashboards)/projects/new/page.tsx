@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useState } from 'react';
 import { AttestationModal } from '@/components/attestation-modal';
+import { FilePicker } from '@/components/file-picker';
 import { ApiProblem } from '@/lib/api';
 import {
   useCreateProject,
@@ -266,12 +267,7 @@ function AlignmentStep({ projectId, isLinear, onNext }: { projectId: string; isL
       <p className="text-sm text-slate-600">
         Upload the {isLinear ? 'centreline' : 'boundary'} as .kml, .kmz, .geojson or a zipped shapefile.
       </p>
-      <input
-        type="file"
-        accept=".kml,.kmz,.geojson,.json,.zip"
-        onChange={(e) => e.target.files?.[0] && void onFile(e.target.files[0])}
-        className="mt-2 block text-sm"
-      />
+      <FilePicker accept=".kml,.kmz,.geojson,.json,.zip" onFile={(f) => f && void onFile(f)} />
       {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
       {preview && (
         <div className="mt-4 space-y-2">

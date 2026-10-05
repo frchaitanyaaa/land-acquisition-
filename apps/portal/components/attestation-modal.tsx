@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { FilePicker } from '@/components/file-picker';
 import { api, apiUpload } from '@/lib/api';
 
 interface Declaration {
@@ -76,14 +77,10 @@ export function AttestationModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 px-4">
       <div className="w-full max-w-lg border border-slate-200 bg-white p-5 shadow-lg">
         <h3 className="text-sm font-semibold text-slate-900">Upload — {docTitle}</h3>
-        <label className="mt-3 block text-sm">
+        <div className="mt-3 text-sm">
           <span className="text-slate-700">File</span>
-          <input
-            type="file"
-            className="mt-1 block w-full text-sm"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          />
-        </label>
+          <FilePicker onFile={setFile} />
+        </div>
 
         <div className="mt-4 border border-slate-200 bg-slate-50 p-3 text-xs leading-relaxed text-slate-700">
           {declaration ? declaration.text : 'Loading declaration…'}
